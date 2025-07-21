@@ -1170,46 +1170,49 @@ export default function BrainstormWhiteboard({ listId, tasks }: BrainstormWhiteb
               </div>
             )}
 
-            {/* Right-click context menu */}
-            {contextMenu && (
-              <div
-                className="fixed bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-lg shadow-xl py-2 min-w-32"
-                style={{
-                  left: `${contextMenu.x}px`,
-                  top: `${contextMenu.y}px`,
-                  zIndex: 9999,
-                  pointerEvents: 'auto',
-                  position: 'fixed'
-                }}
-                onMouseDown={(e) => e.stopPropagation()}
-                onClick={(e) => e.stopPropagation()}
-                onContextMenu={(e) => e.preventDefault()}
-              >
-                <button
-                  onClick={() => {
-                    startEditingNote(contextMenu.noteId);
-                    setContextMenu(null);
-                  }}
-                  className="w-full px-4 py-2 text-left text-sm hover:bg-gray-100 dark:hover:bg-gray-700 flex items-center gap-2 text-gray-800 dark:text-gray-200"
-                >
-                  <Type className="w-4 h-4" />
-                  Edit Note
-                </button>
-                <button
-                  onClick={() => {
-                    removeIdea(contextMenu.noteId);
-                    setContextMenu(null);
-                  }}
-                  className="w-full px-4 py-2 text-left text-sm hover:bg-red-50 dark:hover:bg-red-900/20 text-red-600 dark:text-red-400 flex items-center gap-2"
-                >
-                  <X className="w-4 h-4" />
-                  Delete Note
-                </button>
-              </div>
-            )}
+
           </div>
         </div>
       </div>
+      
+      {/* Right-click context menu - rendered at body level */}
+      {contextMenu && (
+        <div
+          className="fixed bg-white dark:bg-gray-800 border-2 border-gray-400 dark:border-gray-500 rounded-lg shadow-2xl py-2 min-w-40"
+          style={{
+            left: `${contextMenu.x}px`,
+            top: `${contextMenu.y}px`,
+            zIndex: 99999,
+            position: 'fixed',
+            pointerEvents: 'auto'
+          }}
+          onMouseDown={(e) => e.stopPropagation()}
+          onClick={(e) => e.stopPropagation()}
+          onContextMenu={(e) => e.preventDefault()}
+        >
+          <button
+            onClick={() => {
+              startEditingNote(contextMenu.noteId);
+              setContextMenu(null);
+            }}
+            className="w-full px-4 py-3 text-left text-sm hover:bg-blue-50 dark:hover:bg-blue-900/20 flex items-center gap-3 text-gray-800 dark:text-gray-200 font-medium"
+          >
+            <Type className="w-4 h-4 text-blue-600" />
+            Edit Note
+          </button>
+          <div className="border-t border-gray-200 dark:border-gray-600 my-1"></div>
+          <button
+            onClick={() => {
+              removeIdea(contextMenu.noteId);
+              setContextMenu(null);
+            }}
+            className="w-full px-4 py-3 text-left text-sm hover:bg-red-50 dark:hover:bg-red-900/20 text-red-600 dark:text-red-400 flex items-center gap-3 font-medium"
+          >
+            <X className="w-4 h-4" />
+            Delete Note
+          </button>
+        </div>
+      )}
     </div>
   );
 }
