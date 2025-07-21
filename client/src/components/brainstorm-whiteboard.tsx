@@ -194,63 +194,111 @@ export default function BrainstormWhiteboard({ listId, tasks }: BrainstormWhiteb
         </div>
       </div>
 
-      {/* Whiteboard Canvas */}
-      <div 
-        ref={whiteboardRef}
-        className="flex-1 relative overflow-auto bg-white dark:bg-gray-100"
-        style={{
-          backgroundImage: `radial-gradient(circle, #e5e7eb 1px, transparent 1px)`,
-          backgroundSize: '20px 20px'
-        }}
-        onMouseMove={handleMouseMove}
-        onMouseUp={handleMouseUp}
-        onMouseLeave={handleMouseUp}
-      >
-        {stickyNotes.map((note) => (
-          <Card
-            key={note.id}
-            className={`absolute w-48 h-36 cursor-move shadow-lg border-2 transition-transform hover:scale-105 ${
-              draggedNote === note.id ? 'z-50 scale-105' : 'z-10'
-            }`}
+      {/* Enhanced Whiteboard Canvas with Frame */}
+      <div className="flex-1 p-6 bg-gradient-to-b from-gray-50 to-gray-100 dark:from-gray-700 dark:to-gray-800">
+        {/* Whiteboard Frame */}
+        <div className="w-full h-full relative bg-white dark:bg-gray-50 border-8 border-gray-400 dark:border-gray-600 rounded-lg shadow-2xl overflow-hidden">
+          <div 
+            ref={whiteboardRef}
+            className="w-full h-full relative overflow-auto"
             style={{
-              left: note.x,
-              top: note.y,
-              backgroundColor: note.color,
-              borderColor: draggedNote === note.id ? '#6366f1' : 'transparent',
+              backgroundImage: `
+                linear-gradient(rgba(0,0,0,0.03) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(0,0,0,0.03) 1px, transparent 1px)
+              `,
+              backgroundSize: '20px 20px'
             }}
-            onMouseDown={(e) => handleMouseDown(e, note.id)}
+            onMouseMove={handleMouseMove}
+            onMouseUp={handleMouseUp}
+            onMouseLeave={handleMouseUp}
           >
-            <CardContent className="p-3 h-full relative">
-              <button
-                onClick={(e) => {
-                  e.stopPropagation();
-                  removeIdea(note.id);
+            {/* Sticky Notes with Realistic Pins */}
+            {stickyNotes.map((note, index) => (
+              <div
+                key={note.id}
+                className="absolute cursor-move select-none"
+                style={{
+                  left: note.x,
+                  top: note.y,
+                  width: '180px',
+                  minHeight: '120px',
+                  transform: `rotate(${(index % 5) - 2}deg)`,
+                  zIndex: draggedNote === note.id ? 50 : 10,
                 }}
-                className="absolute top-1 right-1 w-6 h-6 rounded-full bg-red-500 text-white flex items-center justify-center hover:bg-red-600 transition-colors opacity-0 group-hover:opacity-100"
+                onMouseDown={(e) => handleMouseDown(e, note.id)}
               >
-                <X className="w-3 h-3" />
-              </button>
-              <div className="absolute top-1 left-1 opacity-50">
-                <Move3D className="w-4 h-4 text-gray-600" />
+                {/* Realistic Push Pin */}
+                <div 
+                  className="absolute -top-2 left-1/2 transform -translate-x-1/2 z-20"
+                  style={{ pointerEvents: 'none' }}
+                >
+                  <div className="w-4 h-4 bg-red-500 rounded-full shadow-lg border-2 border-red-600 relative">
+                    {/* Pin shaft */}
+                    <div className="w-0.5 h-6 bg-gray-400 absolute top-3 left-1/2 transform -translate-x-1/2 shadow-md rounded-full"></div>
+                    {/* Pin highlight */}
+                    <div className="absolute top-0.5 left-1 w-1 h-1 bg-red-300 rounded-full"></div>
+                  </div>
+                </div>
+                
+                {/* Enhanced Sticky Note */}
+                <Card
+                  className={`w-full h-full shadow-lg border-2 transition-all duration-200 ${
+                    draggedNote === note.id ? 'scale-105 shadow-xl' : 'hover:scale-105'
+                  }`}
+                  style={{
+                    backgroundColor: note.color,
+                    borderColor: draggedNote === note.id ? '#6366f1' : 'rgba(0,0,0,0.1)',
+                  }}
+                >
+                  <CardContent className="p-3 h-full relative">
+                    {/* Corner fold effect */}
+                    <div className="absolute top-0 right-0 w-4 h-4 bg-black bg-opacity-10 rounded-bl-lg"></div>
+                    
+                    {/* Delete button */}
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        removeIdea(note.id);
+                      }}
+                      className="absolute top-1 right-1 w-5 h-5 rounded-full bg-red-500 text-white flex items-center justify-center hover:bg-red-600 transition-colors opacity-0 hover:opacity-100 text-xs font-bold"
+                    >
+                      ×
+                    </button>
+                    
+                    {/* Note number */}
+                    <div className="absolute bottom-1 left-2 text-xs text-gray-500 opacity-60 font-mono">
+                      #{index + 1}
+                    </div>
+                    
+                    {/* Note content */}
+                    <div className="mt-2 h-full overflow-auto pr-2">
+                      <p className="text-sm font-medium text-gray-800 break-words leading-tight">
+                        {note.content}
+                      </p>
+                    </div>
+                  </CardContent>
+                </Card>
               </div>
-              <div className="mt-4 h-full overflow-auto">
-                <p className="text-sm font-medium text-gray-800 break-words leading-tight">
-                  {note.content}
-                </p>
-              </div>
-            </CardContent>
-          </Card>
-        ))}
+            ))}
 
-        {stickyNotes.length === 0 && !createTaskMutation.isPending && (
-          <div className="absolute inset-0 flex items-center justify-center">
-            <div className="text-center text-gray-500">
-              <Lightbulb className="w-12 h-12 mx-auto mb-4 opacity-50" />
-              <p className="text-lg mb-2">Welcome to your Brainstorming Whiteboard!</p>
-              <p className="text-sm">Add your first idea using the input above</p>
-            </div>
+            {/* Empty state with enhanced styling */}
+            {stickyNotes.length === 0 && !createTaskMutation.isPending && (
+              <div className="absolute inset-0 flex items-center justify-center">
+                <div className="text-center text-gray-500">
+                  <div className="relative mb-6">
+                    <Lightbulb className="w-16 h-16 mx-auto opacity-30" />
+                    {/* Decorative pin for empty state */}
+                    <div className="absolute -top-2 left-1/2 transform -translate-x-1/2">
+                      <div className="w-3 h-3 bg-red-400 rounded-full border border-red-500 opacity-50"></div>
+                    </div>
+                  </div>
+                  <p className="text-lg mb-2 font-medium">Your brainstorming whiteboard awaits!</p>
+                  <p className="text-sm opacity-75">Add sticky notes with your creative ideas</p>
+                </div>
+              </div>
+            )}
           </div>
-        )}
+        </div>
       </div>
     </div>
   );
