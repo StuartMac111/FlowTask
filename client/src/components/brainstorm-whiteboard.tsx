@@ -77,7 +77,11 @@ export default function BrainstormWhiteboard({ listId, tasks }: BrainstormWhiteb
   const [currentLine, setCurrentLine] = useState<DrawingLine | null>(null);
   const [connectingFrom, setConnectingFrom] = useState<string | null>(null);
   const [selectedNotes, setSelectedNotes] = useState<string[]>([]);
+  const [whiteboardTransform, setWhiteboardTransform] = useState({ x: 0, y: 0, scale: 1 });
+  const [isPanning, setIsPanning] = useState(false);
+  const [panStart, setPanStart] = useState({ x: 0, y: 0 });
   const whiteboardRef = useRef<HTMLDivElement>(null);
+  const containerRef = useRef<HTMLDivElement>(null);
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
@@ -310,6 +314,71 @@ export default function BrainstormWhiteboard({ listId, tasks }: BrainstormWhiteb
     ));
   };
 
+  // Enhanced whiteboard navigation
+  const handleWhiteboardPanStart = (e: React.MouseEvent) => {
+    if (selectedTool === "move" && e.button === 1) { // Middle mouse button
+      setIsPanning(true);
+      setPanStart({ x: e.clientX - whiteboardTransform.x, y: e.clientY - whiteboardTransform.y });
+    }
+  };
+
+  const handleWhiteboardPan = (e: React.MouseEvent) => {
+    if (isPanning) {
+      setWhiteboardTransform(prev => ({
+        ...prev,
+        x: e.clientX - panStart.x,
+        y: e.clientY - panStart.y,
+      }));
+    }
+  };
+
+  const handleWhiteboardPanEnd = () => {
+    setIsPanning(false);
+  };
+
+  const handleZoom = (e: React.WheelEvent) => {
+    e.preventDefault();
+    const zoomFactor = e.deltaY > 0 ? 0.9 : 1.1;
+    const newScale = Math.min(Math.max(whiteboardTransform.scale * zoomFactor, 0.3), 3);
+    
+    setWhiteboardTransform(prev => ({
+      ...prev,
+      scale: newScale,
+    }));
+  };
+
+  const resetWhiteboardView = () => {
+    setWhiteboardTransform({ x: 0, y: 0, scale: 1 });
+  };
+
+  const fitWhiteboardToContent = () => {
+    if (stickyNotes.length === 0) return;
+    
+    const padding = 100;
+    const minX = Math.min(...stickyNotes.map(note => note.x)) - padding;
+    const minY = Math.min(...stickyNotes.map(note => note.y)) - padding;
+    const maxX = Math.max(...stickyNotes.map(note => note.x + 140)) + padding;
+    const maxY = Math.max(...stickyNotes.map(note => note.y + 100)) + padding;
+    
+    const contentWidth = maxX - minX;
+    const contentHeight = maxY - minY;
+    
+    if (containerRef.current) {
+      const containerWidth = containerRef.current.clientWidth;
+      const containerHeight = containerRef.current.clientHeight;
+      
+      const scaleX = containerWidth / contentWidth;
+      const scaleY = containerHeight / contentHeight;
+      const scale = Math.min(scaleX, scaleY, 1);
+      
+      setWhiteboardTransform({
+        x: -minX * scale + (containerWidth - contentWidth * scale) / 2,
+        y: -minY * scale + (containerHeight - contentHeight * scale) / 2,
+        scale: scale,
+      });
+    }
+  };
+
   return (
     <div className="h-full flex flex-col">
       {/* Header */}
@@ -353,6 +422,20 @@ export default function BrainstormWhiteboard({ listId, tasks }: BrainstormWhiteb
           >
             <Download className="w-4 h-4 mr-1" />
             Export
+          </Button>
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={resetWhiteboardView}
+          >
+            Reset View
+          </Button>
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={fitWhiteboardToContent}
+          >
+            Fit to Content
           </Button>
         </div>
 
@@ -415,35 +498,68 @@ export default function BrainstormWhiteboard({ listId, tasks }: BrainstormWhiteb
       </div>
 
       {/* Enhanced Whiteboard Canvas with Massive Frame */}
-      <div className="flex-1 p-0 bg-gradient-to-b from-gray-300 to-gray-400 dark:from-gray-800 dark:to-gray-900">
-        {/* Maximum Width Whiteboard Frame - Edge to Edge */}
-        <div className="w-full h-full relative bg-white dark:bg-gray-50 overflow-hidden"
-             style={{
-               border: '25px solid #8B4513',
-               borderLeft: '0px solid #8B4513',
-               borderRight: '0px solid #8B4513',
-               borderTop: '25px solid #8B4513',
-               borderBottom: '25px solid #8B4513',
-               marginLeft: '-25px',
-               marginRight: '-25px',
-               width: 'calc(100% + 50px)',
-               boxShadow: `
-                 inset 0 0 0 20px #A0522D,
-                 inset 0 0 0 30px #CD853F,
-                 inset 0 0 0 40px #DEB887,
-                 0 40px 80px rgba(0,0,0,0.6),
-                 0 25px 50px rgba(0,0,0,0.5)
-               `
-             }}>
+      <div className="flex-1 p-0 bg-gradient-to-br from-gray-300 via-gray-400 to-gray-500 dark:from-gray-800 dark:via-gray-850 dark:to-gray-900 relative">
+        {/* Zoom indicator */}
+        <div className="absolute top-4 right-4 z-20 bg-black/20 text-white px-3 py-1 rounded-full text-sm font-mono">
+          {Math.round(whiteboardTransform.scale * 100)}%
+        </div>
+        
+        {/* Navigation instructions */}
+        <div className="absolute bottom-4 left-4 z-20 bg-black/20 text-white px-3 py-1 rounded-lg text-xs">
+          Middle-click + drag to pan • Scroll to zoom
+        </div>
+
+        {/* Maximum Width Whiteboard Frame - Edge to Edge with Enhanced Details */}
+        <div 
+          ref={containerRef}
+          className="w-full h-full relative bg-white dark:bg-gray-50 overflow-hidden cursor-grab active:cursor-grabbing"
+          style={{
+            border: '30px solid #8B4513',
+            borderLeft: '0px solid #8B4513',
+            borderRight: '0px solid #8B4513',
+            borderTop: '30px solid #8B4513',
+            borderBottom: '30px solid #8B4513',
+            marginLeft: '-30px',
+            marginRight: '-30px',
+            width: 'calc(100% + 60px)',
+            boxShadow: `
+              inset 0 0 0 25px #A0522D,
+              inset 0 0 0 35px #CD853F,
+              inset 0 0 0 45px #DEB887,
+              inset 0 0 0 50px #F5DEB3,
+              0 50px 100px rgba(0,0,0,0.7),
+              0 30px 60px rgba(0,0,0,0.6),
+              0 15px 30px rgba(0,0,0,0.4)
+            `,
+            backgroundImage: `
+              radial-gradient(circle at 20% 80%, rgba(139, 69, 19, 0.1) 0%, transparent 50%),
+              radial-gradient(circle at 80% 20%, rgba(160, 82, 45, 0.1) 0%, transparent 50%),
+              radial-gradient(circle at 40% 40%, rgba(205, 133, 63, 0.05) 0%, transparent 50%)
+            `
+          }}
+          onMouseDown={handleWhiteboardPanStart}
+          onMouseMove={handleWhiteboardPan}
+          onMouseUp={handleWhiteboardPanEnd}
+          onMouseLeave={handleWhiteboardPanEnd}
+          onWheel={handleZoom}
+        >
           <div 
             ref={whiteboardRef}
-            className="w-full h-full relative overflow-auto"
+            className="w-full h-full relative overflow-hidden"
             style={{
+              transform: `translate(${whiteboardTransform.x}px, ${whiteboardTransform.y}px) scale(${whiteboardTransform.scale})`,
+              transformOrigin: '0 0',
+              minWidth: '200vw',
+              minHeight: '200vh',
               backgroundImage: `
                 linear-gradient(rgba(0,0,0,0.03) 1px, transparent 1px),
-                linear-gradient(90deg, rgba(0,0,0,0.03) 1px, transparent 1px)
+                linear-gradient(90deg, rgba(0,0,0,0.03) 1px, transparent 1px),
+                radial-gradient(circle at 50px 50px, rgba(0,0,0,0.02) 2px, transparent 2px),
+                linear-gradient(45deg, rgba(0,0,0,0.01) 25%, transparent 25%),
+                linear-gradient(-45deg, rgba(0,0,0,0.01) 25%, transparent 25%)
               `,
-              backgroundSize: '20px 20px'
+              backgroundSize: '20px 20px, 20px 20px, 100px 100px, 40px 40px, 40px 40px',
+              backgroundPosition: '0 0, 0 0, 0 0, 0 0, 20px 20px'
             }}
             onMouseMove={selectedTool === "draw" ? continueDrawing : handleMouseMove}
             onMouseUp={handleMouseUp}
@@ -698,33 +814,53 @@ export default function BrainstormWhiteboard({ listId, tasks }: BrainstormWhiteb
               </div>
             ))}
 
-            {/* Empty state with 3D pin */}
+            {/* Enhanced Empty state with detailed background elements */}
             {stickyNotes.length === 0 && !createTaskMutation.isPending && (
               <div className="absolute inset-0 flex items-center justify-center">
-                <div className="text-center text-gray-500">
-                  <div className="relative mb-8">
-                    <Lightbulb className="w-20 h-20 mx-auto opacity-30" />
-                    {/* Decorative 3D pin for empty state */}
-                    <div className="absolute -top-6 left-1/2 transform -translate-x-1/2">
-                      <div className="w-4 h-4 rounded-full relative"
+                <div className="text-center text-gray-500 relative">
+                  {/* Decorative background circles */}
+                  <div className="absolute -top-20 -left-20 w-40 h-40 rounded-full bg-gradient-to-br from-purple-100 to-blue-100 opacity-20 animate-pulse"></div>
+                  <div className="absolute -bottom-20 -right-20 w-32 h-32 rounded-full bg-gradient-to-br from-yellow-100 to-orange-100 opacity-20 animate-pulse" style={{ animationDelay: '1s' }}></div>
+                  
+                  <div className="relative mb-8 z-10">
+                    <Lightbulb className="w-24 h-24 mx-auto opacity-40 text-yellow-500" />
+                    {/* Enhanced 3D pin for empty state */}
+                    <div className="absolute -top-8 left-1/2 transform -translate-x-1/2">
+                      <div className="w-5 h-5 rounded-full relative"
                            style={{
                              background: `radial-gradient(circle at 30% 30%, 
                                #ff6b6b 0%, 
-                               #e74c3c 50%, 
-                               #c0392b 100%)`,
+                               #e74c3c 40%, 
+                               #c0392b 70%,
+                               #8b0000 100%)`,
                              boxShadow: `
-                               0 2px 4px rgba(0,0,0,0.2),
-                               inset 0 1px 0 rgba(255,255,255,0.3)
+                               0 4px 8px rgba(0,0,0,0.3),
+                               inset 0 2px 0 rgba(255,255,255,0.4),
+                               inset 0 -1px 0 rgba(0,0,0,0.2)
                              `,
-                             opacity: 0.6
+                             opacity: 0.8
                            }}>
-                        <div className="absolute top-3 left-1/2 transform -translate-x-1/2 w-0.5 h-6 bg-gray-400 rounded-full opacity-60"></div>
-                        <div className="absolute top-0.5 left-0.5 w-1 h-1 bg-white rounded-full opacity-50"></div>
+                        <div className="absolute top-4 left-1/2 transform -translate-x-1/2 w-1 h-8 bg-gradient-to-b from-gray-500 to-gray-600 rounded-full shadow-sm"></div>
+                        <div className="absolute top-1 left-1 w-1.5 h-1.5 bg-white rounded-full opacity-60"></div>
+                        <div className="absolute bottom-0.5 right-0.5 w-0.5 h-0.5 bg-black rounded-full opacity-30"></div>
                       </div>
                     </div>
                   </div>
-                  <p className="text-xl mb-3 font-medium">Your brainstorming whiteboard awaits!</p>
-                  <p className="text-sm opacity-75">Add sticky notes with your creative ideas</p>
+                  <p className="text-2xl mb-4 font-semibold text-gray-600">Your infinite brainstorming canvas awaits!</p>
+                  <p className="text-sm opacity-75 mb-6">Pan with middle-click, zoom with scroll wheel, and let your ideas flow</p>
+                  
+                  {/* Floating instruction cards */}
+                  <div className="flex gap-4 justify-center text-xs">
+                    <div className="bg-white/80 px-3 py-2 rounded-lg shadow-sm border border-gray-200">
+                      <strong>Move Tool:</strong> Drag notes around
+                    </div>
+                    <div className="bg-white/80 px-3 py-2 rounded-lg shadow-sm border border-gray-200">
+                      <strong>Draw Tool:</strong> Sketch your ideas
+                    </div>
+                    <div className="bg-white/80 px-3 py-2 rounded-lg shadow-sm border border-gray-200">
+                      <strong>Connect Tool:</strong> Link related concepts
+                    </div>
+                  </div>
                 </div>
               </div>
             )}
