@@ -194,10 +194,20 @@ export default function BrainstormWhiteboard({ listId, tasks }: BrainstormWhiteb
         </div>
       </div>
 
-      {/* Enhanced Whiteboard Canvas with Frame */}
-      <div className="flex-1 p-6 bg-gradient-to-b from-gray-50 to-gray-100 dark:from-gray-700 dark:to-gray-800">
-        {/* Whiteboard Frame */}
-        <div className="w-full h-full relative bg-white dark:bg-gray-50 border-8 border-gray-400 dark:border-gray-600 rounded-lg shadow-2xl overflow-hidden">
+      {/* Enhanced Whiteboard Canvas with Massive Frame */}
+      <div className="flex-1 p-12 bg-gradient-to-b from-gray-300 to-gray-400 dark:from-gray-800 dark:to-gray-900">
+        {/* Massive Whiteboard Frame with 3D Effect */}
+        <div className="w-full h-full relative bg-white dark:bg-gray-50 rounded-xl overflow-hidden"
+             style={{
+               border: '20px solid #8B4513',
+               boxShadow: `
+                 inset 0 0 0 8px #A0522D,
+                 inset 0 0 0 12px #CD853F,
+                 inset 0 0 0 16px #DEB887,
+                 0 20px 40px rgba(0,0,0,0.3),
+                 0 10px 20px rgba(0,0,0,0.2)
+               `
+             }}>
           <div 
             ref={whiteboardRef}
             className="w-full h-full relative overflow-auto"
@@ -227,16 +237,42 @@ export default function BrainstormWhiteboard({ listId, tasks }: BrainstormWhiteb
                 }}
                 onMouseDown={(e) => handleMouseDown(e, note.id)}
               >
-                {/* Realistic Push Pin */}
+                {/* Ultra Realistic 3D Push Pin */}
                 <div 
-                  className="absolute -top-2 left-1/2 transform -translate-x-1/2 z-20"
+                  className="absolute -top-4 left-1/2 transform -translate-x-1/2 z-20"
                   style={{ pointerEvents: 'none' }}
                 >
-                  <div className="w-4 h-4 bg-red-500 rounded-full shadow-lg border-2 border-red-600 relative">
-                    {/* Pin shaft */}
-                    <div className="w-0.5 h-6 bg-gray-400 absolute top-3 left-1/2 transform -translate-x-1/2 shadow-md rounded-full"></div>
-                    {/* Pin highlight */}
-                    <div className="absolute top-0.5 left-1 w-1 h-1 bg-red-300 rounded-full"></div>
+                  {/* Pin Head with 3D gradient effect */}
+                  <div className="w-6 h-6 rounded-full relative"
+                       style={{
+                         background: `radial-gradient(circle at 30% 30%, 
+                           #ff6b6b 0%, 
+                           #e74c3c 30%, 
+                           #c0392b 60%, 
+                           #a93226 100%)`,
+                         boxShadow: `
+                           0 2px 4px rgba(0,0,0,0.3),
+                           inset 0 1px 0 rgba(255,255,255,0.4),
+                           inset 0 -1px 0 rgba(0,0,0,0.2)
+                         `
+                       }}>
+                    {/* Pin shaft with metallic effect */}
+                    <div className="absolute top-5 left-1/2 transform -translate-x-1/2 w-1 h-8 rounded-full"
+                         style={{
+                           background: `linear-gradient(90deg, 
+                             #95a5a6 0%, 
+                             #bdc3c7 30%, 
+                             #ecf0f1 50%, 
+                             #bdc3c7 70%, 
+                             #7f8c8d 100%)`,
+                           boxShadow: '0 0 3px rgba(0,0,0,0.2)'
+                         }}></div>
+                    {/* Pin tip */}
+                    <div className="absolute top-12 left-1/2 transform -translate-x-1/2 w-0.5 h-1 bg-gray-600 rounded-b-full"></div>
+                    {/* Glossy highlight on pin head */}
+                    <div className="absolute top-1 left-1.5 w-2 h-2 bg-white rounded-full opacity-40"></div>
+                    {/* Smaller highlight */}
+                    <div className="absolute top-0.5 left-1 w-1 h-1 bg-white rounded-full opacity-60"></div>
                   </div>
                 </div>
                 
@@ -281,18 +317,32 @@ export default function BrainstormWhiteboard({ listId, tasks }: BrainstormWhiteb
               </div>
             ))}
 
-            {/* Empty state with enhanced styling */}
+            {/* Empty state with 3D pin */}
             {stickyNotes.length === 0 && !createTaskMutation.isPending && (
               <div className="absolute inset-0 flex items-center justify-center">
                 <div className="text-center text-gray-500">
-                  <div className="relative mb-6">
-                    <Lightbulb className="w-16 h-16 mx-auto opacity-30" />
-                    {/* Decorative pin for empty state */}
-                    <div className="absolute -top-2 left-1/2 transform -translate-x-1/2">
-                      <div className="w-3 h-3 bg-red-400 rounded-full border border-red-500 opacity-50"></div>
+                  <div className="relative mb-8">
+                    <Lightbulb className="w-20 h-20 mx-auto opacity-30" />
+                    {/* Decorative 3D pin for empty state */}
+                    <div className="absolute -top-6 left-1/2 transform -translate-x-1/2">
+                      <div className="w-4 h-4 rounded-full relative"
+                           style={{
+                             background: `radial-gradient(circle at 30% 30%, 
+                               #ff6b6b 0%, 
+                               #e74c3c 50%, 
+                               #c0392b 100%)`,
+                             boxShadow: `
+                               0 2px 4px rgba(0,0,0,0.2),
+                               inset 0 1px 0 rgba(255,255,255,0.3)
+                             `,
+                             opacity: 0.6
+                           }}>
+                        <div className="absolute top-3 left-1/2 transform -translate-x-1/2 w-0.5 h-6 bg-gray-400 rounded-full opacity-60"></div>
+                        <div className="absolute top-0.5 left-0.5 w-1 h-1 bg-white rounded-full opacity-50"></div>
+                      </div>
                     </div>
                   </div>
-                  <p className="text-lg mb-2 font-medium">Your brainstorming whiteboard awaits!</p>
+                  <p className="text-xl mb-3 font-medium">Your brainstorming whiteboard awaits!</p>
                   <p className="text-sm opacity-75">Add sticky notes with your creative ideas</p>
                 </div>
               </div>
