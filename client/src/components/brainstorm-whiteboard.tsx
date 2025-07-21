@@ -161,6 +161,37 @@ export default function BrainstormWhiteboard({ listId, tasks }: BrainstormWhiteb
     },
   });
 
+  const updateTaskByIdMutation = useMutation({
+    mutationFn: async (taskData: { id: string; priority: 'low' | 'medium' | 'high' }) => {
+      await apiRequest("PATCH", `/api/tasks/${taskData.id}`, { priority: taskData.priority });
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/lists"] });
+      toast({
+        title: "Priority Updated",
+        description: "Task priority has been updated!",
+      });
+    },
+    onError: (error) => {
+      if (isUnauthorizedError(error)) {
+        toast({
+          title: "Unauthorized", 
+          description: "You are logged out. Logging in again...",
+          variant: "destructive",
+        });
+        setTimeout(() => {
+          window.location.href = "/api/login";
+        }, 500);
+        return;
+      }
+      toast({
+        title: "Error",
+        description: "Failed to update priority",
+        variant: "destructive",
+      });
+    },
+  });
+
   const addNewIdea = () => {
     if (!newIdeaText.trim()) return;
 
@@ -312,6 +343,18 @@ export default function BrainstormWhiteboard({ listId, tasks }: BrainstormWhiteb
         textStyle: { ...note.textStyle, ...style } 
       } : note
     ));
+  };
+
+  const updateNotePriority = (noteId: string, priority: 'low' | 'medium' | 'high') => {
+    setStickyNotes(prev => prev.map(note => 
+      note.id === noteId ? { ...note, priority } : note
+    ));
+    
+    // Update task priority in database
+    updateTaskByIdMutation.mutate({
+      id: noteId,
+      priority
+    });
   };
 
   // Enhanced whiteboard navigation
@@ -799,29 +842,96 @@ export default function BrainstormWhiteboard({ listId, tasks }: BrainstormWhiteb
                       )}
                     </div>
                     
-                    {/* Enhanced controls for formatting */}
-                    <div className="absolute bottom-1 right-1 flex gap-1 opacity-0 hover:opacity-100 transition-opacity">
+                    {/* Enhanced controls for formatting and priority */}
+                    <div className="absolute -bottom-8 left-0 bg-white dark:bg-gray-800 rounded-md shadow-lg p-1 flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity z-10">
+                      {/* Text formatting */}
                       <button
-                        className="w-4 h-4 text-xs bg-gray-200 hover:bg-gray-300 rounded flex items-center justify-center"
+                        className="w-6 h-6 text-xs bg-gray-100 hover:bg-gray-200 rounded flex items-center justify-center"
                         onClick={(e) => {
                           e.stopPropagation();
                           updateNoteStyle(note.id, { bold: !note.textStyle?.bold });
                         }}
                         title="Bold"
                       >
-                        <Bold className="w-2 h-2" />
+                        <Bold className="w-3 h-3" />
                       </button>
                       <button
-                        className="w-4 h-4 text-xs bg-gray-200 hover:bg-gray-300 rounded flex items-center justify-center"
+                        className="w-6 h-6 text-xs bg-gray-100 hover:bg-gray-200 rounded flex items-center justify-center"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          updateNoteStyle(note.id, { italic: !note.textStyle?.italic });
+                        }}
+                        title="Italic"
+                      >
+                        <Italic className="w-3 h-3" />
+                      </button>
+                      <button
+                        className="w-6 h-6 text-xs bg-gray-100 hover:bg-gray-200 rounded flex items-center justify-center"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          updateNoteStyle(note.id, { underline: !note.textStyle?.underline });
+                        }}
+                        title="Underline"
+                      >
+                        <Underline className="w-3 h-3" />
+                      </button>
+                      
+                      {/* Divider */}
+                      <div className="w-px h-4 bg-gray-300 mx-1"></div>
+                      
+                      {/* Priority controls */}
+                      <button
+                        className={`w-6 h-6 text-xs rounded flex items-center justify-center ${
+                          note.priority === 'low' ? 'bg-green-500 text-white' : 'bg-gray-100 hover:bg-green-100'
+                        }`}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          updateNotePriority(note.id, 'low');
+                        }}
+                        title="Low Priority (Green)"
+                      >
+                        <div className="w-3 h-3 bg-green-500 rounded-full"></div>
+                      </button>
+                      <button
+                        className={`w-6 h-6 text-xs rounded flex items-center justify-center ${
+                          note.priority === 'medium' ? 'bg-yellow-500 text-white' : 'bg-gray-100 hover:bg-yellow-100'
+                        }`}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          updateNotePriority(note.id, 'medium');
+                        }}
+                        title="Medium Priority (Yellow)"
+                      >
+                        <div className="w-3 h-3 bg-yellow-500 rounded-full"></div>
+                      </button>
+                      <button
+                        className={`w-6 h-6 text-xs rounded flex items-center justify-center ${
+                          note.priority === 'high' ? 'bg-red-500 text-white' : 'bg-gray-100 hover:bg-red-100'
+                        }`}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          updateNotePriority(note.id, 'high');
+                        }}
+                        title="High Priority (Red)"
+                      >
+                        <div className="w-3 h-3 bg-red-500 rounded-full"></div>
+                      </button>
+                      
+                      {/* Divider */}
+                      <div className="w-px h-4 bg-gray-300 mx-1"></div>
+                      
+                      {/* Shape control */}
+                      <button
+                        className="w-6 h-6 text-xs bg-gray-100 hover:bg-gray-200 rounded flex items-center justify-center"
                         onClick={(e) => {
                           e.stopPropagation();
                           updateNoteShape(note.id, note.shape === 'square' ? 'circle' : note.shape === 'circle' ? 'triangle' : 'square');
                         }}
                         title="Change Shape"
                       >
-                        {note.shape === 'square' && <Square className="w-2 h-2" />}
-                        {note.shape === 'circle' && <Circle className="w-2 h-2" />}
-                        {note.shape === 'triangle' && <Triangle className="w-2 h-2" />}
+                        {note.shape === 'square' && <Square className="w-3 h-3" />}
+                        {note.shape === 'circle' && <Circle className="w-3 h-3" />}
+                        {note.shape === 'triangle' && <Triangle className="w-3 h-3" />}
                       </button>
                     </div>
 
