@@ -1,0 +1,198 @@
+import {
+  pgTable,
+  text,
+  varchar,
+  timestamp,
+  jsonb,
+  index,
+  serial,
+  integer,
+  boolean,
+  uuid,
+} from "drizzle-orm/pg-core";
+import { relations } from "drizzle-orm";
+import { createInsertSchema } from "drizzle-zod";
+import { z } from "zod";
+
+// Session storage table (required for Replit Auth)
+export const sessions = pgTable(
+  "sessions",
+  {
+    sid: varchar("sid").primaryKey(),
+    sess: jsonb("sess").notNull(),
+    expire: timestamp("expire").notNull(),
+  },
+  (table) => [index("IDX_session_expire").on(table.expire)],
+);
+
+// User storage table (required for Replit Auth)
+export const users = pgTable("users", {
+  id: varchar("id").primaryKey().notNull(),
+  email: varchar("email").unique(),
+  firstName: varchar("first_name"),
+  lastName: varchar("last_name"),
+  profileImageUrl: varchar("profile_image_url"),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+// Family groups table
+export const familyGroups = pgTable("family_groups", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  name: varchar("name", { length: 100 }).notNull(),
+  description: text("description"),
+  ownerId: varchar("owner_id").references(() => users.id).notNull(),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+// Family group members table
+export const familyGroupMembers = pgTable("family_group_members", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  familyGroupId: uuid("family_group_id").references(() => familyGroups.id, { onDelete: "cascade" }).notNull(),
+  userId: varchar("user_id").references(() => users.id, { onDelete: "cascade" }).notNull(),
+  role: varchar("role", { enum: ["owner", "admin", "member"] }).default("member").notNull(),
+  joinedAt: timestamp("joined_at").defaultNow(),
+});
+
+// Lists table
+export const lists = pgTable("lists", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  name: varchar("name", { length: 100 }).notNull(),
+  description: text("description"),
+  color: varchar("color", { length: 7 }).default("#0078D4"),
+  ownerId: varchar("owner_id").references(() => users.id).notNull(),
+  familyGroupId: uuid("family_group_id").references(() => familyGroups.id, { onDelete: "set null" }),
+  isPrivate: boolean("is_private").default(true),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+// List sharing table
+export const listShares = pgTable("list_shares", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  listId: uuid("list_id").references(() => lists.id, { onDelete: "cascade" }).notNull(),
+  userId: varchar("user_id").references(() => users.id, { onDelete: "cascade" }).notNull(),
+  permission: varchar("permission", { enum: ["view", "edit", "admin"] }).default("view").notNull(),
+  sharedAt: timestamp("shared_at").defaultNow(),
+});
+
+// Tasks table
+export const tasks: any = pgTable("tasks", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  title: varchar("title", { length: 200 }).notNull(),
+  description: text("description"),
+  isCompleted: boolean("is_completed").default(false),
+  priority: varchar("priority", { enum: ["low", "medium", "high"] }).default("medium"),
+  dueDate: timestamp("due_date"),
+  listId: uuid("list_id").references(() => lists.id, { onDelete: "cascade" }).notNull(),
+  assignedTo: varchar("assigned_to").references(() => users.id, { onDelete: "set null" }),
+  parentTaskId: uuid("parent_task_id").references(() => tasks.id, { onDelete: "cascade" }),
+  sortOrder: integer("sort_order").default(0),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+// Relations
+export const usersRelations = relations(users, ({ many }) => ({
+  ownedLists: many(lists),
+  ownedFamilyGroups: many(familyGroups),
+  familyGroupMemberships: many(familyGroupMembers),
+  listShares: many(listShares),
+  assignedTasks: many(tasks),
+}));
+
+export const familyGroupsRelations = relations(familyGroups, ({ one, many }) => ({
+  owner: one(users, {
+    fields: [familyGroups.ownerId],
+    references: [users.id],
+  }),
+  members: many(familyGroupMembers),
+  lists: many(lists),
+}));
+
+export const familyGroupMembersRelations = relations(familyGroupMembers, ({ one }) => ({
+  familyGroup: one(familyGroups, {
+    fields: [familyGroupMembers.familyGroupId],
+    references: [familyGroups.id],
+  }),
+  user: one(users, {
+    fields: [familyGroupMembers.userId],
+    references: [users.id],
+  }),
+}));
+
+export const listsRelations = relations(lists, ({ one, many }) => ({
+  owner: one(users, {
+    fields: [lists.ownerId],
+    references: [users.id],
+  }),
+  familyGroup: one(familyGroups, {
+    fields: [lists.familyGroupId],
+    references: [familyGroups.id],
+  }),
+  tasks: many(tasks),
+  shares: many(listShares),
+}));
+
+export const listSharesRelations = relations(listShares, ({ one }) => ({
+  list: one(lists, {
+    fields: [listShares.listId],
+    references: [lists.id],
+  }),
+  user: one(users, {
+    fields: [listShares.userId],
+    references: [users.id],
+  }),
+}));
+
+export const tasksRelations = relations(tasks, ({ one, many }) => ({
+  list: one(lists, {
+    fields: [tasks.listId],
+    references: [lists.id],
+  }),
+  assignee: one(users, {
+    fields: [tasks.assignedTo],
+    references: [users.id],
+  }),
+  parentTask: one(tasks, {
+    fields: [tasks.parentTaskId],
+    references: [tasks.id],
+  }),
+  subtasks: many(tasks),
+}));
+
+// Zod schemas for validation
+export const upsertUserSchema = createInsertSchema(users);
+export const insertFamilyGroupSchema = createInsertSchema(familyGroups).omit({ id: true, ownerId: true, createdAt: true, updatedAt: true });
+export const insertListSchema = createInsertSchema(lists).omit({ id: true, ownerId: true, createdAt: true, updatedAt: true });
+export const insertTaskSchema = createInsertSchema(tasks).omit({ id: true, createdAt: true, updatedAt: true });
+export const insertListShareSchema = createInsertSchema(listShares).omit({ id: true, sharedAt: true });
+
+// Types
+export type UpsertUser = z.infer<typeof upsertUserSchema>;
+export type User = typeof users.$inferSelect;
+export type FamilyGroup = typeof familyGroups.$inferSelect;
+export type InsertFamilyGroup = z.infer<typeof insertFamilyGroupSchema>;
+export type FamilyGroupMember = typeof familyGroupMembers.$inferSelect;
+export type List = typeof lists.$inferSelect;
+export type InsertList = z.infer<typeof insertListSchema>;
+export type ListShare = typeof listShares.$inferSelect;
+export type InsertListShare = z.infer<typeof insertListShareSchema>;
+export type Task = typeof tasks.$inferSelect;
+export type InsertTask = z.infer<typeof insertTaskSchema>;
+
+// Extended types for API responses
+export type ListWithTasks = List & {
+  tasks: Task[];
+  taskCount: number;
+};
+
+export type TaskWithSubtasks = Task & {
+  assignee?: User;
+  subtasks: Task[];
+};
+
+export type FamilyGroupWithMembers = FamilyGroup & {
+  members: (FamilyGroupMember & { user: User })[];
+};
