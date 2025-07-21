@@ -323,7 +323,7 @@ export default function BrainstormWhiteboard({ listId, tasks }: BrainstormWhiteb
   const handleNoteRightClick = (noteId: string, e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
-    console.log('Right click detected on note:', noteId); // Debug log
+    console.log('Right click detected on note:', noteId, 'Setting context menu at:', e.clientX, e.clientY); // Debug log
     setContextMenu({
       x: e.clientX,
       y: e.clientY,
@@ -728,8 +728,10 @@ export default function BrainstormWhiteboard({ listId, tasks }: BrainstormWhiteb
               handleWhiteboardPanEnd();
             }}
             onMouseDown={(e) => {
-              // Close context menu if clicking outside
-              setContextMenu(null);
+              // Only close context menu if left-clicking (not right-clicking)
+              if (e.button === 0) {
+                setContextMenu(null);
+              }
               
               if (selectedTool === "draw") {
                 startDrawing(e);
@@ -1170,12 +1172,16 @@ export default function BrainstormWhiteboard({ listId, tasks }: BrainstormWhiteb
 
             {/* Right-click context menu */}
             {contextMenu && (
+              console.log('Rendering context menu:', contextMenu) || // Debug log
               <div
                 className="fixed bg-white dark:bg-gray-800 border rounded-lg shadow-lg py-1 z-50"
                 style={{
                   left: contextMenu.x,
                   top: contextMenu.y,
+                  pointerEvents: 'auto'
                 }}
+                onMouseDown={(e) => e.stopPropagation()}
+                onClick={(e) => e.stopPropagation()}
               >
                 <button
                   onClick={() => startEditingNote(contextMenu.noteId)}
