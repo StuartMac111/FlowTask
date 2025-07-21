@@ -223,6 +223,10 @@ export default function BrainstormWhiteboard({ listId, tasks }: BrainstormWhiteb
   };
 
   const handleMouseDown = (e: React.MouseEvent, noteId: string) => {
+    // Only start dragging on left click (button 0)
+    if (e.button !== 0) return;
+    
+    e.stopPropagation();
     const note = stickyNotes.find(n => n.id === noteId);
     if (!note) return;
 
@@ -819,7 +823,12 @@ export default function BrainstormWhiteboard({ listId, tasks }: BrainstormWhiteb
                   zIndex: draggedNote === note.id ? 50 : 10,
                 }}
                 onMouseDown={(e) => handleMouseDown(e, note.id)}
-                onClick={(e) => handleNoteClick(note.id, e)}
+                onClick={(e) => {
+                  // Only handle click for connect tool
+                  if (selectedTool === "connect") {
+                    handleNoteClick(note.id, e);
+                  }
+                }}
                 onContextMenu={(e) => handleNoteRightClick(note.id, e)}
               >
                 {/* Ultra Realistic 3D Push Pin */}
@@ -894,8 +903,10 @@ export default function BrainstormWhiteboard({ listId, tasks }: BrainstormWhiteb
                     
                     {/* Delete button - more visible */}
                     <button
+                      onMouseDown={(e) => e.stopPropagation()}
                       onClick={(e) => {
                         e.stopPropagation();
+                        e.preventDefault();
                         removeIdea(note.id);
                       }}
                       className="absolute -top-2 -right-2 w-6 h-6 rounded-full bg-red-500 text-white flex items-center justify-center hover:bg-red-600 transition-all duration-200 opacity-0 group-hover:opacity-100 text-sm font-bold z-10 shadow-lg hover:scale-110"
@@ -983,8 +994,10 @@ export default function BrainstormWhiteboard({ listId, tasks }: BrainstormWhiteb
                       {/* Delete button in control panel */}
                       <button
                         className="w-6 h-6 text-xs bg-red-500 hover:bg-red-600 text-white rounded flex items-center justify-center"
+                        onMouseDown={(e) => e.stopPropagation()}
                         onClick={(e) => {
                           e.stopPropagation();
+                          e.preventDefault();
                           removeIdea(note.id);
                         }}
                         title="Delete Note"
@@ -1034,8 +1047,10 @@ export default function BrainstormWhiteboard({ listId, tasks }: BrainstormWhiteb
                         className={`w-6 h-6 text-xs rounded flex items-center justify-center ${
                           note.priority === 'low' ? 'bg-green-500 text-white' : 'bg-gray-100 hover:bg-green-100'
                         }`}
+                        onMouseDown={(e) => e.stopPropagation()}
                         onClick={(e) => {
                           e.stopPropagation();
+                          e.preventDefault();
                           updateNotePriority(note.id, 'low');
                         }}
                         title="Low Priority (Green)"
@@ -1046,8 +1061,10 @@ export default function BrainstormWhiteboard({ listId, tasks }: BrainstormWhiteb
                         className={`w-6 h-6 text-xs rounded flex items-center justify-center ${
                           note.priority === 'medium' ? 'bg-yellow-500 text-white' : 'bg-gray-100 hover:bg-yellow-100'
                         }`}
+                        onMouseDown={(e) => e.stopPropagation()}
                         onClick={(e) => {
                           e.stopPropagation();
+                          e.preventDefault();
                           updateNotePriority(note.id, 'medium');
                         }}
                         title="Medium Priority (Yellow)"
@@ -1058,8 +1075,10 @@ export default function BrainstormWhiteboard({ listId, tasks }: BrainstormWhiteb
                         className={`w-6 h-6 text-xs rounded flex items-center justify-center ${
                           note.priority === 'high' ? 'bg-red-500 text-white' : 'bg-gray-100 hover:bg-red-100'
                         }`}
+                        onMouseDown={(e) => e.stopPropagation()}
                         onClick={(e) => {
                           e.stopPropagation();
+                          e.preventDefault();
                           updateNotePriority(note.id, 'high');
                         }}
                         title="High Priority (Red)"
