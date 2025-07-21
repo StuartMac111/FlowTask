@@ -800,6 +800,46 @@ export default function BrainstormWhiteboard({ listId, tasks }: BrainstormWhiteb
               handleMouseUp();
               handleWhiteboardPanEnd();
             }}
+            // Touch event handlers for mobile support
+            onTouchStart={(e) => {
+              if (e.touches.length === 1) {
+                const touch = e.touches[0];
+                const mouseEvent = new MouseEvent('mousedown', {
+                  clientX: touch.clientX,
+                  clientY: touch.clientY,
+                  button: 0
+                });
+                setContextMenu(null);
+                setShowFontSizer(null);
+                
+                if (selectedTool === "draw") {
+                  startDrawing(mouseEvent as any);
+                } else if (selectedTool === "move" && !draggedNote) {
+                  handleWhiteboardPanStart(mouseEvent as any);
+                }
+              }
+            }}
+            onTouchMove={(e) => {
+              e.preventDefault(); // Prevent scrolling
+              if (e.touches.length === 1) {
+                const touch = e.touches[0];
+                const mouseEvent = new MouseEvent('mousemove', {
+                  clientX: touch.clientX,
+                  clientY: touch.clientY
+                });
+                if (selectedTool === "draw") {
+                  continueDrawing(mouseEvent as any);
+                } else if (selectedTool === "move" && !draggedNote) {
+                  handleWhiteboardPan(mouseEvent as any);
+                } else {
+                  handleMouseMove(mouseEvent as any);
+                }
+              }
+            }}
+            onTouchEnd={() => {
+              handleMouseUp();
+              handleWhiteboardPanEnd();
+            }}
           >
             {/* Drawing Lines */}
             <svg className="absolute inset-0 w-full h-full pointer-events-none" style={{ zIndex: 5 }}>

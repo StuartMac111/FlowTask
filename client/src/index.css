@@ -2,6 +2,29 @@
 @tailwind components;
 @tailwind utilities;
 
+/* Touch-friendly mobile styles */
+.touch-manipulation {
+  touch-action: manipulation;
+  -webkit-touch-callout: none;
+  -webkit-user-select: none;
+  -khtml-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
+}
+
+/* Mobile responsive improvements */
+@media (max-width: 768px) {
+  .mobile-bottom-spacing {
+    padding-bottom: 6rem;
+  }
+  
+  button, input, select, textarea {
+    min-height: 44px;
+    font-size: 16px; /* Prevent zoom on iOS */
+  }
+}
+
 :root {
   --background: hsl(0, 0%, 100%);
   --foreground: hsl(240, 10%, 3.9%);

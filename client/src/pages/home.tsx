@@ -8,6 +8,8 @@ import CreateListModal from "@/components/create-list-modal";
 import SettingsDialog from "@/components/settings-dialog";
 import { useAuth } from "@/hooks/useAuth";
 import { useWebSocket } from "@/hooks/useWebSocket";
+import { Button } from "@/components/ui/button";
+import { Monitor, Smartphone } from "lucide-react";
 import type { ListWithTasks } from "@shared/schema";
 
 export default function Home() {
@@ -17,6 +19,7 @@ export default function Home() {
   const [familyModalOpen, setFamilyModalOpen] = useState(false);
   const [createListModalOpen, setCreateListModalOpen] = useState(false);
   const [backgroundTheme, setBackgroundTheme] = useState("default");
+  const [viewMode, setViewMode] = useState<"desktop" | "mobile">("desktop");
 
   // Fetch user's lists
   const { data: lists = [], refetch: refetchLists } = useQuery<ListWithTasks[]>({
@@ -81,28 +84,110 @@ export default function Home() {
 
   return (
     <div className={`flex h-screen overflow-hidden ${getBackgroundClass(backgroundTheme)}`}>
-      {/* Settings Button - Top Right */}
-      <div className="absolute top-4 right-4 z-50">
-        <SettingsDialog
-          selectedBackground={backgroundTheme}
-          onBackgroundChange={setBackgroundTheme}
-        />
+      {/* Top Header with TaskFlow title and Toggle Buttons */}
+      <div className="absolute top-0 left-0 right-0 z-50 bg-white/90 dark:bg-gray-900/90 backdrop-blur-sm border-b border-gray-200 dark:border-gray-700">
+        <div className="flex items-center justify-between p-4">
+          <h1 className="text-2xl font-bold text-gray-900 dark:text-white">
+            Organize your life with TaskFlow
+          </h1>
+          
+          <div className="flex items-center gap-2">
+            {/* View Mode Toggle */}
+            <div className="flex items-center gap-1 bg-gray-100 dark:bg-gray-800 rounded-lg p-1">
+              <Button
+                variant={viewMode === "desktop" ? "default" : "ghost"}
+                size="sm"
+                onClick={() => setViewMode("desktop")}
+                className="h-8 px-3"
+              >
+                <Monitor className="w-4 h-4 mr-1" />
+                Desktop
+              </Button>
+              <Button
+                variant={viewMode === "mobile" ? "default" : "ghost"}
+                size="sm"
+                onClick={() => setViewMode("mobile")}
+                className="h-8 px-3"
+              >
+                <Smartphone className="w-4 h-4 mr-1" />
+                Mobile
+              </Button>
+            </div>
+            
+            {/* Settings Button */}
+            <SettingsDialog
+              selectedBackground={backgroundTheme}
+              onBackgroundChange={setBackgroundTheme}
+            />
+          </div>
+        </div>
       </div>
       
-      <Sidebar
-        lists={lists}
-        selectedListId={selectedListId}
-        onSelectList={setSelectedListId}
-        onCreateList={() => setCreateListModalOpen(true)}
-        onManageFamily={() => setFamilyModalOpen(true)}
-        user={user}
-      />
-      
-      <TaskList
-        list={currentList}
-        onShare={() => setShareModalOpen(true)}
-        onRefresh={refetchLists}
-      />
+      {/* Main Content Area with responsive layout */}
+      <div className="flex w-full pt-16">
+        {viewMode === "desktop" ? (
+          <>
+            <Sidebar
+              lists={lists}
+              selectedListId={selectedListId}
+              onSelectList={setSelectedListId}
+              onCreateList={() => setCreateListModalOpen(true)}
+              onManageFamily={() => setFamilyModalOpen(true)}
+              user={user as any}
+            />
+            
+            <TaskList
+              list={currentList}
+              onShare={() => setShareModalOpen(true)}
+              onRefresh={refetchLists}
+            />
+          </>
+        ) : (
+          /* Mobile View - Full width task list with floating sidebar toggle */
+          <div className="w-full relative mobile-bottom-spacing">
+            <TaskList
+              list={currentList}
+              onShare={() => setShareModalOpen(true)}
+              onRefresh={refetchLists}
+            />
+            
+            {/* Mobile Navigation - Bottom nav bar for touch devices */}
+            <div className="fixed bottom-4 left-4 right-4 bg-white dark:bg-gray-800 rounded-lg shadow-lg border p-3 flex flex-col sm:flex-row gap-3 sm:justify-between sm:items-center z-40">
+              <div className="flex items-center gap-2">
+                <label className="text-sm font-medium text-gray-700 dark:text-gray-300">Current List:</label>
+                <select
+                  value={selectedListId || ''}
+                  onChange={(e) => setSelectedListId(e.target.value)}
+                  className="flex-1 px-3 py-2 bg-gray-50 dark:bg-gray-700 border rounded-md text-sm touch-manipulation min-h-[44px]"
+                >
+                  {lists.map(list => (
+                    <option key={list.id} value={list.id}>
+                      {list.title}
+                    </option>
+                  ))}
+                </select>
+              </div>
+              <div className="flex gap-2">
+                <Button 
+                  size="sm" 
+                  onClick={() => setCreateListModalOpen(true)}
+                  className="touch-manipulation flex-1 sm:flex-none min-h-[44px]"
+                >
+                  New List
+                </Button>
+                <Button 
+                  size="sm" 
+                  variant="outline" 
+                  onClick={() => setFamilyModalOpen(true)}
+                  className="touch-manipulation flex-1 sm:flex-none min-h-[44px]"
+                >
+                  Groups
+                </Button>
+              </div>
+            </div>
+          </div>
+        )}
+      </div>
 
       {shareModalOpen && (
         <ShareModal
