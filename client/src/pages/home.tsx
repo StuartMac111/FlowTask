@@ -5,6 +5,7 @@ import TaskList from "@/components/task-list";
 import ShareModal from "@/components/share-modal";
 import FamilyModal from "@/components/family-modal";
 import CreateListModal from "@/components/create-list-modal";
+import SettingsDialog from "@/components/settings-dialog";
 import { useAuth } from "@/hooks/useAuth";
 import { useWebSocket } from "@/hooks/useWebSocket";
 import type { ListWithTasks } from "@shared/schema";
@@ -15,6 +16,7 @@ export default function Home() {
   const [shareModalOpen, setShareModalOpen] = useState(false);
   const [familyModalOpen, setFamilyModalOpen] = useState(false);
   const [createListModalOpen, setCreateListModalOpen] = useState(false);
+  const [backgroundTheme, setBackgroundTheme] = useState("default");
 
   // Fetch user's lists
   const { data: lists = [], refetch: refetchLists } = useQuery<ListWithTasks[]>({
@@ -64,8 +66,29 @@ export default function Home() {
     );
   }
 
+  const getBackgroundClass = (theme: string) => {
+    switch (theme) {
+      case "gradient-blue": return "bg-gradient-to-br from-blue-400 to-blue-600";
+      case "gradient-purple": return "bg-gradient-to-br from-purple-400 to-purple-600";
+      case "gradient-teal": return "bg-gradient-to-br from-teal-400 to-teal-600";
+      case "gradient-orange": return "bg-gradient-to-br from-orange-400 to-orange-600";
+      case "gradient-pink": return "bg-gradient-to-br from-pink-400 to-pink-600";
+      case "pattern-dots": return "bg-white bg-dotted";
+      case "pattern-grid": return "bg-white bg-grid";
+      default: return "bg-ms-bg dark:bg-gray-900";
+    }
+  };
+
   return (
-    <div className="flex h-screen overflow-hidden bg-ms-bg">
+    <div className={`flex h-screen overflow-hidden ${getBackgroundClass(backgroundTheme)}`}>
+      {/* Settings Button - Top Right */}
+      <div className="absolute top-4 right-4 z-50">
+        <SettingsDialog
+          selectedBackground={backgroundTheme}
+          onBackgroundChange={setBackgroundTheme}
+        />
+      </div>
+      
       <Sidebar
         lists={lists}
         selectedListId={selectedListId}
