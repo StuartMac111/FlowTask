@@ -316,7 +316,8 @@ export default function BrainstormWhiteboard({ listId, tasks }: BrainstormWhiteb
 
   // Enhanced whiteboard navigation
   const handleWhiteboardPanStart = (e: React.MouseEvent) => {
-    if (selectedTool === "move" && e.button === 1) { // Middle mouse button
+    if (e.button === 1 || (selectedTool === "move" && e.button === 0)) { // Middle mouse button or left click in move mode
+      e.preventDefault();
       setIsPanning(true);
       setPanStart({ x: e.clientX - whiteboardTransform.x, y: e.clientY - whiteboardTransform.y });
     }
@@ -506,13 +507,15 @@ export default function BrainstormWhiteboard({ listId, tasks }: BrainstormWhiteb
         
         {/* Navigation instructions */}
         <div className="absolute bottom-4 left-4 z-20 bg-black/20 text-white px-3 py-1 rounded-lg text-xs">
-          Middle-click + drag to pan • Scroll to zoom
+          Left-click + drag to pan (Move mode) • Scroll to zoom
         </div>
 
         {/* Maximum Width Whiteboard Frame - Edge to Edge with Enhanced Details */}
         <div 
           ref={containerRef}
-          className="w-full h-full relative bg-white dark:bg-gray-50 overflow-hidden cursor-grab active:cursor-grabbing"
+          className={`w-full h-full relative bg-white dark:bg-gray-50 overflow-hidden ${
+            selectedTool === "move" ? "cursor-grab active:cursor-grabbing" : "cursor-default"
+          }`}
           style={{
             border: '30px solid #8B4513',
             borderLeft: '0px solid #8B4513',
@@ -549,8 +552,8 @@ export default function BrainstormWhiteboard({ listId, tasks }: BrainstormWhiteb
             style={{
               transform: `translate(${whiteboardTransform.x}px, ${whiteboardTransform.y}px) scale(${whiteboardTransform.scale})`,
               transformOrigin: '0 0',
-              minWidth: '200vw',
-              minHeight: '200vh',
+              width: '120vw',
+              height: '120vh',
               backgroundImage: `
                 linear-gradient(rgba(0,0,0,0.03) 1px, transparent 1px),
                 linear-gradient(90deg, rgba(0,0,0,0.03) 1px, transparent 1px),
@@ -561,10 +564,30 @@ export default function BrainstormWhiteboard({ listId, tasks }: BrainstormWhiteb
               backgroundSize: '20px 20px, 20px 20px, 100px 100px, 40px 40px, 40px 40px',
               backgroundPosition: '0 0, 0 0, 0 0, 0 0, 20px 20px'
             }}
-            onMouseMove={selectedTool === "draw" ? continueDrawing : handleMouseMove}
-            onMouseUp={handleMouseUp}
-            onMouseDown={selectedTool === "draw" ? startDrawing : undefined}
-            onMouseLeave={handleMouseUp}
+            onMouseMove={(e) => {
+              if (selectedTool === "draw") {
+                continueDrawing(e);
+              } else if (selectedTool === "move" && !draggedNote) {
+                handleWhiteboardPan(e);
+              } else {
+                handleMouseMove(e);
+              }
+            }}
+            onMouseUp={() => {
+              handleMouseUp();
+              handleWhiteboardPanEnd();
+            }}
+            onMouseDown={(e) => {
+              if (selectedTool === "draw") {
+                startDrawing(e);
+              } else if (selectedTool === "move" && !draggedNote) {
+                handleWhiteboardPanStart(e);
+              }
+            }}
+            onMouseLeave={() => {
+              handleMouseUp();
+              handleWhiteboardPanEnd();
+            }}
           >
             {/* Drawing Lines */}
             <svg className="absolute inset-0 w-full h-full pointer-events-none" style={{ zIndex: 5 }}>
@@ -846,8 +869,8 @@ export default function BrainstormWhiteboard({ listId, tasks }: BrainstormWhiteb
                       </div>
                     </div>
                   </div>
-                  <p className="text-2xl mb-4 font-semibold text-gray-600">Your infinite brainstorming canvas awaits!</p>
-                  <p className="text-sm opacity-75 mb-6">Pan with middle-click, zoom with scroll wheel, and let your ideas flow</p>
+                  <p className="text-2xl mb-4 font-semibold text-gray-600">Your brainstorming canvas awaits!</p>
+                  <p className="text-sm opacity-75 mb-6">Use Move tool to pan canvas, zoom with scroll wheel, and let your ideas flow</p>
                   
                   {/* Floating instruction cards */}
                   <div className="flex gap-4 justify-center text-xs">
