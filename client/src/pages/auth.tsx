@@ -9,6 +9,7 @@ import { Separator } from "@/components/ui/separator";
 import { Mail, Lock, User, Phone } from "lucide-react";
 import { FaGoogle, FaFacebook, FaApple } from "react-icons/fa";
 import { Monitor, Smartphone } from "lucide-react";
+import { ThemeToggle } from "@/components/theme-toggle";
 import { apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 
@@ -144,6 +145,9 @@ export default function AuthPage() {
             <span className="text-black">Organize your life with </span>
             <span className="text-blue-600 dark:text-blue-400">TaskFlow</span>
           </CardTitle>
+          <div className="flex justify-center my-4">
+            <ThemeToggle />
+          </div>
           <CardDescription className="text-lg">
             Sign in to your account or create a new one
           </CardDescription>

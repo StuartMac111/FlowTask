@@ -2,6 +2,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { CheckCircle, Users, Share2, Target, Calendar, Bell, Monitor, Smartphone } from "lucide-react";
 import { useState } from "react";
+import { ThemeToggle } from "@/components/theme-toggle";
 
 export default function Landing() {
   const [viewMode, setViewMode] = useState<"desktop" | "mobile">("desktop");
@@ -58,6 +59,9 @@ export default function Landing() {
             <span className="text-black">Organize Your Life with </span>
             <span className="text-blue-600 dark:text-blue-400">TaskFlow</span>
           </h1>
+          <div className="flex justify-center mb-6">
+            <ThemeToggle />
+          </div>
           <p className="text-xl text-ms-text-secondary mb-8 max-w-2xl mx-auto">
             A comprehensive to-do list application with family sharing, custom lists, 
             and task assignment features. Stay organized, stay connected.
