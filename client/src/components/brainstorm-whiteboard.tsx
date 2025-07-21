@@ -3,7 +3,7 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent } from "@/components/ui/card";
-import { X, Plus, Move3D, Lightbulb, Calendar, AlertCircle, CheckCircle, Clock, Palette, Download, Link, Square, Circle, Triangle, Type, Bold, Italic, Underline, Minus } from "lucide-react";
+import { X, Plus, Move3D, Lightbulb, Calendar, AlertCircle, CheckCircle, Clock, Palette, Download, Link, Square, Circle, Triangle, Type, Bold, Italic, Underline, Minus, HelpCircle } from "lucide-react";
 import { apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import { isUnauthorizedError } from "@/lib/authUtils";
@@ -80,6 +80,7 @@ export default function BrainstormWhiteboard({ listId, tasks }: BrainstormWhiteb
   const [whiteboardTransform, setWhiteboardTransform] = useState({ x: 0, y: 0, scale: 0.8 });
   const [isPanning, setIsPanning] = useState(false);
   const [panStart, setPanStart] = useState({ x: 0, y: 0 });
+  const [showHelp, setShowHelp] = useState(false);
   const whiteboardRef = useRef<HTMLDivElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
   const { toast } = useToast();
@@ -481,6 +482,14 @@ export default function BrainstormWhiteboard({ listId, tasks }: BrainstormWhiteb
           >
             Fit to Content
           </Button>
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => setShowHelp(!showHelp)}
+          >
+            <HelpCircle className="w-4 h-4 mr-1" />
+            Help
+          </Button>
         </div>
 
         {/* Shape and Color Selection */}
@@ -552,6 +561,47 @@ export default function BrainstormWhiteboard({ listId, tasks }: BrainstormWhiteb
         <div className="absolute bottom-4 left-4 z-20 bg-black/60 text-white px-3 py-1 rounded-lg text-xs font-medium">
           Move Tool: Left-click drag to pan • Scroll wheel to zoom • Starts at 80% size
         </div>
+
+        {/* Help Panel */}
+        {showHelp && (
+          <div className="absolute top-4 left-4 z-30 bg-white dark:bg-gray-800 rounded-lg shadow-xl p-4 max-w-md border">
+            <div className="flex justify-between items-start mb-3">
+              <h3 className="font-semibold text-lg">Brainstorming Help</h3>
+              <Button variant="ghost" size="sm" onClick={() => setShowHelp(false)}>
+                <X className="w-4 h-4" />
+              </Button>
+            </div>
+            
+            <div className="space-y-3 text-sm">
+              <div>
+                <h4 className="font-medium mb-1">Tools:</h4>
+                <ul className="space-y-1 text-gray-600 dark:text-gray-300">
+                  <li>• <strong>Move:</strong> Left-click drag to pan canvas</li>
+                  <li>• <strong>Draw:</strong> Sketch lines and arrows</li>
+                  <li>• <strong>Connect:</strong> Link notes together</li>
+                </ul>
+              </div>
+              
+              <div>
+                <h4 className="font-medium mb-1">Priority Colors:</h4>
+                <ul className="space-y-1 text-gray-600 dark:text-gray-300">
+                  <li>• <span className="inline-block w-3 h-3 bg-green-500 rounded-full mr-2"></span><strong>Green:</strong> Low priority (not important)</li>
+                  <li>• <span className="inline-block w-3 h-3 bg-yellow-500 rounded-full mr-2"></span><strong>Yellow:</strong> Medium priority (somewhat important)</li>
+                  <li>• <span className="inline-block w-3 h-3 bg-red-500 rounded-full mr-2"></span><strong>Red:</strong> High priority (very important)</li>
+                </ul>
+              </div>
+              
+              <div>
+                <h4 className="font-medium mb-1">Navigation:</h4>
+                <ul className="space-y-1 text-gray-600 dark:text-gray-300">
+                  <li>• Scroll wheel to zoom in/out</li>
+                  <li>• Hover over notes to see formatting controls</li>
+                  <li>• Click priority dots to set importance</li>
+                </ul>
+              </div>
+            </div>
+          </div>
+        )}
 
         {/* Maximum Width Whiteboard Frame - Edge to Edge with Enhanced Details */}
         <div 
