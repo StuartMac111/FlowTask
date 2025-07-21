@@ -4,8 +4,9 @@ import { queryClient } from "@/lib/queryClient";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Share2, List, Grid3X3, Calendar, User } from "lucide-react";
+import { Share2, List, Grid3X3, Calendar, User, Lightbulb } from "lucide-react";
 import TaskCard from "./task-card";
+import BrainstormWhiteboard from "./brainstorm-whiteboard";
 import { apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import { isUnauthorizedError } from "@/lib/authUtils";
@@ -87,6 +88,11 @@ export default function TaskList({ list, onShare, onRefresh }: TaskListProps) {
         </div>
       </div>
     );
+  }
+
+  // Show brainstorming whiteboard for brainstorming lists
+  if (list.name.toLowerCase() === "brainstorming") {
+    return <BrainstormWhiteboard listId={list.id} tasks={list.tasks || []} />;
   }
 
   // Filter and sort tasks

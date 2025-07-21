@@ -65,6 +65,10 @@ RESTful API with endpoints for:
 
 ## Recent Changes (January 2025)
 
+- **Brainstorming Whiteboard**: Added special brainstorming list with whiteboard interface featuring draggable sticky notes for idea management
+- **Automatic Default Lists**: New users get four starter lists: "My Day", "Tasks assigned to me", "Shopping list", and "Brainstorming"
+- **Dark Mode Support**: Complete dark mode implementation with theme toggle in user profile section
+- **Background Themes**: Customizable list backgrounds with gradients and patterns for visual organization
 - **Groups System**: Renamed "Family Groups" to "Groups" to support any type of collaboration
 - **Priority Visualization**: Replaced text-based priority (low/medium/high) with color-coded dots:
   - Green dot for low priority

@@ -148,6 +148,13 @@ export class DatabaseStorage implements IStorage {
         isPrivate: true,
         ownerId: userId,
       },
+      {
+        name: "Brainstorming",
+        color: "#5C2D91",
+        backgroundTheme: "pattern-dots",
+        isPrivate: true,
+        ownerId: userId,
+      },
     ];
 
     await db.insert(lists).values(defaultLists);

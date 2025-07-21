@@ -85,7 +85,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // List routes
   app.post('/api/lists', isAuthenticated, async (req: any, res) => {
     try {
-      const userId = req.user.claims.sub;
+      const userId = req.user?.id || req.user?.claims?.sub;
+      if (!userId) {
+        return res.status(401).json({ message: "User not authenticated" });
+      }
       const listData = insertListSchema.parse(req.body);
       const list = await storage.createList(listData, userId);
       
@@ -101,7 +104,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.get('/api/lists', isAuthenticated, async (req: any, res) => {
     try {
-      const userId = req.user.claims.sub;
+      const userId = req.user?.id || req.user?.claims?.sub;
+      if (!userId) {
+        return res.status(401).json({ message: "User not authenticated" });
+      }
       const lists = await storage.getListsForUser(userId);
       res.json(lists);
     } catch (error) {
