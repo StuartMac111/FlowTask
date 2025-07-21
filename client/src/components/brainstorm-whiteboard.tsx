@@ -50,8 +50,8 @@ export default function BrainstormWhiteboard({ listId, tasks }: BrainstormWhiteb
     const notes: StickyNote[] = tasks.map((task, index) => ({
       id: task.id,
       content: task.title,
-      x: 30 + (index % 8) * 160,
-      y: 50 + Math.floor(index / 8) * 120,
+      x: 20 + (index % 10) * 150,
+      y: 50 + Math.floor(index / 10) * 120,
       color: NOTE_COLORS[index % NOTE_COLORS.length],
       priority: task.priority || undefined,
       createdAt: task.createdAt || undefined,
@@ -121,9 +121,9 @@ export default function BrainstormWhiteboard({ listId, tasks }: BrainstormWhiteb
   const addNewIdea = () => {
     if (!newIdeaText.trim()) return;
 
-    // Find a good position for the new note
-    const newX = 30 + (stickyNotes.length % 8) * 160;
-    const newY = 50 + Math.floor(stickyNotes.length / 8) * 120;
+    // Find a good position for the new note across wider whiteboard
+    const newX = 20 + (stickyNotes.length % 10) * 150;
+    const newY = 50 + Math.floor(stickyNotes.length / 10) * 120;
     const newColor = NOTE_COLORS[stickyNotes.length % NOTE_COLORS.length];
 
     createTaskMutation.mutate({
@@ -202,23 +202,23 @@ export default function BrainstormWhiteboard({ listId, tasks }: BrainstormWhiteb
 
       {/* Enhanced Whiteboard Canvas with Massive Frame */}
       <div className="flex-1 p-0 bg-gradient-to-b from-gray-300 to-gray-400 dark:from-gray-800 dark:to-gray-900">
-        {/* Extra Wide Whiteboard Frame - Full Width to Screen Edges */}
+        {/* Maximum Width Whiteboard Frame - Edge to Edge */}
         <div className="w-full h-full relative bg-white dark:bg-gray-50 overflow-hidden"
              style={{
                border: '25px solid #8B4513',
-               borderLeft: '8px solid #8B4513',
+               borderLeft: '0px solid #8B4513',
                borderRight: '0px solid #8B4513',
                borderTop: '25px solid #8B4513',
                borderBottom: '25px solid #8B4513',
-               marginLeft: '-8px',
-               marginRight: '0px',
-               width: 'calc(100% + 8px)',
+               marginLeft: '-25px',
+               marginRight: '-25px',
+               width: 'calc(100% + 50px)',
                boxShadow: `
-                 inset 0 0 0 15px #A0522D,
-                 inset 0 0 0 22px #CD853F,
-                 inset 0 0 0 28px #DEB887,
-                 0 35px 70px rgba(0,0,0,0.5),
-                 0 20px 40px rgba(0,0,0,0.4)
+                 inset 0 0 0 20px #A0522D,
+                 inset 0 0 0 30px #CD853F,
+                 inset 0 0 0 40px #DEB887,
+                 0 40px 80px rgba(0,0,0,0.6),
+                 0 25px 50px rgba(0,0,0,0.5)
                `
              }}>
           <div 
