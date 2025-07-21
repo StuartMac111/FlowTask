@@ -214,14 +214,14 @@ export default function TaskList({ list, onShare, onRefresh }: TaskListProps) {
       <div className="flex-1 overflow-y-auto p-6">
         {/* Add Task Input */}
         <div className="mb-6">
-          <div className="bg-white rounded-lg border border-ms-border p-4 shadow-sm">
+          <div className="bg-white dark:bg-gray-800 rounded-lg border border-ms-border dark:border-gray-600 p-4 shadow-sm">
             <Input
               type="text"
               placeholder="Add a task..."
               value={newTaskTitle}
               onChange={(e) => setNewTaskTitle(e.target.value)}
               onKeyPress={handleKeyPress}
-              className="text-lg placeholder-ms-text-secondary border-none focus-visible:ring-0 p-0"
+              className="text-xl text-black dark:text-white placeholder-gray-500 dark:placeholder-gray-400 border-none focus-visible:ring-0 p-0 bg-transparent touch-manipulation"
             />
             <div className="flex items-center justify-between mt-3">
               <div className="flex items-center space-x-4">

@@ -8,10 +8,12 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Separator } from "@/components/ui/separator";
 import { Mail, Lock, User, Phone } from "lucide-react";
 import { FaGoogle, FaFacebook, FaApple } from "react-icons/fa";
+import { Monitor, Smartphone } from "lucide-react";
 import { apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 
 export default function AuthPage() {
+  const [viewMode, setViewMode] = useState<"desktop" | "mobile">("desktop");
   const [loginForm, setLoginForm] = useState({ email: "", password: "" });
   const [registerForm, setRegisterForm] = useState({
     firstName: "",
@@ -111,7 +113,31 @@ export default function AuthPage() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-50 px-4 py-8">
+    <div className="min-h-screen flex items-center justify-center bg-gray-50 px-4 py-8 relative">
+      {/* View Mode Toggle - Top Right */}
+      <div className="absolute top-4 right-4 z-50">
+        <div className="flex items-center gap-1 bg-gray-100 dark:bg-gray-800 rounded-lg p-1">
+          <Button
+            variant={viewMode === "desktop" ? "default" : "ghost"}
+            size="sm"
+            onClick={() => setViewMode("desktop")}
+            className="h-8 px-3"
+          >
+            <Monitor className="w-4 h-4 mr-1" />
+            Desktop
+          </Button>
+          <Button
+            variant={viewMode === "mobile" ? "default" : "ghost"}
+            size="sm"
+            onClick={() => setViewMode("mobile")}
+            className="h-8 px-3"
+          >
+            <Smartphone className="w-4 h-4 mr-1" />
+            Mobile
+          </Button>
+        </div>
+      </div>
+      
       <Card className="w-full max-w-md mx-auto">
         <CardHeader className="text-center">
           <CardTitle className="text-2xl font-bold text-ms-text">TaskFlow</CardTitle>

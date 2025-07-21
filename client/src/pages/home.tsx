@@ -87,8 +87,9 @@ export default function Home() {
       {/* Top Header with TaskFlow title and Toggle Buttons */}
       <div className="absolute top-0 left-0 right-0 z-50 bg-white/90 dark:bg-gray-900/90 backdrop-blur-sm border-b border-gray-200 dark:border-gray-700">
         <div className="flex items-center justify-between p-4">
-          <h1 className="text-2xl font-bold text-gray-900 dark:text-white">
-            Organize your life with TaskFlow
+          <h1 className="text-3xl font-bold">
+            <span className="text-black dark:text-white">Organize your life with </span>
+            <span className="text-blue-600 dark:text-blue-400">TaskFlow</span>
           </h1>
           
           <div className="flex items-center gap-2">

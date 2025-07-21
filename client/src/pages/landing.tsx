@@ -1,8 +1,11 @@
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { CheckCircle, Users, Share2, Target, Calendar, Bell } from "lucide-react";
+import { CheckCircle, Users, Share2, Target, Calendar, Bell, Monitor, Smartphone } from "lucide-react";
+import { useState } from "react";
 
 export default function Landing() {
+  const [viewMode, setViewMode] = useState<"desktop" | "mobile">("desktop");
+  
   const handleLogin = () => {
     window.location.href = "/auth";
   };
@@ -16,16 +19,41 @@ export default function Landing() {
             <CheckCircle className="h-8 w-8 text-primary" />
             <h1 className="text-2xl font-bold text-ms-text">TaskFlow</h1>
           </div>
-          <Button onClick={handleLogin} size="lg">
-            Sign In
-          </Button>
+          
+          <div className="flex items-center gap-4">
+            {/* View Mode Toggle */}
+            <div className="flex items-center gap-1 bg-gray-100 dark:bg-gray-800 rounded-lg p-1">
+              <Button
+                variant={viewMode === "desktop" ? "default" : "ghost"}
+                size="sm"
+                onClick={() => setViewMode("desktop")}
+                className="h-8 px-3"
+              >
+                <Monitor className="w-4 h-4 mr-1" />
+                Desktop
+              </Button>
+              <Button
+                variant={viewMode === "mobile" ? "default" : "ghost"}
+                size="sm"
+                onClick={() => setViewMode("mobile")}
+                className="h-8 px-3"
+              >
+                <Smartphone className="w-4 h-4 mr-1" />
+                Mobile
+              </Button>
+            </div>
+            
+            <Button onClick={handleLogin} size="lg">
+              Sign In
+            </Button>
+          </div>
         </header>
 
         {/* Hero Section */}
         <div className="text-center mb-16">
-          <h1 className="text-5xl font-bold text-ms-text mb-6">
-            Organize Your Life with 
-            <span className="text-primary"> TaskFlow</span>
+          <h1 className="text-6xl font-bold mb-6">
+            <span className="text-black dark:text-white">Organize Your Life with </span>
+            <span className="text-blue-600 dark:text-blue-400">TaskFlow</span>
           </h1>
           <p className="text-xl text-ms-text-secondary mb-8 max-w-2xl mx-auto">
             A comprehensive to-do list application with family sharing, custom lists, 
