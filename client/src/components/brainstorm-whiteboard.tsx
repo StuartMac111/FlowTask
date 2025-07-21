@@ -836,15 +836,16 @@ export default function BrainstormWhiteboard({ listId, tasks }: BrainstormWhiteb
                       </div>
                     )}
                     
-                    {/* Delete button */}
+                    {/* Delete button - more visible */}
                     <button
                       onClick={(e) => {
                         e.stopPropagation();
                         removeIdea(note.id);
                       }}
-                      className="absolute top-1 right-1 w-5 h-5 rounded-full bg-red-500 text-white flex items-center justify-center hover:bg-red-600 transition-colors opacity-0 hover:opacity-100 text-xs font-bold z-10"
+                      className="absolute -top-2 -right-2 w-6 h-6 rounded-full bg-red-500 text-white flex items-center justify-center hover:bg-red-600 transition-all duration-200 opacity-0 group-hover:opacity-100 text-sm font-bold z-10 shadow-lg hover:scale-110"
+                      title="Delete this note"
                     >
-                      ×
+                      <X className="w-3 h-3" />
                     </button>
                     
                     {/* Note number and date */}
@@ -890,6 +891,20 @@ export default function BrainstormWhiteboard({ listId, tasks }: BrainstormWhiteb
                     
                     {/* Enhanced controls for formatting and priority */}
                     <div className="absolute -bottom-8 left-0 bg-white dark:bg-gray-800 rounded-md shadow-lg p-1 flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity z-10">
+                      {/* Delete button in control panel */}
+                      <button
+                        className="w-6 h-6 text-xs bg-red-500 hover:bg-red-600 text-white rounded flex items-center justify-center"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          removeIdea(note.id);
+                        }}
+                        title="Delete Note"
+                      >
+                        <X className="w-3 h-3" />
+                      </button>
+                      
+                      {/* Divider */}
+                      <div className="w-px h-4 bg-gray-300 mx-1"></div>
                       {/* Text formatting */}
                       <button
                         className="w-6 h-6 text-xs bg-gray-100 hover:bg-gray-200 rounded flex items-center justify-center"
