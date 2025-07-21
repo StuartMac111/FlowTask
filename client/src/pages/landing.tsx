@@ -52,8 +52,8 @@ export default function Landing() {
         {/* Hero Section */}
         <div className="text-center mb-16">
           <h1 className="text-6xl font-bold mb-6">
-            <span className="text-black dark:text-white" style={{ textShadow: '2px 2px 0 black, -2px -2px 0 black, 2px -2px 0 black, -2px 2px 0 black' }}>Organize Your Life with </span>
-            <span className="text-blue-600 dark:text-blue-400" style={{ textShadow: '2px 2px 0 black, -2px -2px 0 black, 2px -2px 0 black, -2px 2px 0 black' }}>TaskFlow</span>
+            <span className="text-black dark:text-white">Organize Your Life with </span>
+            <span className="text-blue-600 dark:text-blue-400">TaskFlow</span>
           </h1>
           <p className="text-xl text-ms-text-secondary mb-8 max-w-2xl mx-auto">
             A comprehensive to-do list application with family sharing, custom lists, 
