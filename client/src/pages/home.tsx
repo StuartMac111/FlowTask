@@ -10,6 +10,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { useWebSocket } from "@/hooks/useWebSocket";
 import { Button } from "@/components/ui/button";
 import { Monitor, Smartphone } from "lucide-react";
+import { ThemeToggle } from "@/components/theme-toggle";
 import type { ListWithTasks } from "@shared/schema";
 
 export default function Home() {
@@ -87,10 +88,10 @@ export default function Home() {
       {/* Top Header with TaskFlow title and Toggle Buttons */}
       <div className="absolute top-0 left-0 right-0 z-50 bg-white/90 dark:bg-gray-900/90 backdrop-blur-sm border-b border-gray-200 dark:border-gray-700">
         <div className="flex items-center justify-between p-4">
-          <h1 className="text-3xl font-bold">
-            <span className="text-black">Organize your life with </span>
-            <span className="text-blue-600 dark:text-blue-400">TaskFlow</span>
-          </h1>
+          <div className="flex items-center gap-4">
+            <h1 className="text-2xl font-bold text-blue-600 dark:text-blue-400">TaskFlow</h1>
+            <ThemeToggle />
+          </div>
           
           <div className="flex items-center gap-2">
             {/* View Mode Toggle */}
