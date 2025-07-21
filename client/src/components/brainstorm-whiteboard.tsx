@@ -323,6 +323,7 @@ export default function BrainstormWhiteboard({ listId, tasks }: BrainstormWhiteb
   const handleNoteRightClick = (noteId: string, e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
+    console.log('Right click detected on note:', noteId); // Debug log
     setContextMenu({
       x: e.clientX,
       y: e.clientY,
@@ -727,6 +728,9 @@ export default function BrainstormWhiteboard({ listId, tasks }: BrainstormWhiteb
               handleWhiteboardPanEnd();
             }}
             onMouseDown={(e) => {
+              // Close context menu if clicking outside
+              setContextMenu(null);
+              
               if (selectedTool === "draw") {
                 startDrawing(e);
               } else if (selectedTool === "move" && !draggedNote) {
