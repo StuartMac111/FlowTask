@@ -43,7 +43,7 @@ export const users = pgTable("users", {
 
 // Groups table
 export const groups = pgTable("groups", {
-  id: uuid("id").primaryKey().defaultRandom(),
+  id: varchar("id").primaryKey().$defaultFn(() => crypto.randomUUID()),
   name: varchar("name", { length: 100 }).notNull(),
   description: text("description"),
   ownerId: varchar("owner_id").references(() => users.id).notNull(),
@@ -53,8 +53,8 @@ export const groups = pgTable("groups", {
 
 // Group members table
 export const groupMembers = pgTable("group_members", {
-  id: uuid("id").primaryKey().defaultRandom(),
-  groupId: uuid("group_id").references(() => groups.id, { onDelete: "cascade" }).notNull(),
+  id: varchar("id").primaryKey().$defaultFn(() => crypto.randomUUID()),
+  groupId: varchar("group_id").references(() => groups.id, { onDelete: "cascade" }).notNull(),
   userId: varchar("user_id").references(() => users.id, { onDelete: "cascade" }).notNull(),
   role: varchar("role", { enum: ["owner", "admin", "member"] }).default("member").notNull(),
   joinedAt: timestamp("joined_at").defaultNow(),
@@ -62,13 +62,13 @@ export const groupMembers = pgTable("group_members", {
 
 // Lists table
 export const lists = pgTable("lists", {
-  id: uuid("id").primaryKey().defaultRandom(),
+  id: varchar("id").primaryKey().$defaultFn(() => crypto.randomUUID()),
   name: varchar("name", { length: 100 }).notNull(),
   description: text("description"),
   color: varchar("color", { length: 7 }).default("#0078D4"),
   backgroundTheme: varchar("background_theme").default("default"),
   ownerId: varchar("owner_id").references(() => users.id).notNull(),
-  groupId: uuid("group_id").references(() => groups.id, { onDelete: "set null" }),
+  groupId: varchar("group_id").references(() => groups.id, { onDelete: "set null" }),
   isPrivate: boolean("is_private").default(true),
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
@@ -76,8 +76,8 @@ export const lists = pgTable("lists", {
 
 // List sharing table
 export const listShares = pgTable("list_shares", {
-  id: uuid("id").primaryKey().defaultRandom(),
-  listId: uuid("list_id").references(() => lists.id, { onDelete: "cascade" }).notNull(),
+  id: varchar("id").primaryKey().$defaultFn(() => crypto.randomUUID()),
+  listId: varchar("list_id").references(() => lists.id, { onDelete: "cascade" }).notNull(),
   userId: varchar("user_id").references(() => users.id, { onDelete: "cascade" }).notNull(),
   permission: varchar("permission", { enum: ["view", "edit", "admin"] }).default("view").notNull(),
   sharedAt: timestamp("shared_at").defaultNow(),
@@ -85,15 +85,15 @@ export const listShares = pgTable("list_shares", {
 
 // Tasks table
 export const tasks: any = pgTable("tasks", {
-  id: uuid("id").primaryKey().defaultRandom(),
+  id: varchar("id").primaryKey().$defaultFn(() => crypto.randomUUID()),
   title: varchar("title", { length: 200 }).notNull(),
   description: text("description"),
   isCompleted: boolean("is_completed").default(false),
   priority: varchar("priority", { enum: ["low", "medium", "high"] }).default("medium"),
   dueDate: timestamp("due_date"),
-  listId: uuid("list_id").references(() => lists.id, { onDelete: "cascade" }).notNull(),
+  listId: varchar("list_id").references(() => lists.id, { onDelete: "cascade" }).notNull(),
   assignedTo: varchar("assigned_to").references(() => users.id, { onDelete: "set null" }),
-  parentTaskId: uuid("parent_task_id").references(() => tasks.id, { onDelete: "cascade" }),
+  parentTaskId: varchar("parent_task_id").references(() => tasks.id, { onDelete: "cascade" }),
   sortOrder: integer("sort_order").default(0),
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
