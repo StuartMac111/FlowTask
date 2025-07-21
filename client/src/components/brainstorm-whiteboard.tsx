@@ -1172,20 +1172,25 @@ export default function BrainstormWhiteboard({ listId, tasks }: BrainstormWhiteb
 
             {/* Right-click context menu */}
             {contextMenu && (
-              console.log('Rendering context menu:', contextMenu) || // Debug log
               <div
-                className="fixed bg-white dark:bg-gray-800 border rounded-lg shadow-lg py-1 z-50"
+                className="fixed bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-lg shadow-xl py-2 min-w-32"
                 style={{
-                  left: contextMenu.x,
-                  top: contextMenu.y,
-                  pointerEvents: 'auto'
+                  left: `${contextMenu.x}px`,
+                  top: `${contextMenu.y}px`,
+                  zIndex: 9999,
+                  pointerEvents: 'auto',
+                  position: 'fixed'
                 }}
                 onMouseDown={(e) => e.stopPropagation()}
                 onClick={(e) => e.stopPropagation()}
+                onContextMenu={(e) => e.preventDefault()}
               >
                 <button
-                  onClick={() => startEditingNote(contextMenu.noteId)}
-                  className="w-full px-4 py-2 text-left text-sm hover:bg-gray-100 dark:hover:bg-gray-700 flex items-center gap-2"
+                  onClick={() => {
+                    startEditingNote(contextMenu.noteId);
+                    setContextMenu(null);
+                  }}
+                  className="w-full px-4 py-2 text-left text-sm hover:bg-gray-100 dark:hover:bg-gray-700 flex items-center gap-2 text-gray-800 dark:text-gray-200"
                 >
                   <Type className="w-4 h-4" />
                   Edit Note
@@ -1195,7 +1200,7 @@ export default function BrainstormWhiteboard({ listId, tasks }: BrainstormWhiteb
                     removeIdea(contextMenu.noteId);
                     setContextMenu(null);
                   }}
-                  className="w-full px-4 py-2 text-left text-sm hover:bg-gray-100 dark:hover:bg-gray-700 text-red-600 flex items-center gap-2"
+                  className="w-full px-4 py-2 text-left text-sm hover:bg-red-50 dark:hover:bg-red-900/20 text-red-600 dark:text-red-400 flex items-center gap-2"
                 >
                   <X className="w-4 h-4" />
                   Delete Note
