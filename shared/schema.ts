@@ -84,7 +84,7 @@ export const listShares = pgTable("list_shares", {
 });
 
 // Tasks table
-export const tasks: any = pgTable("tasks", {
+export const tasks = pgTable("tasks", {
   id: varchar("id").primaryKey().$defaultFn(() => crypto.randomUUID()),
   title: varchar("title", { length: 200 }).notNull(),
   description: text("description"),
@@ -93,7 +93,7 @@ export const tasks: any = pgTable("tasks", {
   dueDate: timestamp("due_date"),
   listId: varchar("list_id").references(() => lists.id, { onDelete: "cascade" }).notNull(),
   assignedTo: varchar("assigned_to").references(() => users.id, { onDelete: "set null" }),
-  parentTaskId: varchar("parent_task_id").references(() => tasks.id, { onDelete: "cascade" }),
+  parentTaskId: varchar("parent_task_id"),
   sortOrder: integer("sort_order").default(0),
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),

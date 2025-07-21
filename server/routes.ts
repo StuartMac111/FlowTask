@@ -64,7 +64,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const { userId: memberUserId, role } = req.body;
       
       // Check if family group exists and user has permission
-      const familyGroup = await storage.getFamilyGroupById(id);
+      const familyGroup = await storage.getGroupById(id);
       if (!familyGroup) {
         return res.status(404).json({ message: "Family group not found" });
       }
@@ -74,7 +74,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(400).json({ message: "Family group cannot have more than 8 members" });
       }
 
-      const member = await storage.addFamilyGroupMember(id, memberUserId, role || "member");
+      const member = await storage.addGroupMember(id, memberUserId, role || "member");
       res.json(member);
     } catch (error) {
       console.error("Error adding family member:", error);

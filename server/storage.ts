@@ -125,40 +125,7 @@ export class DatabaseStorage implements IStorage {
     return user;
   }
 
-  async createDefaultLists(userId: string): Promise<void> {
-    const defaultLists = [
-      {
-        name: "My Day",
-        color: "#0078D4",
-        backgroundTheme: "default",
-        isPrivate: true,
-        ownerId: userId,
-      },
-      {
-        name: "Tasks assigned to me",
-        color: "#107C10",
-        backgroundTheme: "default",
-        isPrivate: true,
-        ownerId: userId,
-      },
-      {
-        name: "Shopping list",
-        color: "#FF8C00",
-        backgroundTheme: "default",
-        isPrivate: true,
-        ownerId: userId,
-      },
-      {
-        name: "Brainstorming",
-        color: "#5C2D91",
-        backgroundTheme: "pattern-dots",
-        isPrivate: true,
-        ownerId: userId,
-      },
-    ];
 
-    await db.insert(lists).values(defaultLists);
-  }
 
   // Group operations
   async createGroup(group: InsertGroup, ownerId: string): Promise<Group> {
@@ -411,8 +378,8 @@ export class DatabaseStorage implements IStorage {
 
   // Task operations
   async createTask(task: InsertTask): Promise<Task> {
-    const [newTask] = await db.insert(tasks).values(task).returning();
-    return newTask;
+    const result = await db.insert(tasks).values(task).returning();
+    return result[0];
   }
 
   async getTasksForList(listId: string): Promise<TaskWithSubtasks[]> {
