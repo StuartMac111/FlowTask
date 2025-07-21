@@ -112,4 +112,24 @@
   .priority-low {
     @apply bg-gray-100 text-gray-800;
   }
+
+  /* Mobile-responsive design */
+  @media (max-width: 768px) {
+    .min-h-screen {
+      min-height: 100vh;
+      min-height: 100dvh;
+    }
+    
+    .container {
+      padding-left: 1rem;
+      padding-right: 1rem;
+    }
+  }
+
+  /* Touch-friendly buttons on mobile */
+  @media (pointer: coarse) {
+    button, input, select, textarea {
+      min-height: 44px;
+    }
+  }
 }

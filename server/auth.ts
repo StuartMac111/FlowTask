@@ -62,8 +62,13 @@ export async function setupAuth(app: Express) {
       async (email: string, password: string, done) => {
         try {
           const user = await storage.getUserByEmail(email);
-          if (!user || !user.password) {
+          if (!user) {
             return done(null, false, { message: "Invalid credentials" });
+          }
+
+          // Check if user has a password (local auth)
+          if (!user.password) {
+            return done(null, false, { message: "Please sign in with your social account" });
           }
 
           const isMatch = await bcrypt.compare(password, user.password);

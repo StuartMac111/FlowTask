@@ -24,7 +24,19 @@ export default function AuthPage() {
 
   const loginMutation = useMutation({
     mutationFn: async (data: { email: string; password: string }) => {
-      return await apiRequest("POST", "/auth/login", data);
+      const response = await fetch("/auth/login", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(data),
+        credentials: "include",
+      });
+      
+      if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.message || "Login failed");
+      }
+      
+      return response.json();
     },
     onSuccess: () => {
       window.location.href = "/";
@@ -45,7 +57,19 @@ export default function AuthPage() {
       email: string;
       password: string;
     }) => {
-      return await apiRequest("POST", "/auth/register", data);
+      const response = await fetch("/auth/register", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(data),
+        credentials: "include",
+      });
+      
+      if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.message || "Registration failed");
+      }
+      
+      return response.json();
     },
     onSuccess: () => {
       window.location.href = "/";
@@ -87,8 +111,8 @@ export default function AuthPage() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-50 px-4">
-      <Card className="w-full max-w-md">
+    <div className="min-h-screen flex items-center justify-center bg-gray-50 px-4 py-8">
+      <Card className="w-full max-w-md mx-auto">
         <CardHeader className="text-center">
           <CardTitle className="text-2xl font-bold text-ms-text">TaskFlow</CardTitle>
           <CardDescription>
@@ -278,9 +302,12 @@ export default function AuthPage() {
             </div>
           </div>
 
-          <div className="mt-4 text-center">
+          <div className="mt-6 text-center">
             <p className="text-sm text-gray-500">
               Coming soon: Phone number authentication
+            </p>
+            <p className="text-xs text-gray-400 mt-2">
+              Works on all devices: desktop, tablet, and mobile
             </p>
           </div>
         </CardContent>
