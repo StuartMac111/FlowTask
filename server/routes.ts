@@ -2,7 +2,7 @@ import type { Express } from "express";
 import { createServer, type Server } from "http";
 import { WebSocketServer, WebSocket } from "ws";
 import { storage } from "./storage";
-import { setupAuth, isAuthenticated } from "./replitAuth";
+import { setupAuth, isAuthenticated } from "./auth";
 import { 
   insertGroupSchema,
   insertListSchema,
@@ -26,8 +26,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Auth routes
   app.get('/api/auth/user', isAuthenticated, async (req: any, res) => {
     try {
-      const userId = req.user.claims.sub;
-      const user = await storage.getUser(userId);
+      const user = req.user;
       res.json(user);
     } catch (error) {
       console.error("Error fetching user:", error);
@@ -38,7 +37,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Group routes
   app.post('/api/groups', isAuthenticated, async (req: any, res) => {
     try {
-      const userId = req.user.claims.sub;
+      const userId = req.user.id;
       const groupData = insertGroupSchema.parse(req.body);
       const group = await storage.createGroup(groupData, userId);
       res.json(group);
@@ -50,7 +49,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.get('/api/groups', isAuthenticated, async (req: any, res) => {
     try {
-      const userId = req.user.claims.sub;
+      const userId = req.user.id;
       const groups = await storage.getGroupsForUser(userId);
       res.json(groups);
     } catch (error) {

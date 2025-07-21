@@ -26,6 +26,9 @@ import { eq, and, or, desc, asc } from "drizzle-orm";
 export interface IStorage {
   // User operations (required for Replit Auth)
   getUser(id: string): Promise<User | undefined>;
+  getUserByEmail(email: string): Promise<User | undefined>;
+  getUserByProvider(provider: string, providerId: string): Promise<User | undefined>;
+  linkProvider(userId: string, provider: string, providerId: string): Promise<void>;
   upsertUser(user: UpsertUser): Promise<User>;
 
   // Group operations
@@ -58,6 +61,52 @@ export class DatabaseStorage implements IStorage {
   async getUser(id: string): Promise<User | undefined> {
     const [user] = await db.select().from(users).where(eq(users.id, id));
     return user;
+  }
+
+  async getUserByEmail(email: string): Promise<User | undefined> {
+    const [user] = await db.select().from(users).where(eq(users.email, email));
+    return user;
+  }
+
+  async getUserByProvider(provider: string, providerId: string): Promise<User | undefined> {
+    const allUsers = await db.select().from(users);
+    for (const user of allUsers) {
+      if (user.providers) {
+        try {
+          const providers = JSON.parse(user.providers);
+          if (providers.some((p: any) => p.provider === provider && p.providerId === providerId)) {
+            return user;
+          }
+        } catch (e) {
+          // Skip invalid JSON
+        }
+      }
+    }
+    return undefined;
+  }
+
+  async linkProvider(userId: string, provider: string, providerId: string): Promise<void> {
+    const user = await this.getUser(userId);
+    if (!user) return;
+
+    let providers = [];
+    if (user.providers) {
+      try {
+        providers = JSON.parse(user.providers);
+      } catch (e) {
+        providers = [];
+      }
+    }
+
+    providers.push({ provider, providerId });
+    
+    await db
+      .update(users)
+      .set({ 
+        providers: JSON.stringify(providers),
+        updatedAt: new Date()
+      })
+      .where(eq(users.id, userId));
   }
 
   async upsertUser(userData: UpsertUser): Promise<User> {
