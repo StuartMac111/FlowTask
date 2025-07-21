@@ -15,6 +15,9 @@ interface StickyNote {
   x: number;
   y: number;
   color: string;
+  priority?: "low" | "medium" | "high";
+  createdAt?: Date;
+  description?: string;
 }
 
 interface BrainstormWhiteboardProps {
@@ -47,9 +50,12 @@ export default function BrainstormWhiteboard({ listId, tasks }: BrainstormWhiteb
     const notes: StickyNote[] = tasks.map((task, index) => ({
       id: task.id,
       content: task.title,
-      x: 100 + (index % 5) * 220,
-      y: 100 + Math.floor(index / 5) * 180,
+      x: 100 + (index % 5) * 240,
+      y: 100 + Math.floor(index / 5) * 200,
       color: NOTE_COLORS[index % NOTE_COLORS.length],
+      priority: task.priority,
+      createdAt: task.createdAt,
+      description: task.description || "",
     }));
     setStickyNotes(notes);
   }, [tasks]);
@@ -195,17 +201,17 @@ export default function BrainstormWhiteboard({ listId, tasks }: BrainstormWhiteb
       </div>
 
       {/* Enhanced Whiteboard Canvas with Massive Frame */}
-      <div className="flex-1 pl-12 pt-12 pb-12 pr-0 bg-gradient-to-b from-gray-300 to-gray-400 dark:from-gray-800 dark:to-gray-900">
-        {/* Massive Whiteboard Frame with 3D Effect */}
-        <div className="w-full h-full relative bg-white dark:bg-gray-50 rounded-xl overflow-hidden"
+      <div className="flex-1 p-0 bg-gradient-to-b from-gray-300 to-gray-400 dark:from-gray-800 dark:to-gray-900">
+        {/* Massive Whiteboard Frame with 3D Effect - Full Screen */}
+        <div className="w-full h-full relative bg-white dark:bg-gray-50 overflow-hidden"
              style={{
-               border: '20px solid #8B4513',
+               border: '25px solid #8B4513',
                boxShadow: `
-                 inset 0 0 0 8px #A0522D,
-                 inset 0 0 0 12px #CD853F,
-                 inset 0 0 0 16px #DEB887,
-                 0 20px 40px rgba(0,0,0,0.3),
-                 0 10px 20px rgba(0,0,0,0.2)
+                 inset 0 0 0 10px #A0522D,
+                 inset 0 0 0 15px #CD853F,
+                 inset 0 0 0 20px #DEB887,
+                 0 25px 50px rgba(0,0,0,0.4),
+                 0 15px 30px rgba(0,0,0,0.3)
                `
              }}>
           <div 
@@ -230,9 +236,9 @@ export default function BrainstormWhiteboard({ listId, tasks }: BrainstormWhiteb
                 style={{
                   left: note.x,
                   top: note.y,
-                  width: '180px',
-                  minHeight: '120px',
-                  transform: `rotate(${(index % 5) - 2}deg)`,
+                  width: '200px',
+                  minHeight: '140px',
+                  transform: `rotate(${(index % 7) - 3}deg)`,
                   zIndex: draggedNote === note.id ? 50 : 10,
                 }}
                 onMouseDown={(e) => handleMouseDown(e, note.id)}
@@ -276,7 +282,7 @@ export default function BrainstormWhiteboard({ listId, tasks }: BrainstormWhiteb
                   </div>
                 </div>
                 
-                {/* Enhanced Sticky Note */}
+                {/* Enhanced Detailed Sticky Note */}
                 <Card
                   className={`w-full h-full shadow-lg border-2 transition-all duration-200 ${
                     draggedNote === note.id ? 'scale-105 shadow-xl' : 'hover:scale-105'
@@ -284,11 +290,21 @@ export default function BrainstormWhiteboard({ listId, tasks }: BrainstormWhiteb
                   style={{
                     backgroundColor: note.color,
                     borderColor: draggedNote === note.id ? '#6366f1' : 'rgba(0,0,0,0.1)',
+                    minHeight: '140px',
+                    width: '200px',
                   }}
                 >
                   <CardContent className="p-3 h-full relative">
                     {/* Corner fold effect */}
                     <div className="absolute top-0 right-0 w-4 h-4 bg-black bg-opacity-10 rounded-bl-lg"></div>
+                    
+                    {/* Priority indicator */}
+                    {note.priority && (
+                      <div className={`absolute top-1 left-1 w-3 h-3 rounded-full ${
+                        note.priority === 'high' ? 'bg-red-500' :
+                        note.priority === 'medium' ? 'bg-yellow-500' : 'bg-green-500'
+                      }`} title={`Priority: ${note.priority}`}></div>
+                    )}
                     
                     {/* Delete button */}
                     <button
@@ -296,21 +312,41 @@ export default function BrainstormWhiteboard({ listId, tasks }: BrainstormWhiteb
                         e.stopPropagation();
                         removeIdea(note.id);
                       }}
-                      className="absolute top-1 right-1 w-5 h-5 rounded-full bg-red-500 text-white flex items-center justify-center hover:bg-red-600 transition-colors opacity-0 hover:opacity-100 text-xs font-bold"
+                      className="absolute top-1 right-1 w-5 h-5 rounded-full bg-red-500 text-white flex items-center justify-center hover:bg-red-600 transition-colors opacity-0 hover:opacity-100 text-xs font-bold z-10"
                     >
                       ×
                     </button>
                     
-                    {/* Note number */}
+                    {/* Note number and date */}
                     <div className="absolute bottom-1 left-2 text-xs text-gray-500 opacity-60 font-mono">
                       #{index + 1}
+                      {note.createdAt && (
+                        <div className="text-xs">
+                          {new Date(note.createdAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
+                        </div>
+                      )}
                     </div>
                     
-                    {/* Note content */}
-                    <div className="mt-2 h-full overflow-auto pr-2">
-                      <p className="text-sm font-medium text-gray-800 break-words leading-tight">
+                    {/* Note content with better spacing */}
+                    <div className="mt-6 mb-6 h-full overflow-auto pr-2">
+                      <p className="text-sm font-medium text-gray-800 break-words leading-relaxed mb-2">
                         {note.content}
                       </p>
+                      
+                      {/* Description if available */}
+                      {note.description && note.description.trim() && (
+                        <p className="text-xs text-gray-600 opacity-80 leading-relaxed border-t pt-2 mt-2">
+                          {note.description.length > 80 
+                            ? `${note.description.substring(0, 80)}...` 
+                            : note.description
+                          }
+                        </p>
+                      )}
+                    </div>
+                    
+                    {/* Decorative elements */}
+                    <div className="absolute bottom-1 right-2 text-xs text-gray-400 opacity-40">
+                      💡
                     </div>
                   </CardContent>
                 </Card>
