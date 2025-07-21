@@ -3,7 +3,7 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent } from "@/components/ui/card";
-import { X, Plus, Move3D, Lightbulb } from "lucide-react";
+import { X, Plus, Move3D, Lightbulb, Calendar, AlertCircle, CheckCircle, Clock } from "lucide-react";
 import { apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import { isUnauthorizedError } from "@/lib/authUtils";
@@ -53,8 +53,8 @@ export default function BrainstormWhiteboard({ listId, tasks }: BrainstormWhiteb
       x: 100 + (index % 5) * 240,
       y: 100 + Math.floor(index / 5) * 200,
       color: NOTE_COLORS[index % NOTE_COLORS.length],
-      priority: task.priority,
-      createdAt: task.createdAt,
+      priority: task.priority || undefined,
+      createdAt: task.createdAt || undefined,
       description: task.description || "",
     }));
     setStickyNotes(notes);
@@ -122,8 +122,8 @@ export default function BrainstormWhiteboard({ listId, tasks }: BrainstormWhiteb
     if (!newIdeaText.trim()) return;
 
     // Find a good position for the new note
-    const newX = 100 + (stickyNotes.length % 5) * 220;
-    const newY = 100 + Math.floor(stickyNotes.length / 5) * 180;
+    const newX = 100 + (stickyNotes.length % 5) * 240;
+    const newY = 100 + Math.floor(stickyNotes.length / 5) * 200;
     const newColor = NOTE_COLORS[stickyNotes.length % NOTE_COLORS.length];
 
     createTaskMutation.mutate({
@@ -236,8 +236,8 @@ export default function BrainstormWhiteboard({ listId, tasks }: BrainstormWhiteb
                 style={{
                   left: note.x,
                   top: note.y,
-                  width: '200px',
-                  minHeight: '140px',
+                  width: '240px',
+                  minHeight: '160px',
                   transform: `rotate(${(index % 7) - 3}deg)`,
                   zIndex: draggedNote === note.id ? 50 : 10,
                 }}
@@ -290,20 +290,25 @@ export default function BrainstormWhiteboard({ listId, tasks }: BrainstormWhiteb
                   style={{
                     backgroundColor: note.color,
                     borderColor: draggedNote === note.id ? '#6366f1' : 'rgba(0,0,0,0.1)',
-                    minHeight: '140px',
-                    width: '200px',
+                    minHeight: '160px',
+                    width: '240px',
                   }}
                 >
                   <CardContent className="p-3 h-full relative">
                     {/* Corner fold effect */}
                     <div className="absolute top-0 right-0 w-4 h-4 bg-black bg-opacity-10 rounded-bl-lg"></div>
                     
-                    {/* Priority indicator */}
+                    {/* Priority indicator with icon */}
                     {note.priority && (
-                      <div className={`absolute top-1 left-1 w-3 h-3 rounded-full ${
+                      <div className={`absolute top-2 left-2 flex items-center gap-1 px-2 py-1 rounded-full text-white text-xs font-bold ${
                         note.priority === 'high' ? 'bg-red-500' :
                         note.priority === 'medium' ? 'bg-yellow-500' : 'bg-green-500'
-                      }`} title={`Priority: ${note.priority}`}></div>
+                      }`} title={`Priority: ${note.priority}`}>
+                        {note.priority === 'high' && <AlertCircle className="w-2 h-2" />}
+                        {note.priority === 'medium' && <Clock className="w-2 h-2" />}
+                        {note.priority === 'low' && <CheckCircle className="w-2 h-2" />}
+                        <span className="uppercase">{note.priority}</span>
+                      </div>
                     )}
                     
                     {/* Delete button */}
@@ -318,11 +323,18 @@ export default function BrainstormWhiteboard({ listId, tasks }: BrainstormWhiteb
                     </button>
                     
                     {/* Note number and date */}
-                    <div className="absolute bottom-1 left-2 text-xs text-gray-500 opacity-60 font-mono">
-                      #{index + 1}
+                    <div className="absolute bottom-2 left-2 text-xs text-gray-500 opacity-70 font-mono">
+                      <div className="flex items-center gap-1 mb-1">
+                        <span className="bg-gray-200 px-1 rounded">#{index + 1}</span>
+                      </div>
                       {note.createdAt && (
-                        <div className="text-xs">
-                          {new Date(note.createdAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
+                        <div className="flex items-center gap-1 text-xs">
+                          <Calendar className="w-2 h-2" />
+                          {new Date(note.createdAt).toLocaleDateString('en-US', { 
+                            month: 'short', 
+                            day: 'numeric',
+                            year: '2-digit'
+                          })}
                         </div>
                       )}
                     </div>
