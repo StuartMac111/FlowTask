@@ -3,11 +3,13 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent } from "@/components/ui/card";
-import { X, Plus, Move3D, Lightbulb, Calendar, AlertCircle, CheckCircle, Clock, Palette, Download, Link, Square, Circle, Triangle, Type, Bold, Italic, Underline, Minus, HelpCircle } from "lucide-react";
+import { X, Plus, Move3D, Lightbulb, Calendar, AlertCircle, CheckCircle, Clock, Palette, Download, Link, Square, Circle, Triangle, Type, Bold, Italic, Underline, Minus, HelpCircle, CalendarDays } from "lucide-react";
 import { apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import { isUnauthorizedError } from "@/lib/authUtils";
 import type { InsertTask, Task } from "@shared/schema";
+import { DayPicker } from "react-day-picker";
+import "react-day-picker/dist/style.css";
 
 interface StickyNote {
   id: string;
@@ -17,6 +19,7 @@ interface StickyNote {
   color: string;
   priority?: "low" | "medium" | "high";
   createdAt?: Date;
+  dueDate?: Date;
   description?: string;
   shape?: "square" | "circle" | "triangle";
   textStyle?: {
@@ -84,6 +87,8 @@ export default function BrainstormWhiteboard({ listId, tasks }: BrainstormWhiteb
   const [contextMenu, setContextMenu] = useState<{ x: number; y: number; noteId: string } | null>(null);
   const [editingNote, setEditingNote] = useState<string | null>(null);
   const [editText, setEditText] = useState("");
+  const [showDatePicker, setShowDatePicker] = useState<string | null>(null);
+  const [selectedDate, setSelectedDate] = useState<Date | undefined>(undefined);
   const whiteboardRef = useRef<HTMLDivElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
   const { toast } = useToast();
@@ -99,6 +104,7 @@ export default function BrainstormWhiteboard({ listId, tasks }: BrainstormWhiteb
       color: NOTE_COLORS[index % NOTE_COLORS.length],
       priority: task.priority || undefined,
       createdAt: task.createdAt || undefined,
+      dueDate: task.dueDate || undefined,
       description: task.description || "",
       shape: "square",
       textStyle: { bold: false, italic: false, underline: false, fontSize: 14 },
@@ -407,6 +413,46 @@ export default function BrainstormWhiteboard({ listId, tasks }: BrainstormWhiteb
       id: noteId,
       priority
     });
+  };
+
+  const updateNoteDueDate = (noteId: string, dueDate: Date | null) => {
+    setStickyNotes(prev => prev.map(note => 
+      note.id === noteId ? { ...note, dueDate: dueDate || undefined } : note
+    ));
+    
+    // Update task due date in database using a separate API call
+    apiRequest("PATCH", `/api/tasks/${noteId}`, {
+      dueDate: dueDate?.toISOString() || null
+    }).then(() => {
+      queryClient.invalidateQueries({ queryKey: ["/api/lists"] });
+      toast({
+        title: "Due Date Updated",
+        description: dueDate ? `Due date set to ${dueDate.toLocaleDateString()}` : "Due date removed",
+      });
+    }).catch((error) => {
+      if (isUnauthorizedError(error)) {
+        toast({
+          title: "Unauthorized",
+          description: "You are logged out. Logging in again...",
+          variant: "destructive",
+        });
+        setTimeout(() => {
+          window.location.href = "/api/login";
+        }, 500);
+        return;
+      }
+      toast({
+        title: "Error",
+        description: "Failed to update due date",
+        variant: "destructive",
+      });
+    });
+  };
+
+  const openDatePicker = (noteId: string) => {
+    const note = stickyNotes.find(n => n.id === noteId);
+    setSelectedDate(note?.dueDate);
+    setShowDatePicker(noteId);
   };
 
   // Enhanced whiteboard navigation
@@ -922,9 +968,9 @@ export default function BrainstormWhiteboard({ listId, tasks }: BrainstormWhiteb
                     </button>
                     
                     {/* Note number and date */}
-                    <div className="absolute bottom-2 left-2 text-xs text-gray-500 opacity-70 font-mono">
+                    <div className="absolute bottom-2 left-2 text-xs text-gray-500 dark:text-gray-400 opacity-70 font-mono">
                       <div className="flex items-center gap-1 mb-1">
-                        <span className="bg-gray-200 px-1 rounded">#{index + 1}</span>
+                        <span className="bg-gray-200 dark:bg-gray-600 dark:text-gray-200 px-1 rounded">#{index + 1}</span>
                       </div>
                       {note.createdAt && (
                         <div className="flex items-center gap-1 text-xs">
@@ -936,6 +982,19 @@ export default function BrainstormWhiteboard({ listId, tasks }: BrainstormWhiteb
                           })}
                         </div>
                       )}
+                      {note.dueDate && (
+                        <div className="flex items-center gap-1 text-xs">
+                          <Clock className="w-2 h-2" />
+                          <span className={`${
+                            new Date(note.dueDate) < new Date() ? 'text-red-500' : 'text-blue-500'
+                          }`}>
+                            Due: {new Date(note.dueDate).toLocaleDateString('en-US', { 
+                              month: 'short', 
+                              day: 'numeric'
+                            })}
+                          </span>
+                        </div>
+                      )}
                     </div>
                     
                     {/* Note content with enhanced formatting */}
@@ -945,7 +1004,7 @@ export default function BrainstormWhiteboard({ listId, tasks }: BrainstormWhiteb
                           <textarea
                             value={editText}
                             onChange={(e) => setEditText(e.target.value)}
-                            className="w-full h-12 p-1 text-sm border rounded resize-none"
+                            className="w-full h-12 p-1 text-sm border rounded resize-none bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 border-gray-300 dark:border-gray-600"
                             autoFocus
                             onKeyDown={(e) => {
                               if (e.key === 'Enter' && !e.shiftKey) {
@@ -972,7 +1031,7 @@ export default function BrainstormWhiteboard({ listId, tasks }: BrainstormWhiteb
                           </div>
                         </div>
                       ) : (
-                        <p className={`text-sm text-gray-800 break-words leading-relaxed mb-2 ${
+                        <p className={`text-sm text-gray-800 dark:text-gray-200 break-words leading-relaxed mb-2 ${
                           note.textStyle?.bold ? 'font-bold' : 'font-medium'
                         } ${
                           note.textStyle?.italic ? 'italic' : ''
@@ -986,7 +1045,7 @@ export default function BrainstormWhiteboard({ listId, tasks }: BrainstormWhiteb
                       
                       {/* Description if available */}
                       {note.description && note.description.trim() && (
-                        <p className="text-xs text-gray-600 opacity-80 leading-relaxed border-t pt-2 mt-2">
+                        <p className="text-xs text-gray-600 dark:text-gray-400 opacity-80 leading-relaxed border-t pt-2 mt-2">
                           {note.description.length > 80 
                             ? `${note.description.substring(0, 80)}...` 
                             : note.description
@@ -1043,6 +1102,20 @@ export default function BrainstormWhiteboard({ listId, tasks }: BrainstormWhiteb
                         title="Underline"
                       >
                         <Underline className="w-3 h-3" />
+                      </button>
+                      
+                      {/* Due Date button */}
+                      <button
+                        className="w-6 h-6 text-xs bg-blue-500 hover:bg-blue-600 text-white rounded flex items-center justify-center"
+                        onMouseDown={(e) => e.stopPropagation()}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          e.preventDefault();
+                          openDatePicker(note.id);
+                        }}
+                        title="Set Due Date"
+                      >
+                        <CalendarDays className="w-3 h-3" />
                       </button>
                       
                       {/* Divider */}
@@ -1211,6 +1284,68 @@ export default function BrainstormWhiteboard({ listId, tasks }: BrainstormWhiteb
             <X className="w-4 h-4" />
             Delete Note
           </button>
+        </div>
+      )}
+      
+      {/* Date Picker Popup */}
+      {showDatePicker && (
+        <div
+          className="fixed bg-white dark:bg-gray-800 border-2 border-gray-300 dark:border-gray-600 rounded-lg shadow-2xl p-4"
+          style={{
+            left: '50%',
+            top: '50%',
+            transform: 'translate(-50%, -50%)',
+            zIndex: 99999,
+            position: 'fixed'
+          }}
+          onMouseDown={(e) => e.stopPropagation()}
+          onClick={(e) => e.stopPropagation()}
+        >
+          <div className="flex justify-between items-center mb-4">
+            <h3 className="text-lg font-semibold text-gray-800 dark:text-gray-200">Set Due Date</h3>
+            <button
+              onClick={() => setShowDatePicker(null)}
+              className="text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200"
+            >
+              <X className="w-5 h-5" />
+            </button>
+          </div>
+          
+          <div className="space-y-4">
+            <DayPicker
+              mode="single"
+              selected={selectedDate}
+              onSelect={(date) => {
+                setSelectedDate(date);
+                if (date && showDatePicker) {
+                  updateNoteDueDate(showDatePicker, date);
+                  setShowDatePicker(null);
+                }
+              }}
+              disabled={(date) => date < new Date(new Date().setHours(0, 0, 0, 0))}
+              className="dark:text-gray-200"
+            />
+            
+            <div className="flex gap-2">
+              <button
+                onClick={() => {
+                  if (showDatePicker) {
+                    updateNoteDueDate(showDatePicker, null);
+                    setShowDatePicker(null);
+                  }
+                }}
+                className="px-3 py-2 bg-gray-500 hover:bg-gray-600 text-white rounded text-sm"
+              >
+                Clear Date
+              </button>
+              <button
+                onClick={() => setShowDatePicker(null)}
+                className="px-3 py-2 bg-blue-500 hover:bg-blue-600 text-white rounded text-sm"
+              >
+                Cancel
+              </button>
+            </div>
+          </div>
         </div>
       )}
     </div>
