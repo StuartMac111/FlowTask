@@ -11,6 +11,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Checkbox } from "@/components/ui/checkbox";
+import { BackgroundSelector } from "@/components/background-selector";
 import { Palette } from "lucide-react";
 import { apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
@@ -38,6 +39,7 @@ export default function CreateListModal({ open, onOpenChange, onSuccess }: Creat
   const [name, setName] = useState("");
   const [description, setDescription] = useState("");
   const [color, setColor] = useState(COLOR_OPTIONS[0]);
+  const [backgroundTheme, setBackgroundTheme] = useState("default");
   const [isPrivate, setIsPrivate] = useState(true);
   const { toast } = useToast();
 
@@ -78,6 +80,7 @@ export default function CreateListModal({ open, onOpenChange, onSuccess }: Creat
     setName("");
     setDescription("");
     setColor(COLOR_OPTIONS[0]);
+    setBackgroundTheme("default");
     setIsPrivate(true);
   };
 
@@ -89,6 +92,7 @@ export default function CreateListModal({ open, onOpenChange, onSuccess }: Creat
       name: name.trim(),
       description: description.trim() || null,
       color,
+      backgroundTheme,
       isPrivate,
     } as InsertList);
   };
@@ -161,6 +165,12 @@ export default function CreateListModal({ open, onOpenChange, onSuccess }: Creat
               ))}
             </div>
           </div>
+
+          {/* Background Theme Selection */}
+          <BackgroundSelector
+            value={backgroundTheme}
+            onChange={setBackgroundTheme}
+          />
 
           {/* Privacy Settings */}
           <div className="flex items-center space-x-2">

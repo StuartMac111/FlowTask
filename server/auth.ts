@@ -10,7 +10,7 @@ import { storage } from "./storage";
 import type { User } from "@shared/schema";
 
 interface AuthUser extends User {
-  password?: string;
+  password?: string | null;
 }
 
 export function getSession() {
@@ -210,6 +210,9 @@ function setupAuthRoutes(app: Express) {
           email: email
         }])
       });
+
+      // Create default lists for new user
+      await storage.createDefaultLists(user.id);
 
       req.login(user, (err) => {
         if (err) return res.status(500).json({ message: "Login error" });

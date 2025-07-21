@@ -66,6 +66,7 @@ export const lists = pgTable("lists", {
   name: varchar("name", { length: 100 }).notNull(),
   description: text("description"),
   color: varchar("color", { length: 7 }).default("#0078D4"),
+  backgroundTheme: varchar("background_theme").default("default"),
   ownerId: varchar("owner_id").references(() => users.id).notNull(),
   groupId: uuid("group_id").references(() => groups.id, { onDelete: "set null" }),
   isPrivate: boolean("is_private").default(true),

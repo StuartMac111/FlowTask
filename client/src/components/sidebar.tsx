@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
+import { ThemeToggle } from "@/components/theme-toggle";
 import { Search, Plus, Users } from "lucide-react";
 import type { ListWithTasks, User, GroupWithMembers } from "@shared/schema";
 
@@ -55,12 +56,13 @@ export default function Sidebar({
               {user.firstName?.[0]}{user.lastName?.[0]}
             </AvatarFallback>
           </Avatar>
-          <div>
+          <div className="flex-1">
             <h3 className="font-semibold text-sm">
               {user.firstName} {user.lastName}
             </h3>
             <p className="text-xs text-ms-text-secondary">{user.email}</p>
           </div>
+          <ThemeToggle />
         </div>
       </div>
 

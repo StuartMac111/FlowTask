@@ -30,6 +30,7 @@ export interface IStorage {
   getUserByProvider(provider: string, providerId: string): Promise<User | undefined>;
   linkProvider(userId: string, provider: string, providerId: string): Promise<void>;
   upsertUser(user: UpsertUser): Promise<User>;
+  createDefaultLists(userId: string): Promise<void>;
 
   // Group operations
   createGroup(group: InsertGroup, ownerId: string): Promise<Group>;
@@ -124,6 +125,34 @@ export class DatabaseStorage implements IStorage {
     return user;
   }
 
+  async createDefaultLists(userId: string): Promise<void> {
+    const defaultLists = [
+      {
+        name: "My Day",
+        color: "#0078D4",
+        backgroundTheme: "default",
+        isPrivate: true,
+        ownerId: userId,
+      },
+      {
+        name: "Tasks assigned to me",
+        color: "#107C10",
+        backgroundTheme: "default",
+        isPrivate: true,
+        ownerId: userId,
+      },
+      {
+        name: "Shopping list",
+        color: "#FF8C00",
+        backgroundTheme: "default",
+        isPrivate: true,
+        ownerId: userId,
+      },
+    ];
+
+    await db.insert(lists).values(defaultLists);
+  }
+
   // Group operations
   async createGroup(group: InsertGroup, ownerId: string): Promise<Group> {
     const [newGroup] = await db
@@ -206,6 +235,44 @@ export class DatabaseStorage implements IStorage {
         eq(groupMembers.groupId, groupId),
         eq(groupMembers.userId, userId)
       ));
+  }
+
+  async createDefaultLists(userId: string): Promise<void> {
+    const { randomUUID } = await import("crypto");
+    const defaultLists = [
+      {
+        id: randomUUID(),
+        name: "My Day",
+        description: "Tasks for today",
+        color: "#0078D4",
+        backgroundTheme: "default",
+        ownerId: userId,
+        groupId: null,
+        isPrivate: true,
+      },
+      {
+        id: randomUUID(),
+        name: "Tasks assigned to me", 
+        description: "Tasks assigned by others",
+        color: "#8764B8",
+        backgroundTheme: "default",
+        ownerId: userId,
+        groupId: null,
+        isPrivate: true,
+      },
+      {
+        id: randomUUID(),
+        name: "Shopping list",
+        description: "Items to buy",
+        color: "#00A4EF",
+        backgroundTheme: "default",
+        ownerId: userId,
+        groupId: null,
+        isPrivate: true,
+      }
+    ];
+
+    await db.insert(lists).values(defaultLists);
   }
 
   // List operations
