@@ -50,8 +50,8 @@ export default function BrainstormWhiteboard({ listId, tasks }: BrainstormWhiteb
     const notes: StickyNote[] = tasks.map((task, index) => ({
       id: task.id,
       content: task.title,
-      x: 100 + (index % 5) * 240,
-      y: 100 + Math.floor(index / 5) * 200,
+      x: 50 + (index % 6) * 200,
+      y: 50 + Math.floor(index / 6) * 140,
       color: NOTE_COLORS[index % NOTE_COLORS.length],
       priority: task.priority || undefined,
       createdAt: task.createdAt || undefined,
@@ -122,8 +122,8 @@ export default function BrainstormWhiteboard({ listId, tasks }: BrainstormWhiteb
     if (!newIdeaText.trim()) return;
 
     // Find a good position for the new note
-    const newX = 100 + (stickyNotes.length % 5) * 240;
-    const newY = 100 + Math.floor(stickyNotes.length / 5) * 200;
+    const newX = 50 + (stickyNotes.length % 6) * 200;
+    const newY = 50 + Math.floor(stickyNotes.length / 6) * 140;
     const newColor = NOTE_COLORS[stickyNotes.length % NOTE_COLORS.length];
 
     createTaskMutation.mutate({
@@ -202,16 +202,18 @@ export default function BrainstormWhiteboard({ listId, tasks }: BrainstormWhiteb
 
       {/* Enhanced Whiteboard Canvas with Massive Frame */}
       <div className="flex-1 p-0 bg-gradient-to-b from-gray-300 to-gray-400 dark:from-gray-800 dark:to-gray-900">
-        {/* Massive Whiteboard Frame with 3D Effect - Full Screen */}
+        {/* Massive Whiteboard Frame with 3D Effect - Edge to Edge */}
         <div className="w-full h-full relative bg-white dark:bg-gray-50 overflow-hidden"
              style={{
-               border: '25px solid #8B4513',
+               border: '30px solid #8B4513',
+               borderLeft: '15px solid #8B4513',
+               borderRight: '0px solid #8B4513',
                boxShadow: `
-                 inset 0 0 0 10px #A0522D,
-                 inset 0 0 0 15px #CD853F,
-                 inset 0 0 0 20px #DEB887,
-                 0 25px 50px rgba(0,0,0,0.4),
-                 0 15px 30px rgba(0,0,0,0.3)
+                 inset 0 0 0 12px #A0522D,
+                 inset 0 0 0 18px #CD853F,
+                 inset 0 0 0 24px #DEB887,
+                 0 30px 60px rgba(0,0,0,0.4),
+                 0 18px 36px rgba(0,0,0,0.3)
                `
              }}>
           <div 
@@ -236,8 +238,8 @@ export default function BrainstormWhiteboard({ listId, tasks }: BrainstormWhiteb
                 style={{
                   left: note.x,
                   top: note.y,
-                  width: '240px',
-                  minHeight: '160px',
+                  width: '180px',
+                  minHeight: '120px',
                   transform: `rotate(${(index % 7) - 3}deg)`,
                   zIndex: draggedNote === note.id ? 50 : 10,
                 }}
@@ -290,8 +292,8 @@ export default function BrainstormWhiteboard({ listId, tasks }: BrainstormWhiteb
                   style={{
                     backgroundColor: note.color,
                     borderColor: draggedNote === note.id ? '#6366f1' : 'rgba(0,0,0,0.1)',
-                    minHeight: '160px',
-                    width: '240px',
+                    minHeight: '120px',
+                    width: '180px',
                   }}
                 >
                   <CardContent className="p-3 h-full relative">
