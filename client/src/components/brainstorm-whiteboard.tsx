@@ -827,16 +827,12 @@ export default function BrainstormWhiteboard({ listId, tasks }: BrainstormWhiteb
                     {/* Corner fold effect */}
                     <div className="absolute top-0 right-0 w-4 h-4 bg-black bg-opacity-10 rounded-bl-lg"></div>
                     
-                    {/* Priority indicator with icon */}
+                    {/* Priority indicator with colored dot only */}
                     {note.priority && (
-                      <div className={`absolute top-2 left-2 flex items-center gap-1 px-2 py-1 rounded-full text-white text-xs font-bold ${
+                      <div className={`absolute top-2 left-2 w-4 h-4 rounded-full ${
                         note.priority === 'high' ? 'bg-red-500' :
                         note.priority === 'medium' ? 'bg-yellow-500' : 'bg-green-500'
                       }`} title={`Priority: ${note.priority}`}>
-                        {note.priority === 'high' && <AlertCircle className="w-2 h-2" />}
-                        {note.priority === 'medium' && <Clock className="w-2 h-2" />}
-                        {note.priority === 'low' && <CheckCircle className="w-2 h-2" />}
-                        <span className="uppercase">{note.priority}</span>
                       </div>
                     )}
                     
