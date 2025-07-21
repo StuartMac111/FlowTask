@@ -15,9 +15,12 @@ export default function Landing() {
       <div className="container mx-auto px-4 py-8">
         {/* Header */}
         <header className="flex justify-between items-center mb-16">
-          <div className="flex items-center space-x-2">
+          <div className="flex items-center space-x-4">
             <CheckCircle className="h-8 w-8 text-primary" />
-            <h1 className="text-2xl font-bold text-ms-text">TaskFlow</h1>
+            <h1 className="text-3xl font-bold">
+              <span className="text-black">Organize your life with </span>
+              <span className="text-blue-600 dark:text-blue-400">TaskFlow</span>
+            </h1>
           </div>
           
           <div className="flex items-center gap-4">

@@ -140,8 +140,11 @@ export default function AuthPage() {
       
       <Card className="w-full max-w-md mx-auto">
         <CardHeader className="text-center">
-          <CardTitle className="text-2xl font-bold text-ms-text">TaskFlow</CardTitle>
-          <CardDescription>
+          <CardTitle className="text-3xl font-bold">
+            <span className="text-black">Organize your life with </span>
+            <span className="text-blue-600 dark:text-blue-400">TaskFlow</span>
+          </CardTitle>
+          <CardDescription className="text-lg">
             Sign in to your account or create a new one
           </CardDescription>
         </CardHeader>
