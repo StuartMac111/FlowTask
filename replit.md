@@ -65,15 +65,26 @@ RESTful API with endpoints for:
 
 ## Recent Changes (January 2025)
 
-- **Brainstorming Whiteboard**: Added special brainstorming list with whiteboard interface featuring draggable sticky notes for idea management
+### Advanced Brainstorming Whiteboard (Latest)
+- **Professional Drawing Tools**: Line drawing with color selection and adjustable thickness
+- **Smart Connection System**: Click-to-connect notes with labeled arrows and visual feedback
+- **Multiple Note Shapes**: Square, circle, and triangle sticky notes with shape-changing controls
+- **Text Formatting**: Bold, italic, underline options with hover controls on each note
+- **Pan & Zoom Navigation**: Left-click drag to pan, scroll wheel zoom (30%-300% range)
+- **Infinite Canvas**: Extended 120% viewport whiteboard with transform-based movement
+- **Enhanced Visual Frame**: Multi-layered wooden borders with realistic shadows and gradients
+- **Complex Background Patterns**: Grid, dots, and diagonal line overlays for professional appearance
+- **Export Functionality**: Save complete whiteboard state as JSON file
+- **Navigation Controls**: Reset view and fit-to-content buttons for easy navigation
+- **Real-time Feedback**: Live zoom indicator and contextual instruction hints
+
+### Core Features
+- **Brainstorming Whiteboard**: Special brainstorming list with advanced whiteboard interface
 - **Automatic Default Lists**: New users get four starter lists: "My Day", "Tasks assigned to me", "Shopping list", and "Brainstorming"
 - **Dark Mode Support**: Complete dark mode implementation with theme toggle in user profile section
 - **Background Themes**: Customizable list backgrounds with gradients and patterns for visual organization
 - **Groups System**: Renamed "Family Groups" to "Groups" to support any type of collaboration
-- **Priority Visualization**: Replaced text-based priority (low/medium/high) with color-coded dots:
-  - Green dot for low priority
-  - Yellow dot for medium priority  
-  - Red dot for high priority
+- **Priority Visualization**: Color-coded priority dots (green/yellow/red) with enhanced visual indicators
 - **UI Components**: Updated sidebar, task cards, and modals to reflect group terminology
 - **Database Schema**: Updated table names and relationships from family-specific to general groups
 
