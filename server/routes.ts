@@ -108,6 +108,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
       if (!userId) {
         return res.status(401).json({ message: "User not authenticated" });
       }
+      
+      // Ensure user has default lists (for existing users too)
+      await storage.ensureDefaultLists(userId);
+      
       const lists = await storage.getListsForUser(userId);
       res.json(lists);
     } catch (error) {

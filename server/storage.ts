@@ -259,27 +259,60 @@ export class DatabaseStorage implements IStorage {
       },
       {
         id: randomUUID(),
-        name: "Tasks assigned to me", 
-        description: "Tasks assigned by others",
-        color: "#8764B8",
-        backgroundTheme: "default",
+        name: "Brainstorming",
+        description: "Ideas and creative thoughts - whiteboard mode",
+        color: "#F7630C",
+        backgroundTheme: "gradient-orange",
         ownerId: userId,
         groupId: null,
         isPrivate: true,
       },
-      {
+    ];
+
+    await db.insert(lists).values(defaultLists);
+  }
+
+  async ensureDefaultLists(userId: string): Promise<void> {
+    // Check if user already has these default lists
+    const existingLists = await db
+      .select({ name: lists.name })
+      .from(lists)
+      .where(eq(lists.ownerId, userId));
+    
+    const existingListNames = existingLists.map(l => l.name);
+    const { randomUUID } = await import("crypto");
+    
+    const neededLists = [];
+    
+    if (!existingListNames.includes("My Day")) {
+      neededLists.push({
         id: randomUUID(),
-        name: "Shopping list",
-        description: "Items to buy",
-        color: "#00A4EF",
+        name: "My Day",
+        description: "Tasks for today",
+        color: "#0078D4",
         backgroundTheme: "default",
         ownerId: userId,
         groupId: null,
         isPrivate: true,
-      }
-    ];
+      });
+    }
+    
+    if (!existingListNames.includes("Brainstorming")) {
+      neededLists.push({
+        id: randomUUID(),
+        name: "Brainstorming",
+        description: "Ideas and creative thoughts - whiteboard mode",
+        color: "#F7630C",
+        backgroundTheme: "gradient-orange",
+        ownerId: userId,
+        groupId: null,
+        isPrivate: true,
+      });
+    }
 
-    await db.insert(lists).values(defaultLists);
+    if (neededLists.length > 0) {
+      await db.insert(lists).values(neededLists);
+    }
   }
 
   // List operations
