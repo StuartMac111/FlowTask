@@ -3,7 +3,7 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent } from "@/components/ui/card";
-import { X, Plus, Move3D, Lightbulb, Calendar, AlertCircle, CheckCircle, Clock, Palette, Download, Link, Square, Circle, Triangle, Type, Bold, Italic, Underline, Minus, HelpCircle, CalendarDays } from "lucide-react";
+import { X, Plus, Move3D, Lightbulb, Calendar, AlertCircle, CheckCircle, Clock, Palette, Download, Link, Square, Circle, Triangle, Type, Bold, Italic, Underline, Minus, HelpCircle, CalendarDays, Edit } from "lucide-react";
 import { apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import { isUnauthorizedError } from "@/lib/authUtils";
@@ -89,6 +89,7 @@ export default function BrainstormWhiteboard({ listId, tasks }: BrainstormWhiteb
   const [editText, setEditText] = useState("");
   const [showDatePicker, setShowDatePicker] = useState<string | null>(null);
   const [selectedDate, setSelectedDate] = useState<Date | undefined>(undefined);
+  const [showFontSizer, setShowFontSizer] = useState<string | null>(null);
   const whiteboardRef = useRef<HTMLDivElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
   const { toast } = useToast();
@@ -455,6 +456,15 @@ export default function BrainstormWhiteboard({ listId, tasks }: BrainstormWhiteb
     setShowDatePicker(noteId);
   };
 
+  const updateNoteFontSize = (noteId: string, fontSize: number) => {
+    setStickyNotes(prev => prev.map(note => 
+      note.id === noteId ? { 
+        ...note, 
+        textStyle: { ...note.textStyle, fontSize } 
+      } : note
+    ));
+  };
+
   // Enhanced whiteboard navigation
   const handleWhiteboardPanStart = (e: React.MouseEvent) => {
     if (e.button === 1 || (selectedTool === "move" && e.button === 0)) { // Middle mouse button or left click in move mode
@@ -777,6 +787,7 @@ export default function BrainstormWhiteboard({ listId, tasks }: BrainstormWhiteb
               // Only close context menu if left-clicking (not right-clicking)
               if (e.button === 0) {
                 setContextMenu(null);
+                setShowFontSizer(null);
               }
               
               if (selectedTool === "draw") {
@@ -1118,6 +1129,42 @@ export default function BrainstormWhiteboard({ listId, tasks }: BrainstormWhiteb
                         <CalendarDays className="w-3 h-3" />
                       </button>
                       
+                      {/* Font Size button */}
+                      <button
+                        className="w-6 h-6 text-xs bg-purple-500 hover:bg-purple-600 text-white rounded flex items-center justify-center"
+                        onMouseDown={(e) => e.stopPropagation()}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          e.preventDefault();
+                          setShowFontSizer(showFontSizer === note.id ? null : note.id);
+                        }}
+                        title="Adjust Font Size"
+                      >
+                        <Type className="w-3 h-3" />
+                      </button>
+                      
+                      {/* Font size controls popup */}
+                      {showFontSizer === note.id && (
+                        <div className="absolute top-8 left-0 bg-white dark:bg-gray-800 border rounded-md shadow-lg p-2 flex flex-col gap-1 z-20">
+                          <div className="text-xs text-gray-600 dark:text-gray-400 mb-1">Font Size</div>
+                          {[10, 12, 14, 16, 18, 20, 24].map(size => (
+                            <button
+                              key={size}
+                              className={`px-2 py-1 text-xs rounded hover:bg-gray-100 dark:hover:bg-gray-700 ${
+                                (note.textStyle?.fontSize || 14) === size ? 'bg-purple-100 dark:bg-purple-900' : ''
+                              }`}
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                updateNoteFontSize(note.id, size);
+                                setShowFontSizer(null);
+                              }}
+                            >
+                              {size}px
+                            </button>
+                          ))}
+                        </div>
+                      )}
+                      
                       {/* Divider */}
                       <div className="w-px h-4 bg-gray-300 mx-1"></div>
                       
@@ -1270,8 +1317,18 @@ export default function BrainstormWhiteboard({ listId, tasks }: BrainstormWhiteb
             }}
             className="w-full px-4 py-3 text-left text-sm hover:bg-blue-50 dark:hover:bg-blue-900/20 flex items-center gap-3 text-gray-800 dark:text-gray-200 font-medium"
           >
-            <Type className="w-4 h-4 text-blue-600" />
+            <Edit className="w-4 h-4 text-blue-600" />
             Edit Note
+          </button>
+          <button
+            onClick={() => {
+              openDatePicker(contextMenu.noteId);
+              setContextMenu(null);
+            }}
+            className="w-full px-4 py-3 text-left text-sm hover:bg-purple-50 dark:hover:bg-purple-900/20 flex items-center gap-3 text-gray-800 dark:text-gray-200 font-medium"
+          >
+            <CalendarDays className="w-4 h-4 text-purple-600" />
+            Set Due Date
           </button>
           <div className="border-t border-gray-200 dark:border-gray-600 my-1"></div>
           <button
