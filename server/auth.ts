@@ -10,7 +10,7 @@ import { storage } from "./storage";
 import type { User } from "@shared/schema";
 
 interface AuthUser extends User {
-  password?: string | null;
+  password?: string | null | undefined;
 }
 
 export function getSession() {

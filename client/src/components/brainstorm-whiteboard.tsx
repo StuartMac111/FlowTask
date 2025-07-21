@@ -123,9 +123,9 @@ export default function BrainstormWhiteboard({ listId, tasks }: BrainstormWhiteb
     createTaskMutation.mutate({
       title: newIdeaText.trim(),
       listId,
-      completed: false,
+      isCompleted: false,
       priority: "medium",
-    });
+    } as InsertTask);
 
     setNewIdeaText("");
   };
