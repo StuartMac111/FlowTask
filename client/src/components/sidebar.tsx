@@ -5,7 +5,7 @@ import { Input } from "@/components/ui/input";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Search, Plus, Users } from "lucide-react";
-import type { ListWithTasks, User, FamilyGroupWithMembers } from "@shared/schema";
+import type { ListWithTasks, User, GroupWithMembers } from "@shared/schema";
 
 interface SidebarProps {
   lists: ListWithTasks[];
@@ -26,9 +26,9 @@ export default function Sidebar({
 }: SidebarProps) {
   const [searchQuery, setSearchQuery] = useState("");
 
-  // Fetch family groups
-  const { data: familyGroups = [] } = useQuery<FamilyGroupWithMembers[]>({
-    queryKey: ["/api/family-groups"],
+  // Fetch groups
+  const { data: groups = [] } = useQuery<GroupWithMembers[]>({
+    queryKey: ["/api/groups"],
   });
 
   // Filter lists based on search
@@ -157,14 +157,14 @@ export default function Sidebar({
       <div className="border-t border-ms-border p-4">
         <div className="flex items-center justify-between mb-3">
           <h4 className="text-xs font-semibold text-ms-text-secondary uppercase tracking-wide">
-            Family Groups
+            Groups
           </h4>
           <Button variant="ghost" size="sm" onClick={onManageFamily}>
             <Plus className="w-4 h-4" />
           </Button>
         </div>
         <div className="flex -space-x-2">
-          {familyGroups.slice(0, 1).map((group) =>
+          {groups.slice(0, 1).map((group) =>
             group.members.slice(0, 6).map((member) => (
               <Avatar key={member.user.id} className="w-8 h-8 border-2 border-white">
                 <AvatarImage src={member.user.profileImageUrl || undefined} />
@@ -174,9 +174,9 @@ export default function Sidebar({
               </Avatar>
             ))
           )}
-          {familyGroups.length > 0 && familyGroups[0].members.length > 6 && (
+          {groups.length > 0 && groups[0].members.length > 6 && (
             <div className="w-8 h-8 rounded-full border-2 border-white bg-gray-200 flex items-center justify-center text-xs font-medium text-ms-text-secondary">
-              +{familyGroups[0].members.length - 6}
+              +{groups[0].members.length - 6}
             </div>
           )}
         </div>

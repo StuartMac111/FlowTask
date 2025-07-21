@@ -1,15 +1,15 @@
 import {
   users,
-  familyGroups,
-  familyGroupMembers,
+  groups,
+  groupMembers,
   lists,
   listShares,
   tasks,
   type User,
   type UpsertUser,
-  type FamilyGroup,
-  type InsertFamilyGroup,
-  type FamilyGroupMember,
+  type Group,
+  type InsertGroup,
+  type GroupMember,
   type List,
   type InsertList,
   type ListShare,
@@ -18,7 +18,7 @@ import {
   type InsertTask,
   type ListWithTasks,
   type TaskWithSubtasks,
-  type FamilyGroupWithMembers,
+  type GroupWithMembers,
 } from "@shared/schema";
 import { db } from "./db";
 import { eq, and, or, desc, asc } from "drizzle-orm";
@@ -28,12 +28,12 @@ export interface IStorage {
   getUser(id: string): Promise<User | undefined>;
   upsertUser(user: UpsertUser): Promise<User>;
 
-  // Family group operations
-  createFamilyGroup(familyGroup: InsertFamilyGroup, ownerId: string): Promise<FamilyGroup>;
-  getFamilyGroupsForUser(userId: string): Promise<FamilyGroupWithMembers[]>;
-  getFamilyGroupById(id: string): Promise<FamilyGroupWithMembers | undefined>;
-  addFamilyGroupMember(familyGroupId: string, userId: string, role: "member" | "admin"): Promise<FamilyGroupMember>;
-  removeFamilyGroupMember(familyGroupId: string, userId: string): Promise<void>;
+  // Group operations
+  createGroup(group: InsertGroup, ownerId: string): Promise<Group>;
+  getGroupsForUser(userId: string): Promise<GroupWithMembers[]>;
+  getGroupById(id: string): Promise<GroupWithMembers | undefined>;
+  addGroupMember(groupId: string, userId: string, role: "member" | "admin"): Promise<GroupMember>;
+  removeGroupMember(groupId: string, userId: string): Promise<void>;
 
   // List operations
   createList(list: InsertList, ownerId: string): Promise<List>;
@@ -75,44 +75,44 @@ export class DatabaseStorage implements IStorage {
     return user;
   }
 
-  // Family group operations
-  async createFamilyGroup(familyGroup: InsertFamilyGroup, ownerId: string): Promise<FamilyGroup> {
-    const [group] = await db
-      .insert(familyGroups)
-      .values({ ...familyGroup, ownerId })
+  // Group operations
+  async createGroup(group: InsertGroup, ownerId: string): Promise<Group> {
+    const [newGroup] = await db
+      .insert(groups)
+      .values({ ...group, ownerId })
       .returning();
     
     // Add owner as member
-    await db.insert(familyGroupMembers).values({
-      familyGroupId: group.id,
+    await db.insert(groupMembers).values({
+      groupId: newGroup.id,
       userId: ownerId,
       role: "owner",
     });
 
-    return group;
+    return newGroup;
   }
 
-  async getFamilyGroupsForUser(userId: string): Promise<FamilyGroupWithMembers[]> {
+  async getGroupsForUser(userId: string): Promise<GroupWithMembers[]> {
     const memberGroups = await db
       .select({
-        group: familyGroups,
-        membership: familyGroupMembers,
+        group: groups,
+        membership: groupMembers,
       })
-      .from(familyGroupMembers)
-      .innerJoin(familyGroups, eq(familyGroupMembers.familyGroupId, familyGroups.id))
-      .where(eq(familyGroupMembers.userId, userId));
+      .from(groupMembers)
+      .innerJoin(groups, eq(groupMembers.groupId, groups.id))
+      .where(eq(groupMembers.userId, userId));
 
-    const groupsWithMembers: FamilyGroupWithMembers[] = [];
+    const groupsWithMembers: GroupWithMembers[] = [];
     
     for (const { group } of memberGroups) {
       const members = await db
         .select({
-          membership: familyGroupMembers,
+          membership: groupMembers,
           user: users,
         })
-        .from(familyGroupMembers)
-        .innerJoin(users, eq(familyGroupMembers.userId, users.id))
-        .where(eq(familyGroupMembers.familyGroupId, group.id));
+        .from(groupMembers)
+        .innerJoin(users, eq(groupMembers.userId, users.id))
+        .where(eq(groupMembers.groupId, group.id));
 
       groupsWithMembers.push({
         ...group,
@@ -123,18 +123,18 @@ export class DatabaseStorage implements IStorage {
     return groupsWithMembers;
   }
 
-  async getFamilyGroupById(id: string): Promise<FamilyGroupWithMembers | undefined> {
-    const [group] = await db.select().from(familyGroups).where(eq(familyGroups.id, id));
+  async getGroupById(id: string): Promise<GroupWithMembers | undefined> {
+    const [group] = await db.select().from(groups).where(eq(groups.id, id));
     if (!group) return undefined;
 
     const members = await db
       .select({
-        membership: familyGroupMembers,
+        membership: groupMembers,
         user: users,
       })
-      .from(familyGroupMembers)
-      .innerJoin(users, eq(familyGroupMembers.userId, users.id))
-      .where(eq(familyGroupMembers.familyGroupId, id));
+      .from(groupMembers)
+      .innerJoin(users, eq(groupMembers.userId, users.id))
+      .where(eq(groupMembers.groupId, id));
 
     return {
       ...group,
@@ -142,20 +142,20 @@ export class DatabaseStorage implements IStorage {
     };
   }
 
-  async addFamilyGroupMember(familyGroupId: string, userId: string, role: "member" | "admin"): Promise<FamilyGroupMember> {
+  async addGroupMember(groupId: string, userId: string, role: "member" | "admin"): Promise<GroupMember> {
     const [member] = await db
-      .insert(familyGroupMembers)
-      .values({ familyGroupId, userId, role })
+      .insert(groupMembers)
+      .values({ groupId, userId, role })
       .returning();
     return member;
   }
 
-  async removeFamilyGroupMember(familyGroupId: string, userId: string): Promise<void> {
+  async removeGroupMember(groupId: string, userId: string): Promise<void> {
     await db
-      .delete(familyGroupMembers)
+      .delete(groupMembers)
       .where(and(
-        eq(familyGroupMembers.familyGroupId, familyGroupId),
-        eq(familyGroupMembers.userId, userId)
+        eq(groupMembers.groupId, groupId),
+        eq(groupMembers.userId, userId)
       ));
   }
 

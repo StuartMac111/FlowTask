@@ -4,7 +4,7 @@ import { WebSocketServer, WebSocket } from "ws";
 import { storage } from "./storage";
 import { setupAuth, isAuthenticated } from "./replitAuth";
 import { 
-  insertFamilyGroupSchema,
+  insertGroupSchema,
   insertListSchema,
   insertTaskSchema,
   insertListShareSchema,
@@ -35,27 +35,27 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Family group routes
-  app.post('/api/family-groups', isAuthenticated, async (req: any, res) => {
+  // Group routes
+  app.post('/api/groups', isAuthenticated, async (req: any, res) => {
     try {
       const userId = req.user.claims.sub;
-      const familyGroupData = insertFamilyGroupSchema.parse(req.body);
-      const familyGroup = await storage.createFamilyGroup(familyGroupData, userId);
-      res.json(familyGroup);
+      const groupData = insertGroupSchema.parse(req.body);
+      const group = await storage.createGroup(groupData, userId);
+      res.json(group);
     } catch (error) {
-      console.error("Error creating family group:", error);
-      res.status(500).json({ message: "Failed to create family group" });
+      console.error("Error creating group:", error);
+      res.status(500).json({ message: "Failed to create group" });
     }
   });
 
-  app.get('/api/family-groups', isAuthenticated, async (req: any, res) => {
+  app.get('/api/groups', isAuthenticated, async (req: any, res) => {
     try {
       const userId = req.user.claims.sub;
-      const familyGroups = await storage.getFamilyGroupsForUser(userId);
-      res.json(familyGroups);
+      const groups = await storage.getGroupsForUser(userId);
+      res.json(groups);
     } catch (error) {
-      console.error("Error fetching family groups:", error);
-      res.status(500).json({ message: "Failed to fetch family groups" });
+      console.error("Error fetching groups:", error);
+      res.status(500).json({ message: "Failed to fetch groups" });
     }
   });
 

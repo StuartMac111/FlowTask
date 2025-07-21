@@ -14,6 +14,7 @@ import {
 import { apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import { isUnauthorizedError } from "@/lib/authUtils";
+import PriorityDot from "./priority-dot";
 import type { Task } from "@shared/schema";
 
 interface TaskCardProps {
@@ -132,9 +133,7 @@ export default function TaskCard({ task, onUpdate }: TaskCardProps) {
               {task.title}
             </h3>
             <div className="flex items-center space-x-2">
-              <Badge className={getPriorityColor(task.priority || 'medium')}>
-                {task.priority || 'medium'}
-              </Badge>
+              <PriorityDot priority={(task.priority as "low" | "medium" | "high") || 'medium'} />
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
                   <Button variant="ghost" size="sm">

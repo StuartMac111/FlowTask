@@ -2,7 +2,7 @@
 
 ## Overview
 
-This is a modern full-stack task management application called TaskFlow, built as a Microsoft To-Do inspired clone. The application features a React + TypeScript frontend with Express.js backend, using PostgreSQL with Drizzle ORM for data persistence. The system supports family collaboration, list sharing, real-time updates via WebSockets, and authentication through Replit's OAuth system.
+This is a modern full-stack task management application called TaskFlow, built as a Microsoft To-Do inspired clone. The application features a React + TypeScript frontend with Express.js backend, using PostgreSQL with Drizzle ORM for data persistence. The system supports group collaboration, list sharing, real-time updates via WebSockets, and authentication through Replit's OAuth system.
 
 ## User Preferences
 
@@ -30,9 +30,9 @@ Preferred communication style: Simple, everyday language.
 #### Database Schema
 Located in `shared/schema.ts`, the database includes:
 - **Users**: Core user information from Replit OAuth
-- **Family Groups**: Collaborative groups with up to 8 members
+- **Groups**: Collaborative groups for any number of members
 - **Lists**: Task collections with privacy settings and color themes
-- **Tasks**: Individual tasks with subtask support, due dates, and assignment
+- **Tasks**: Individual tasks with subtask support, due dates, assignment, and color-coded priority dots
 - **Sharing**: List sharing permissions and member management
 - **Sessions**: Secure session storage for authentication
 
@@ -58,10 +58,20 @@ RESTful API with endpoints for:
 ## Data Flow
 
 1. **Authentication**: Users authenticate via Replit OAuth, creating sessions stored in PostgreSQL
-2. **List Management**: Users create private or shared lists, organized by family groups
-3. **Task Operations**: Tasks are created, assigned, and updated with real-time synchronization
-4. **Collaboration**: Family members can share lists and assign tasks to each other
+2. **List Management**: Users create private or shared lists, organized by groups
+3. **Task Operations**: Tasks are created, assigned, and updated with real-time synchronization and color-coded priority system
+4. **Collaboration**: Group members can share lists and assign tasks to each other
 5. **Real-time Updates**: WebSocket connections broadcast changes to all connected clients
+
+## Recent Changes (January 2025)
+
+- **Groups System**: Renamed "Family Groups" to "Groups" to support any type of collaboration
+- **Priority Visualization**: Replaced text-based priority (low/medium/high) with color-coded dots:
+  - Green dot for low priority
+  - Yellow dot for medium priority  
+  - Red dot for high priority
+- **UI Components**: Updated sidebar, task cards, and modals to reflect group terminology
+- **Database Schema**: Updated table names and relationships from family-specific to general groups
 
 ## External Dependencies
 

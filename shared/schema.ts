@@ -36,8 +36,8 @@ export const users = pgTable("users", {
   updatedAt: timestamp("updated_at").defaultNow(),
 });
 
-// Family groups table
-export const familyGroups = pgTable("family_groups", {
+// Groups table
+export const groups = pgTable("groups", {
   id: uuid("id").primaryKey().defaultRandom(),
   name: varchar("name", { length: 100 }).notNull(),
   description: text("description"),
@@ -46,10 +46,10 @@ export const familyGroups = pgTable("family_groups", {
   updatedAt: timestamp("updated_at").defaultNow(),
 });
 
-// Family group members table
-export const familyGroupMembers = pgTable("family_group_members", {
+// Group members table
+export const groupMembers = pgTable("group_members", {
   id: uuid("id").primaryKey().defaultRandom(),
-  familyGroupId: uuid("family_group_id").references(() => familyGroups.id, { onDelete: "cascade" }).notNull(),
+  groupId: uuid("group_id").references(() => groups.id, { onDelete: "cascade" }).notNull(),
   userId: varchar("user_id").references(() => users.id, { onDelete: "cascade" }).notNull(),
   role: varchar("role", { enum: ["owner", "admin", "member"] }).default("member").notNull(),
   joinedAt: timestamp("joined_at").defaultNow(),
@@ -62,7 +62,7 @@ export const lists = pgTable("lists", {
   description: text("description"),
   color: varchar("color", { length: 7 }).default("#0078D4"),
   ownerId: varchar("owner_id").references(() => users.id).notNull(),
-  familyGroupId: uuid("family_group_id").references(() => familyGroups.id, { onDelete: "set null" }),
+  groupId: uuid("group_id").references(() => groups.id, { onDelete: "set null" }),
   isPrivate: boolean("is_private").default(true),
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
@@ -96,28 +96,28 @@ export const tasks: any = pgTable("tasks", {
 // Relations
 export const usersRelations = relations(users, ({ many }) => ({
   ownedLists: many(lists),
-  ownedFamilyGroups: many(familyGroups),
-  familyGroupMemberships: many(familyGroupMembers),
+  ownedGroups: many(groups),
+  groupMemberships: many(groupMembers),
   listShares: many(listShares),
   assignedTasks: many(tasks),
 }));
 
-export const familyGroupsRelations = relations(familyGroups, ({ one, many }) => ({
+export const groupsRelations = relations(groups, ({ one, many }) => ({
   owner: one(users, {
-    fields: [familyGroups.ownerId],
+    fields: [groups.ownerId],
     references: [users.id],
   }),
-  members: many(familyGroupMembers),
+  members: many(groupMembers),
   lists: many(lists),
 }));
 
-export const familyGroupMembersRelations = relations(familyGroupMembers, ({ one }) => ({
-  familyGroup: one(familyGroups, {
-    fields: [familyGroupMembers.familyGroupId],
-    references: [familyGroups.id],
+export const groupMembersRelations = relations(groupMembers, ({ one }) => ({
+  group: one(groups, {
+    fields: [groupMembers.groupId],
+    references: [groups.id],
   }),
   user: one(users, {
-    fields: [familyGroupMembers.userId],
+    fields: [groupMembers.userId],
     references: [users.id],
   }),
 }));
@@ -127,9 +127,9 @@ export const listsRelations = relations(lists, ({ one, many }) => ({
     fields: [lists.ownerId],
     references: [users.id],
   }),
-  familyGroup: one(familyGroups, {
-    fields: [lists.familyGroupId],
-    references: [familyGroups.id],
+  group: one(groups, {
+    fields: [lists.groupId],
+    references: [groups.id],
   }),
   tasks: many(tasks),
   shares: many(listShares),
@@ -164,7 +164,7 @@ export const tasksRelations = relations(tasks, ({ one, many }) => ({
 
 // Zod schemas for validation
 export const upsertUserSchema = createInsertSchema(users);
-export const insertFamilyGroupSchema = createInsertSchema(familyGroups).omit({ id: true, ownerId: true, createdAt: true, updatedAt: true });
+export const insertGroupSchema = createInsertSchema(groups).omit({ id: true, ownerId: true, createdAt: true, updatedAt: true });
 export const insertListSchema = createInsertSchema(lists).omit({ id: true, ownerId: true, createdAt: true, updatedAt: true });
 export const insertTaskSchema = createInsertSchema(tasks).omit({ id: true, createdAt: true, updatedAt: true });
 export const insertListShareSchema = createInsertSchema(listShares).omit({ id: true, sharedAt: true });
@@ -172,9 +172,9 @@ export const insertListShareSchema = createInsertSchema(listShares).omit({ id: t
 // Types
 export type UpsertUser = z.infer<typeof upsertUserSchema>;
 export type User = typeof users.$inferSelect;
-export type FamilyGroup = typeof familyGroups.$inferSelect;
-export type InsertFamilyGroup = z.infer<typeof insertFamilyGroupSchema>;
-export type FamilyGroupMember = typeof familyGroupMembers.$inferSelect;
+export type Group = typeof groups.$inferSelect;
+export type InsertGroup = z.infer<typeof insertGroupSchema>;
+export type GroupMember = typeof groupMembers.$inferSelect;
 export type List = typeof lists.$inferSelect;
 export type InsertList = z.infer<typeof insertListSchema>;
 export type ListShare = typeof listShares.$inferSelect;
@@ -193,6 +193,6 @@ export type TaskWithSubtasks = Task & {
   subtasks: Task[];
 };
 
-export type FamilyGroupWithMembers = FamilyGroup & {
-  members: (FamilyGroupMember & { user: User })[];
+export type GroupWithMembers = Group & {
+  members: (GroupMember & { user: User })[];
 };
