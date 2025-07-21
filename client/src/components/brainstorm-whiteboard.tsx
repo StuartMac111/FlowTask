@@ -195,7 +195,7 @@ export default function BrainstormWhiteboard({ listId, tasks }: BrainstormWhiteb
       </div>
 
       {/* Enhanced Whiteboard Canvas with Massive Frame */}
-      <div className="flex-1 p-12 bg-gradient-to-b from-gray-300 to-gray-400 dark:from-gray-800 dark:to-gray-900">
+      <div className="flex-1 pl-12 pt-12 pb-12 pr-0 bg-gradient-to-b from-gray-300 to-gray-400 dark:from-gray-800 dark:to-gray-900">
         {/* Massive Whiteboard Frame with 3D Effect */}
         <div className="w-full h-full relative bg-white dark:bg-gray-50 rounded-xl overflow-hidden"
              style={{
