@@ -81,6 +81,9 @@ export default function BrainstormWhiteboard({ listId, tasks }: BrainstormWhiteb
   const [isPanning, setIsPanning] = useState(false);
   const [panStart, setPanStart] = useState({ x: 0, y: 0 });
   const [showHelp, setShowHelp] = useState(false);
+  const [contextMenu, setContextMenu] = useState<{ x: number; y: number; noteId: string } | null>(null);
+  const [editingNote, setEditingNote] = useState<string | null>(null);
+  const [editText, setEditText] = useState("");
   const whiteboardRef = useRef<HTMLDivElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
   const { toast } = useToast();
@@ -163,8 +166,11 @@ export default function BrainstormWhiteboard({ listId, tasks }: BrainstormWhiteb
   });
 
   const updateTaskByIdMutation = useMutation({
-    mutationFn: async (taskData: { id: string; priority: 'low' | 'medium' | 'high' }) => {
-      await apiRequest("PATCH", `/api/tasks/${taskData.id}`, { priority: taskData.priority });
+    mutationFn: async (taskData: { id: string; priority?: 'low' | 'medium' | 'high'; title?: string }) => {
+      const updateData: any = {};
+      if (taskData.priority) updateData.priority = taskData.priority;
+      if (taskData.title) updateData.title = taskData.title;
+      await apiRequest("PATCH", `/api/tasks/${taskData.id}`, updateData);
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/lists"] });
@@ -310,6 +316,46 @@ export default function BrainstormWhiteboard({ listId, tasks }: BrainstormWhiteb
     }
   };
 
+  const handleNoteRightClick = (noteId: string, e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setContextMenu({
+      x: e.clientX,
+      y: e.clientY,
+      noteId
+    });
+  };
+
+  const startEditingNote = (noteId: string) => {
+    const note = stickyNotes.find(n => n.id === noteId);
+    if (note) {
+      setEditingNote(noteId);
+      setEditText(note.content);
+    }
+    setContextMenu(null);
+  };
+
+  const saveEditedNote = (noteId: string) => {
+    if (editText.trim()) {
+      setStickyNotes(prev => prev.map(note => 
+        note.id === noteId ? { ...note, content: editText.trim() } : note
+      ));
+      
+      // Update in database
+      updateTaskByIdMutation.mutate({
+        id: noteId,
+        title: editText.trim()
+      });
+    }
+    setEditingNote(null);
+    setEditText("");
+  };
+
+  const cancelEditing = () => {
+    setEditingNote(null);
+    setEditText("");
+  };
+
   // Export functionality
   const exportWhiteboard = () => {
     const data = {
@@ -423,6 +469,15 @@ export default function BrainstormWhiteboard({ listId, tasks }: BrainstormWhiteb
       });
     }
   };
+
+  // Close context menu when clicking outside
+  useEffect(() => {
+    const handleClickOutside = () => setContextMenu(null);
+    if (contextMenu) {
+      document.addEventListener('click', handleClickOutside);
+      return () => document.removeEventListener('click', handleClickOutside);
+    }
+  }, [contextMenu]);
 
   return (
     <div className="h-full flex flex-col">
@@ -765,6 +820,7 @@ export default function BrainstormWhiteboard({ listId, tasks }: BrainstormWhiteb
                 }}
                 onMouseDown={(e) => handleMouseDown(e, note.id)}
                 onClick={(e) => handleNoteClick(note.id, e)}
+                onContextMenu={(e) => handleNoteRightClick(note.id, e)}
               >
                 {/* Ultra Realistic 3D Push Pin */}
                 <div 
@@ -867,16 +923,49 @@ export default function BrainstormWhiteboard({ listId, tasks }: BrainstormWhiteb
                     
                     {/* Note content with enhanced formatting */}
                     <div className="mt-6 mb-6 h-full overflow-auto pr-2">
-                      <p className={`text-sm text-gray-800 break-words leading-relaxed mb-2 ${
-                        note.textStyle?.bold ? 'font-bold' : 'font-medium'
-                      } ${
-                        note.textStyle?.italic ? 'italic' : ''
-                      } ${
-                        note.textStyle?.underline ? 'underline' : ''
-                      }`}
-                      style={{ fontSize: `${note.textStyle?.fontSize || 14}px` }}>
-                        {note.content}
-                      </p>
+                      {editingNote === note.id ? (
+                        <div className="space-y-2">
+                          <textarea
+                            value={editText}
+                            onChange={(e) => setEditText(e.target.value)}
+                            className="w-full h-12 p-1 text-sm border rounded resize-none"
+                            autoFocus
+                            onKeyDown={(e) => {
+                              if (e.key === 'Enter' && !e.shiftKey) {
+                                e.preventDefault();
+                                saveEditedNote(note.id);
+                              } else if (e.key === 'Escape') {
+                                cancelEditing();
+                              }
+                            }}
+                          />
+                          <div className="flex gap-1">
+                            <button
+                              onClick={() => saveEditedNote(note.id)}
+                              className="px-2 py-1 bg-green-500 text-white text-xs rounded hover:bg-green-600"
+                            >
+                              Save
+                            </button>
+                            <button
+                              onClick={cancelEditing}
+                              className="px-2 py-1 bg-gray-500 text-white text-xs rounded hover:bg-gray-600"
+                            >
+                              Cancel
+                            </button>
+                          </div>
+                        </div>
+                      ) : (
+                        <p className={`text-sm text-gray-800 break-words leading-relaxed mb-2 ${
+                          note.textStyle?.bold ? 'font-bold' : 'font-medium'
+                        } ${
+                          note.textStyle?.italic ? 'italic' : ''
+                        } ${
+                          note.textStyle?.underline ? 'underline' : ''
+                        }`}
+                        style={{ fontSize: `${note.textStyle?.fontSize || 14}px` }}>
+                          {note.content}
+                        </p>
+                      )}
                       
                       {/* Description if available */}
                       {note.description && note.description.trim() && (
@@ -1053,6 +1142,35 @@ export default function BrainstormWhiteboard({ listId, tasks }: BrainstormWhiteb
                     </div>
                   </div>
                 </div>
+              </div>
+            )}
+
+            {/* Right-click context menu */}
+            {contextMenu && (
+              <div
+                className="fixed bg-white dark:bg-gray-800 border rounded-lg shadow-lg py-1 z-50"
+                style={{
+                  left: contextMenu.x,
+                  top: contextMenu.y,
+                }}
+              >
+                <button
+                  onClick={() => startEditingNote(contextMenu.noteId)}
+                  className="w-full px-4 py-2 text-left text-sm hover:bg-gray-100 dark:hover:bg-gray-700 flex items-center gap-2"
+                >
+                  <Type className="w-4 h-4" />
+                  Edit Note
+                </button>
+                <button
+                  onClick={() => {
+                    removeIdea(contextMenu.noteId);
+                    setContextMenu(null);
+                  }}
+                  className="w-full px-4 py-2 text-left text-sm hover:bg-gray-100 dark:hover:bg-gray-700 text-red-600 flex items-center gap-2"
+                >
+                  <X className="w-4 h-4" />
+                  Delete Note
+                </button>
               </div>
             )}
           </div>
