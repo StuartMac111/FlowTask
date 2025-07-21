@@ -77,7 +77,7 @@ export default function BrainstormWhiteboard({ listId, tasks }: BrainstormWhiteb
   const [currentLine, setCurrentLine] = useState<DrawingLine | null>(null);
   const [connectingFrom, setConnectingFrom] = useState<string | null>(null);
   const [selectedNotes, setSelectedNotes] = useState<string[]>([]);
-  const [whiteboardTransform, setWhiteboardTransform] = useState({ x: 0, y: 0, scale: 1 });
+  const [whiteboardTransform, setWhiteboardTransform] = useState({ x: 0, y: 0, scale: 0.8 });
   const [isPanning, setIsPanning] = useState(false);
   const [panStart, setPanStart] = useState({ x: 0, y: 0 });
   const whiteboardRef = useRef<HTMLDivElement>(null);
@@ -90,8 +90,8 @@ export default function BrainstormWhiteboard({ listId, tasks }: BrainstormWhiteb
     const notes: StickyNote[] = tasks.map((task, index) => ({
       id: task.id,
       content: task.title,
-      x: 20 + (index % 10) * 150,
-      y: 50 + Math.floor(index / 10) * 120,
+      x: 50 + (index % 6) * 180,
+      y: 80 + Math.floor(index / 6) * 140,
       color: NOTE_COLORS[index % NOTE_COLORS.length],
       priority: task.priority || undefined,
       createdAt: task.createdAt || undefined,
@@ -164,9 +164,9 @@ export default function BrainstormWhiteboard({ listId, tasks }: BrainstormWhiteb
   const addNewIdea = () => {
     if (!newIdeaText.trim()) return;
 
-    // Find a good position for the new note across wider whiteboard
-    const newX = 20 + (stickyNotes.length % 10) * 150;
-    const newY = 50 + Math.floor(stickyNotes.length / 10) * 120;
+    // Find a good position for the new note in smaller whiteboard
+    const newX = 50 + (stickyNotes.length % 6) * 180;
+    const newY = 80 + Math.floor(stickyNotes.length / 6) * 140;
     const newColor = NOTE_COLORS[stickyNotes.length % NOTE_COLORS.length];
 
     createTaskMutation.mutate({
@@ -349,7 +349,7 @@ export default function BrainstormWhiteboard({ listId, tasks }: BrainstormWhiteb
   };
 
   const resetWhiteboardView = () => {
-    setWhiteboardTransform({ x: 0, y: 0, scale: 1 });
+    setWhiteboardTransform({ x: 0, y: 0, scale: 0.8 });
   };
 
   const fitWhiteboardToContent = () => {
@@ -506,8 +506,8 @@ export default function BrainstormWhiteboard({ listId, tasks }: BrainstormWhiteb
         </div>
         
         {/* Navigation instructions */}
-        <div className="absolute bottom-4 left-4 z-20 bg-black/20 text-white px-3 py-1 rounded-lg text-xs">
-          Left-click + drag to pan (Move mode) • Scroll to zoom
+        <div className="absolute bottom-4 left-4 z-20 bg-black/60 text-white px-3 py-1 rounded-lg text-xs font-medium">
+          Move Tool: Left-click drag to pan • Scroll wheel to zoom • Starts at 80% size
         </div>
 
         {/* Maximum Width Whiteboard Frame - Edge to Edge with Enhanced Details */}
@@ -517,22 +517,17 @@ export default function BrainstormWhiteboard({ listId, tasks }: BrainstormWhiteb
             selectedTool === "move" ? "cursor-grab active:cursor-grabbing" : "cursor-default"
           }`}
           style={{
-            border: '30px solid #8B4513',
-            borderLeft: '0px solid #8B4513',
-            borderRight: '0px solid #8B4513',
-            borderTop: '30px solid #8B4513',
-            borderBottom: '30px solid #8B4513',
-            marginLeft: '-30px',
-            marginRight: '-30px',
-            width: 'calc(100% + 60px)',
+            border: '15px solid #8B4513',
+            borderRadius: '8px',
+            maxWidth: '95%',
+            maxHeight: '85%',
+            margin: '2% auto',
             boxShadow: `
-              inset 0 0 0 25px #A0522D,
-              inset 0 0 0 35px #CD853F,
-              inset 0 0 0 45px #DEB887,
-              inset 0 0 0 50px #F5DEB3,
-              0 50px 100px rgba(0,0,0,0.7),
-              0 30px 60px rgba(0,0,0,0.6),
-              0 15px 30px rgba(0,0,0,0.4)
+              inset 0 0 0 8px #A0522D,
+              inset 0 0 0 12px #CD853F,
+              inset 0 0 0 16px #DEB887,
+              0 15px 30px rgba(0,0,0,0.4),
+              0 8px 16px rgba(0,0,0,0.3)
             `,
             backgroundImage: `
               radial-gradient(circle at 20% 80%, rgba(139, 69, 19, 0.1) 0%, transparent 50%),
@@ -552,8 +547,10 @@ export default function BrainstormWhiteboard({ listId, tasks }: BrainstormWhiteb
             style={{
               transform: `translate(${whiteboardTransform.x}px, ${whiteboardTransform.y}px) scale(${whiteboardTransform.scale})`,
               transformOrigin: '0 0',
-              width: '120vw',
-              height: '120vh',
+              width: '100%',
+              height: '100%',
+              maxWidth: '1200px',
+              maxHeight: '800px',
               backgroundImage: `
                 linear-gradient(rgba(0,0,0,0.03) 1px, transparent 1px),
                 linear-gradient(90deg, rgba(0,0,0,0.03) 1px, transparent 1px),
