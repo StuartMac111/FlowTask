@@ -6,7 +6,7 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
-import { Calendar, User, Plus, Edit3, MoreVertical, ChevronDown, ChevronRight, Save, X } from "lucide-react";
+import { Calendar, User, Plus, Edit3, MoreVertical, ChevronDown, ChevronRight, Save, X, Trash2 } from "lucide-react";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -38,7 +38,32 @@ export default function TaskCard({ task, onUpdate }: TaskCardProps) {
   const [editDescription, setEditDescription] = useState(task.description || "");
   const [recurringType, setRecurringType] = useState<string>("none");
   const [selectedDays, setSelectedDays] = useState<string[]>([]);
+  const [showContextMenu, setShowContextMenu] = useState(false);
+  const [contextMenuPosition, setContextMenuPosition] = useState({ x: 0, y: 0 });
   const { toast } = useToast();
+
+  // Play completion sound
+  const playCompletionSound = () => {
+    try {
+      const audioContext = new (window.AudioContext || (window as any).webkitAudioContext)();
+      const oscillator = audioContext.createOscillator();
+      const gainNode = audioContext.createGain();
+      
+      oscillator.connect(gainNode);
+      gainNode.connect(audioContext.destination);
+      
+      oscillator.frequency.setValueAtTime(800, audioContext.currentTime);
+      oscillator.frequency.setValueAtTime(1000, audioContext.currentTime + 0.1);
+      
+      gainNode.gain.setValueAtTime(0.3, audioContext.currentTime);
+      gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.3);
+      
+      oscillator.start(audioContext.currentTime);
+      oscillator.stop(audioContext.currentTime + 0.3);
+    } catch (error) {
+      // Fallback: no sound if audio context fails
+    }
+  };
 
   // Toggle task completion mutation
   const toggleCompleteMutation = useMutation({
@@ -48,6 +73,9 @@ export default function TaskCard({ task, onUpdate }: TaskCardProps) {
       });
     },
     onSuccess: () => {
+      if (!task.isCompleted) {
+        playCompletionSound();
+      }
       onUpdate();
     },
     onError: (error) => {
@@ -213,10 +241,29 @@ export default function TaskCard({ task, onUpdate }: TaskCardProps) {
     priorityMutation.mutate(newPriority);
   };
 
+  const handleRightClick = (e: React.MouseEvent) => {
+    e.preventDefault();
+    setContextMenuPosition({ x: e.clientX, y: e.clientY });
+    setShowContextMenu(true);
+  };
+
+  const handleContextEdit = () => {
+    setIsEditing(true);
+    setShowContextMenu(false);
+  };
+
+  const handleContextDelete = () => {
+    deleteTaskMutation.mutate();
+    setShowContextMenu(false);
+  };
+
   return (
-    <div className={`task-card bg-white dark:bg-gray-800 rounded-lg border border-gray-300 dark:border-gray-600 p-4 shadow-sm ${
-      task.isCompleted ? 'completed-task' : ''
-    }`}>
+    <div 
+      className={`task-card bg-white dark:bg-gray-800 rounded-lg border border-gray-300 dark:border-gray-600 p-4 shadow-sm ${
+        task.isCompleted ? 'completed-task' : ''
+      }`}
+      onContextMenu={handleRightClick}
+    >
       <div className="flex items-start space-x-3">
         <Checkbox
           checked={task.isCompleted}
@@ -416,6 +463,38 @@ export default function TaskCard({ task, onUpdate }: TaskCardProps) {
           </div>
         </div>
       </div>
+
+      {/* Right-click Context Menu */}
+      {showContextMenu && (
+        <>
+          <div 
+            className="fixed inset-0 z-40"
+            onClick={() => setShowContextMenu(false)}
+          />
+          <div 
+            className="fixed z-50 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-600 rounded-md shadow-lg py-1"
+            style={{
+              left: contextMenuPosition.x,
+              top: contextMenuPosition.y,
+            }}
+          >
+            <button
+              onClick={handleContextEdit}
+              className="w-full px-3 py-2 text-sm text-left hover:bg-gray-100 dark:hover:bg-gray-700 flex items-center gap-2"
+            >
+              <Edit3 className="w-4 h-4" />
+              Edit Task
+            </button>
+            <button
+              onClick={handleContextDelete}
+              className="w-full px-3 py-2 text-sm text-left hover:bg-gray-100 dark:hover:bg-gray-700 text-red-600 dark:text-red-400 flex items-center gap-2"
+            >
+              <Trash2 className="w-4 h-4" />
+              Delete Task
+            </button>
+          </div>
+        </>
+      )}
     </div>
   );
 }

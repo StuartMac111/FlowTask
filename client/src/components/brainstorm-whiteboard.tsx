@@ -3,7 +3,7 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent } from "@/components/ui/card";
-import { X, Plus, Move3D, Lightbulb, Calendar, AlertCircle, CheckCircle, Clock, Palette, Download, Link, Square, Circle, Triangle, Type, Bold, Italic, Underline, Minus, HelpCircle, CalendarDays, Edit } from "lucide-react";
+import { X, Plus, Move3D, Lightbulb, Calendar, AlertCircle, CheckCircle, Clock, Palette, Download, Link, Square, Circle, Triangle, Type, Bold, Italic, Underline, Minus, HelpCircle, CalendarDays, Edit, Check } from "lucide-react";
 import { apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import { isUnauthorizedError } from "@/lib/authUtils";
@@ -30,6 +30,8 @@ interface StickyNote {
   };
   groupId?: string;
   connections?: string[];
+  isCompleted?: boolean;
+  isCrumpling?: boolean;
 }
 
 interface DrawingLine {
@@ -110,6 +112,8 @@ export default function BrainstormWhiteboard({ listId, tasks }: BrainstormWhiteb
       shape: "square",
       textStyle: { bold: false, italic: false, underline: false, fontSize: 14 },
       connections: [],
+      isCompleted: task.isCompleted || false,
+      isCrumpling: false,
     }));
     setStickyNotes(notes);
   }, [tasks]);
@@ -463,6 +467,64 @@ export default function BrainstormWhiteboard({ listId, tasks }: BrainstormWhiteb
         textStyle: { ...note.textStyle, fontSize } 
       } : note
     ));
+  };
+
+  // Play completion sound
+  const playCompletionSound = () => {
+    try {
+      const audioContext = new (window.AudioContext || (window as any).webkitAudioContext)();
+      const oscillator = audioContext.createOscillator();
+      const gainNode = audioContext.createGain();
+      
+      oscillator.connect(gainNode);
+      gainNode.connect(audioContext.destination);
+      
+      oscillator.frequency.setValueAtTime(800, audioContext.currentTime);
+      oscillator.frequency.setValueAtTime(1000, audioContext.currentTime + 0.1);
+      
+      gainNode.gain.setValueAtTime(0.3, audioContext.currentTime);
+      gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.3);
+      
+      oscillator.start(audioContext.currentTime);
+      oscillator.stop(audioContext.currentTime + 0.3);
+    } catch (error) {
+      // Fallback: no sound if audio context fails
+    }
+  };
+
+  // Toggle note completion with crumple animation
+  const toggleNoteCompletion = (noteId: string) => {
+    const note = stickyNotes.find(n => n.id === noteId);
+    if (!note) return;
+
+    if (!note.isCompleted) {
+      // Starting completion - trigger crumple animation
+      setStickyNotes(prev => prev.map(n => 
+        n.id === noteId ? { ...n, isCrumpling: true } : n
+      ));
+      
+      playCompletionSound();
+      
+      // After animation, mark as completed and remove from view
+      setTimeout(() => {
+        setStickyNotes(prev => prev.filter(n => n.id !== noteId));
+        
+        // Update task in database
+        apiRequest("PUT", `/api/tasks/${noteId}`, {
+          isCompleted: true,
+        }).then(() => {
+          queryClient.invalidateQueries({ queryKey: ["/api/lists"] });
+          toast({
+            title: "Idea Completed!",
+            description: "Sticky note has been marked as done",
+          });
+        }).catch((error) => {
+          console.error("Failed to update task completion:", error);
+          // Revert UI changes on error
+          setStickyNotes(prev => [...prev, { ...note, isCompleted: false, isCrumpling: false }]);
+        });
+      }, 800); // Match animation duration
+    }
   };
 
   // Enhanced whiteboard navigation
@@ -982,6 +1044,8 @@ export default function BrainstormWhiteboard({ listId, tasks }: BrainstormWhiteb
                   } ${
                     note.shape === 'circle' ? 'rounded-full' : 
                     note.shape === 'triangle' ? 'clip-triangle' : 'rounded-lg'
+                  } ${
+                    note.isCrumpling ? 'animate-crumple' : ''
                   }`}
                   style={{
                     backgroundColor: note.color,
@@ -989,11 +1053,32 @@ export default function BrainstormWhiteboard({ listId, tasks }: BrainstormWhiteb
                                 connectingFrom === note.id ? '#3b82f6' : 'rgba(0,0,0,0.1)',
                     minHeight: '100px',
                     width: '140px',
+                    transform: note.isCrumpling ? 'rotateX(45deg) rotateY(-15deg) scale(0.8)' : '',
+                    transformStyle: 'preserve-3d',
+                    transition: note.isCrumpling ? 'all 0.8s cubic-bezier(0.25, 0.46, 0.45, 0.94)' : 'all 0.2s',
                   }}
                 >
                   <CardContent className="p-3 h-full relative">
                     {/* Corner fold effect */}
                     <div className="absolute top-0 right-0 w-4 h-4 bg-black bg-opacity-10 rounded-bl-lg"></div>
+                    
+                    {/* Completion Checkbox */}
+                    <div 
+                      className="absolute top-1 right-1 w-5 h-5 border-2 border-gray-400 rounded cursor-pointer hover:border-green-500 hover:bg-green-50 transition-all duration-200 bg-white flex items-center justify-center z-20"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        e.preventDefault();
+                        toggleNoteCompletion(note.id);
+                      }}
+                      onMouseDown={(e) => e.stopPropagation()}
+                      title="Mark as completed"
+                    >
+                      {note.isCompleted ? (
+                        <Check className="w-3 h-3 text-green-600" />
+                      ) : (
+                        <div className="w-2 h-2 rounded-full bg-gray-300 hover:bg-green-300 transition-colors"></div>
+                      )}
+                    </div>
                     
                     {/* Priority indicator with colored dot only */}
                     {note.priority && (

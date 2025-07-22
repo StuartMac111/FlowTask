@@ -4,7 +4,10 @@ import { queryClient } from "@/lib/queryClient";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Share2, List, Grid3X3, Calendar, User, Lightbulb } from "lucide-react";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { Calendar as CalendarComponent } from "@/components/ui/calendar";
+import { Share2, List, Grid3X3, Calendar, User, Lightbulb, Repeat, X } from "lucide-react";
+import { format } from "date-fns";
 import TaskCard from "./task-card";
 import BrainstormWhiteboard from "./brainstorm-whiteboard";
 import { apiRequest } from "@/lib/queryClient";
@@ -24,6 +27,11 @@ export default function TaskList({ list, onShare, onRefresh }: TaskListProps) {
   const [sortBy, setSortBy] = useState("created");
   const [assigneeFilter, setAssigneeFilter] = useState("all");
   const [viewMode, setViewMode] = useState("list");
+  const [selectedDueDate, setSelectedDueDate] = useState<Date>();
+  const [showDatePicker, setShowDatePicker] = useState(false);
+  const [showRepeatOptions, setShowRepeatOptions] = useState(false);
+  const [repeatType, setRepeatType] = useState<string>("none");
+  const [selectedDays, setSelectedDays] = useState<string[]>([]);
   const { toast } = useToast();
 
   // Create task mutation
@@ -37,7 +45,7 @@ export default function TaskList({ list, onShare, onRefresh }: TaskListProps) {
         description: "Task created successfully",
       });
       onRefresh();
-      setNewTaskTitle("");
+      resetTaskForm();
     },
     onError: (error) => {
       if (isUnauthorizedError(error)) {
@@ -62,11 +70,33 @@ export default function TaskList({ list, onShare, onRefresh }: TaskListProps) {
   const handleAddTask = () => {
     if (!newTaskTitle.trim() || !list) return;
 
-    createTaskMutation.mutate({
+    const taskData: any = {
       title: newTaskTitle,
       listId: list.id,
       priority: "medium",
-    } as InsertTask);
+    };
+
+    if (selectedDueDate) {
+      taskData.dueDate = selectedDueDate.toISOString();
+    }
+
+    if (repeatType !== "none") {
+      taskData.recurringType = repeatType;
+      if (repeatType === "custom") {
+        taskData.recurringDays = selectedDays;
+      }
+    }
+
+    createTaskMutation.mutate(taskData as InsertTask);
+  };
+
+  const resetTaskForm = () => {
+    setNewTaskTitle("");
+    setSelectedDueDate(undefined);
+    setShowDatePicker(false);
+    setShowRepeatOptions(false);
+    setRepeatType("none");
+    setSelectedDays([]);
   };
 
   const handleKeyPress = (e: React.KeyboardEvent) => {
@@ -225,10 +255,88 @@ export default function TaskList({ list, onShare, onRefresh }: TaskListProps) {
             />
             <div className="flex items-center justify-between mt-3">
               <div className="flex items-center space-x-4">
-                <Button variant="ghost" size="sm" className="text-gray-600 dark:text-gray-400">
-                  <Calendar className="w-4 h-4 mr-1" />
-                  Due date
-                </Button>
+                <Popover open={showDatePicker} onOpenChange={setShowDatePicker}>
+                  <PopoverTrigger asChild>
+                    <Button variant="ghost" size="sm" className="text-gray-600 dark:text-gray-400">
+                      <Calendar className="w-4 h-4 mr-1" />
+                      {selectedDueDate ? format(selectedDueDate, "PPP") : "Due date"}
+                    </Button>
+                  </PopoverTrigger>
+                  <PopoverContent className="w-auto p-0" align="start">
+                    <CalendarComponent
+                      mode="single"
+                      selected={selectedDueDate}
+                      onSelect={setSelectedDueDate}
+                      initialFocus
+                    />
+                    {selectedDueDate && (
+                      <div className="p-2 border-t">
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => setSelectedDueDate(undefined)}
+                          className="w-full"
+                        >
+                          <X className="w-4 h-4 mr-1" />
+                          Clear date
+                        </Button>
+                      </div>
+                    )}
+                  </PopoverContent>
+                </Popover>
+
+                <Popover open={showRepeatOptions} onOpenChange={setShowRepeatOptions}>
+                  <PopoverTrigger asChild>
+                    <Button variant="ghost" size="sm" className="text-gray-600 dark:text-gray-400">
+                      <Repeat className="w-4 h-4 mr-1" />
+                      {repeatType !== "none" ? `Repeat ${repeatType}` : "Repeat"}
+                    </Button>
+                  </PopoverTrigger>
+                  <PopoverContent className="w-80 p-4" align="start">
+                    <div className="space-y-3">
+                      <h4 className="font-medium">Repeat Task</h4>
+                      <Select value={repeatType} onValueChange={setRepeatType}>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Select repeat option" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="none">Don't repeat</SelectItem>
+                          <SelectItem value="daily">Daily</SelectItem>
+                          <SelectItem value="weekly">Weekly</SelectItem>
+                          <SelectItem value="monthly">Monthly</SelectItem>
+                          <SelectItem value="custom">Custom days</SelectItem>
+                        </SelectContent>
+                      </Select>
+                      
+                      {repeatType === "custom" && (
+                        <div className="space-y-2">
+                          <label className="text-sm font-medium">Select days:</label>
+                          <div className="flex flex-wrap gap-2">
+                            {["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"].map((day) => (
+                              <Button
+                                key={day}
+                                type="button"
+                                size="sm"
+                                variant={selectedDays.includes(day) ? "default" : "outline"}
+                                onClick={() => {
+                                  setSelectedDays(prev => 
+                                    prev.includes(day) 
+                                      ? prev.filter(d => d !== day)
+                                      : [...prev, day]
+                                  );
+                                }}
+                                className="text-xs"
+                              >
+                                {day.slice(0, 3)}
+                              </Button>
+                            ))}
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  </PopoverContent>
+                </Popover>
+
                 <Button variant="ghost" size="sm" className="text-gray-600 dark:text-gray-400">
                   <User className="w-4 h-4 mr-1" />
                   Assign
