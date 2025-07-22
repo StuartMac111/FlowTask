@@ -140,6 +140,7 @@ export default function Home() {
             
             <TaskList
               list={currentList}
+              allLists={lists}
               onShare={() => setShareModalOpen(true)}
               onRefresh={refetchLists}
             />
@@ -149,6 +150,7 @@ export default function Home() {
           <div className="w-full relative mobile-bottom-spacing">
             <TaskList
               list={currentList}
+              allLists={lists}
               onShare={() => setShareModalOpen(true)}
               onRefresh={refetchLists}
             />

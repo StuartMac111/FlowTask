@@ -80,8 +80,9 @@ RESTful API with endpoints for:
 - **Real-time Feedback**: Live zoom indicator and contextual instruction hints
 
 ### Core Features
+- **Statistics Dashboard**: Comprehensive task analytics showing completion rates, performance metrics, and insights
 - **Brainstorming Whiteboard**: Special brainstorming list with advanced whiteboard interface and sticky notes
-- **Automatic Default Lists**: New users get six starter lists: "My Day", "Tasks assigned to me", "Tasks", "Completed Tasks", "Shopping list", and "Brainstorming"
+- **Automatic Default Lists**: New users get seven starter lists: "My Day", "Tasks assigned to me", "Tasks", "Completed Tasks", "Shopping list", "Brainstorming", and "Statistics"
 - **Enhanced Task Management**: Left-click editing, right-click delete, completion sounds, animated completion effects
 - **Responsive Design**: Mobile/desktop toggle with 💻 Desktop and 📱 Mobile buttons
 - **Enhanced Typography**: 1.5x bigger font sizes throughout interface for better readability

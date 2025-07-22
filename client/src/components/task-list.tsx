@@ -11,6 +11,7 @@ import { Share2, List, Grid3X3, Calendar, User, Lightbulb, Repeat, X, Edit, Tras
 import { format } from "date-fns";
 import TaskCard from "./task-card";
 import BrainstormWhiteboard from "./brainstorm-whiteboard";
+import StatisticsDashboard from "./statistics-dashboard";
 import { apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import { isUnauthorizedError } from "@/lib/authUtils";
@@ -19,11 +20,12 @@ import type { ListWithTasks, InsertTask } from "@shared/schema";
 
 interface TaskListProps {
   list?: ListWithTasks;
+  allLists?: ListWithTasks[];
   onShare: () => void;
   onRefresh: () => void;
 }
 
-export default function TaskList({ list, onShare, onRefresh }: TaskListProps) {
+export default function TaskList({ list, allLists = [], onShare, onRefresh }: TaskListProps) {
   const [newTaskTitle, setNewTaskTitle] = useState("");
   const [newTaskNote, setNewTaskNote] = useState("");
   const [filter, setFilter] = useState("all");
@@ -181,6 +183,11 @@ export default function TaskList({ list, onShare, onRefresh }: TaskListProps) {
   // Show brainstorming whiteboard for brainstorming lists
   if (list.name.toLowerCase() === "brainstorming") {
     return <BrainstormWhiteboard listId={list.id} tasks={list.tasks || []} />;
+  }
+
+  // Show statistics dashboard for statistics list
+  if (list.name.toLowerCase() === "statistics") {
+    return <StatisticsDashboard lists={allLists} listId={list.id} />;
   }
 
   // Filter and sort tasks

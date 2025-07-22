@@ -295,6 +295,16 @@ export class DatabaseStorage implements IStorage {
       });
     }
     
+    if (!existingListNames.includes("Statistics")) {
+      neededLists.push({
+        name: "Statistics",
+        description: "Task completion stats and performance metrics",
+        color: "#DC2626",
+        ownerId: userId,
+        isPrivate: true,
+      });
+    }
+    
     if (neededLists.length > 0) {
       await db.insert(lists).values(neededLists);
     }
