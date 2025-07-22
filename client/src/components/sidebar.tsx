@@ -21,7 +21,14 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
-import { Search, Plus, Users, Edit, Trash2, Merge } from "lucide-react";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import { Search, Plus, Users, Edit, Trash2, Merge, LogOut, Settings, User as UserIcon, ChevronDown } from "lucide-react";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import { isUnauthorizedError } from "@/lib/authUtils";
@@ -167,23 +174,56 @@ export default function Sidebar({
 
   return (
     <div className="w-80 bg-ms-surface border-r border-ms-border flex flex-col">
-      {/* User Profile */}
+      {/* User Profile Dropdown */}
       <div className="p-4 border-b border-ms-border">
-        <div className="flex items-center space-x-3">
-          <Avatar className="w-10 h-10">
-            <AvatarImage src={user.profileImageUrl || undefined} />
-            <AvatarFallback>
-              {user.firstName?.[0]}{user.lastName?.[0]}
-            </AvatarFallback>
-          </Avatar>
-          <div className="flex-1">
-            <h3 className="font-semibold text-sm">
-              {user.firstName} {user.lastName}
-            </h3>
-            <p className="text-xs text-ms-text-secondary">{user.email}</p>
-          </div>
-          <ThemeToggle />
-        </div>
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <div className="flex items-center space-x-3 cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg p-2 transition-colors">
+              <Avatar className="w-10 h-10">
+                <AvatarImage src={user.profileImageUrl || undefined} />
+                <AvatarFallback className="bg-blue-500 text-white">
+                  {user.firstName?.[0]}{user.lastName?.[0]}
+                </AvatarFallback>
+              </Avatar>
+              <div className="flex-1">
+                <h3 className="font-semibold text-sm text-gray-900 dark:text-gray-100">
+                  {user.firstName} {user.lastName}
+                </h3>
+                <p className="text-xs text-gray-600 dark:text-gray-400">{user.email}</p>
+              </div>
+              <ChevronDown className="w-4 h-4 text-gray-500" />
+            </div>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="start" className="w-64">
+            <DropdownMenuItem onClick={() => {
+              toast({ title: "Edit Profile", description: "Profile editing feature coming soon!" });
+            }}>
+              <Settings className="w-4 h-4 mr-2" />
+              Edit Profile
+            </DropdownMenuItem>
+            <DropdownMenuItem onClick={() => {
+              toast({ title: "Switch Accounts", description: "Account switching feature coming soon!" });
+            }}>
+              <UserIcon className="w-4 h-4 mr-2" />
+              Switch Accounts
+            </DropdownMenuItem>
+            <DropdownMenuSeparator />
+            <DropdownMenuItem>
+              <span className="mr-2">🌙</span>
+              <ThemeToggle />
+            </DropdownMenuItem>
+            <DropdownMenuSeparator />
+            <DropdownMenuItem 
+              onClick={() => {
+                window.location.href = "/api/logout";
+              }}
+              className="text-red-600 dark:text-red-400"
+            >
+              <LogOut className="w-4 h-4 mr-2" />
+              Sign Out
+            </DropdownMenuItem>
+          </DropdownMenuContent>
+        </DropdownMenu>
       </div>
 
       {/* Search Bar */}

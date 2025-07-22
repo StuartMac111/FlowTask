@@ -93,6 +93,7 @@ RESTful API with endpoints for:
 - **Daily Cleanup**: Automatic midnight cleanup of "My Day" list (moves tasks to "Tasks" list except those due next day or later)
 - **Automatic Task Routing**: New tasks from sticky notes and "My Day" automatically go to "Tasks" list
 - **Completion Routing**: All completed tasks automatically move to "Completed Tasks" list
+- **User Profile Management**: Top-left profile dropdown with avatar, email, logout, edit profile, and switch accounts options
 - **Dark Mode Support**: Complete dark mode implementation with theme toggle in user profile section
 - **Background Themes**: Customizable list backgrounds with gradients and patterns for visual organization
 - **Groups System**: Renamed "Family Groups" to "Groups" to support any type of collaboration
