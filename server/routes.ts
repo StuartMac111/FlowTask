@@ -125,7 +125,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
       
       // Ensure user has default lists (for existing users too)
-      await storage.ensureDefaultLists(userId);
+      await storage.createDefaultLists(userId);
       
       const lists = await storage.getListsForUser(userId);
       res.json(lists);
