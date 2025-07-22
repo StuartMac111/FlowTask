@@ -219,8 +219,8 @@ export default function BrainstormWhiteboard({ listId, tasks }: BrainstormWhiteb
 
     try {
       // Get the "Tasks" list to create the task there instead of brainstorming list
-      const listsResponse = await apiRequest("GET", "/api/lists") as any[];
-      const tasksList = listsResponse.find((list: any) => list.name === "Tasks");
+      const listsResponse = await apiRequest("GET", "/api/lists");
+      const tasksList = (listsResponse as any[]).find((list: any) => list.name === "Tasks");
       
       if (!tasksList) {
         throw new Error("Tasks list not found");

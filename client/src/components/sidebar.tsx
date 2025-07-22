@@ -458,7 +458,7 @@ export default function Sidebar({
             setShowListEditor(false);
             setListToEdit(null);
           }}
-          onRefresh={onRefresh}
+          onRefresh={onRefresh || (() => {})}
         />
       )}
     </div>

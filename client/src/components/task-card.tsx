@@ -8,6 +8,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Calendar, User, Plus, Edit3, MoreVertical, ChevronDown, ChevronRight, Save, X, Trash2 } from "lucide-react";
+import { format } from "date-fns";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -77,8 +78,8 @@ export default function TaskCard({ task, onUpdate, listName }: TaskCardProps) {
     mutationFn: async () => {
       if (!task.isCompleted) {
         // Task is being completed - move to "Completed Tasks" list
-        const listsResponse = await apiRequest("GET", "/api/lists") as any[];
-        const completedTasksList = listsResponse.find((list: any) => list.name === "Completed Tasks");
+        const listsResponse = await apiRequest("GET", "/api/lists");
+        const completedTasksList = (listsResponse as any[]).find((list: any) => list.name === "Completed Tasks");
         
         if (completedTasksList) {
           await apiRequest("PUT", `/api/tasks/${task.id}`, {
@@ -93,8 +94,8 @@ export default function TaskCard({ task, onUpdate, listName }: TaskCardProps) {
         }
       } else {
         // Task is being uncompleted - move back to "Tasks" list
-        const listsResponse = await apiRequest("GET", "/api/lists") as any[];
-        const tasksList = listsResponse.find((list: any) => list.name === "Tasks");
+        const listsResponse = await apiRequest("GET", "/api/lists");
+        const tasksList = (listsResponse as any[]).find((list: any) => list.name === "Tasks");
         
         if (tasksList) {
           await apiRequest("PUT", `/api/tasks/${task.id}`, {
@@ -144,13 +145,17 @@ export default function TaskCard({ task, onUpdate, listName }: TaskCardProps) {
   // Restore task mutation for undo functionality
   const restoreTaskMutation = useMutation({
     mutationFn: async () => {
+      // Restore task to its original list
       await apiRequest("POST", "/api/tasks", {
         title: task.title,
         description: task.description,
-        listId: task.listId,
+        listId: task.listId, // Keep original list ID for proper restoration
         priority: task.priority,
         isCompleted: task.isCompleted,
         dueDate: task.dueDate,
+        recurringType: task.recurringType,
+        recurringDays: task.recurringDays,
+        assignedTo: task.assignedTo,
       });
     },
     onSuccess: () => {
@@ -249,7 +254,10 @@ export default function TaskCard({ task, onUpdate, listName }: TaskCardProps) {
       await apiRequest("DELETE", `/api/tasks/${task.id}`);
     },
     onSuccess: () => {
-      // Show undo toast
+      // Immediate UI update
+      onUpdate();
+      
+      // Show undo toast with action button
       toast({
         title: "Task Deleted",
         description: "Task has been deleted",
@@ -262,8 +270,8 @@ export default function TaskCard({ task, onUpdate, listName }: TaskCardProps) {
             Undo
           </Button>
         ),
+        duration: 5000, // Show for 5 seconds
       });
-      onUpdate();
     },
     onError: (error) => {
       if (isUnauthorizedError(error)) {
@@ -561,7 +569,7 @@ export default function TaskCard({ task, onUpdate, listName }: TaskCardProps) {
               {task.dueDate && (
                 <div className="flex items-center space-x-1 text-sm text-gray-600 dark:text-gray-400">
                   <Calendar className="w-4 h-4" />
-                  <span>{formatDate(new Date(task.dueDate))}</span>
+                  <span>{format(new Date(task.dueDate), "MMM d, yyyy")}</span>
                 </div>
               )}
               
