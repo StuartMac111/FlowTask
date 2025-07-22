@@ -1,4 +1,5 @@
 import { useState } from "react";
+import React from "react";
 import { useMutation } from "@tanstack/react-query";
 import { queryClient } from "@/lib/queryClient";
 import { Button } from "@/components/ui/button";
@@ -33,6 +34,20 @@ export default function TaskList({ list, onShare, onRefresh }: TaskListProps) {
   const [repeatType, setRepeatType] = useState<string>("none");
   const [selectedDays, setSelectedDays] = useState<string[]>([]);
   const { toast } = useToast();
+
+  // Add click handler to close dropdowns when clicking away
+  React.useEffect(() => {
+    const handleClickAway = (e: MouseEvent) => {
+      const target = e.target as HTMLElement;
+      if (!target.closest('[data-radix-popper-content-wrapper], [data-radix-select-content], button')) {
+        setShowDatePicker(false);
+        setShowRepeatOptions(false);
+      }
+    };
+
+    document.addEventListener('mousedown', handleClickAway);
+    return () => document.removeEventListener('mousedown', handleClickAway);
+  }, []);
 
   // Create task mutation
   const createTaskMutation = useMutation({

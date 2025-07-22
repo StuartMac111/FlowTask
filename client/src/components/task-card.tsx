@@ -1,4 +1,5 @@
 import { useState } from "react";
+import React from "react";
 import { useMutation } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -257,17 +258,34 @@ export default function TaskCard({ task, onUpdate }: TaskCardProps) {
     setShowContextMenu(false);
   };
 
+  // Handle click away to exit editing
+  React.useEffect(() => {
+    const handleClickAway = (e: MouseEvent) => {
+      const target = e.target as HTMLElement;
+      if (isEditing && !target.closest('.task-card')) {
+        handleCancelEdit();
+      }
+    };
+
+    if (isEditing) {
+      document.addEventListener('mousedown', handleClickAway);
+      return () => document.removeEventListener('mousedown', handleClickAway);
+    }
+  }, [isEditing]);
+
   return (
     <div 
       className={`task-card bg-white dark:bg-gray-800 rounded-lg border border-gray-300 dark:border-gray-600 p-4 shadow-sm cursor-pointer ${
-        task.isCompleted ? 'completed-task' : ''
+        task.isCompleted ? 'completed-task opacity-75' : ''
       }`}
       onContextMenu={handleRightClick}
       onClick={(e) => {
+        e.stopPropagation();
         const target = e.target as HTMLElement;
-        // Only edit if clicking on the task title or card body (not interactive elements)
-        if (target.closest('.task-title') || 
-            (target === e.currentTarget && !target.closest('button, input, select, [role="button"]'))) {
+        // Only edit if NOT clicking on interactive elements (checkbox, buttons, dropdowns)
+        if (!target.closest('button, input, select, [role="button"], [data-radix-popper-content-wrapper]') &&
+            !target.hasAttribute('role') && 
+            !target.closest('[role="button"], [role="menuitem"], [role="option"]')) {
           setIsEditing(true);
         }
       }}
@@ -276,7 +294,9 @@ export default function TaskCard({ task, onUpdate }: TaskCardProps) {
         <Checkbox
           checked={task.isCompleted}
           onCheckedChange={() => {
-            playCompletionSound();
+            if (!task.isCompleted) {
+              playCompletionSound();
+            }
             toggleCompleteMutation.mutate();
           }}
           className="mt-1"
@@ -374,14 +394,14 @@ export default function TaskCard({ task, onUpdate }: TaskCardProps) {
             <>
               <div className="flex items-center justify-between">
                 <h3 className={`task-title font-medium text-black dark:text-white ${
-                  task.isCompleted ? 'line-through' : ''
+                  task.isCompleted ? 'line-through opacity-60' : ''
                 }`}>
                   {task.title}
                 </h3>
                 <div className="flex items-center space-x-2">
                   <DropdownMenu>
                     <DropdownMenuTrigger asChild>
-                      <div className="cursor-pointer">
+                      <div className="cursor-pointer" onClick={(e) => e.stopPropagation()}>
                         <PriorityDot 
                           priority={(task.priority as "low" | "medium" | "high") || 'medium'} 
                           size="lg"
@@ -389,20 +409,29 @@ export default function TaskCard({ task, onUpdate }: TaskCardProps) {
                         />
                       </div>
                     </DropdownMenuTrigger>
-                    <DropdownMenuContent>
-                      <DropdownMenuItem onClick={() => handlePriorityChange('low')}>
+                    <DropdownMenuContent onClick={(e) => e.stopPropagation()}>
+                      <DropdownMenuItem onClick={(e) => {
+                        e.stopPropagation();
+                        handlePriorityChange('low');
+                      }}>
                         <div className="flex items-center space-x-2">
                           <div className="w-3 h-3 rounded-full bg-green-500"></div>
                           <span>Green (Not Important)</span>
                         </div>
                       </DropdownMenuItem>
-                      <DropdownMenuItem onClick={() => handlePriorityChange('medium')}>
+                      <DropdownMenuItem onClick={(e) => {
+                        e.stopPropagation();
+                        handlePriorityChange('medium');
+                      }}>
                         <div className="flex items-center space-x-2">
                           <div className="w-3 h-3 rounded-full bg-yellow-500"></div>
                           <span>Yellow (Important)</span>
                         </div>
                       </DropdownMenuItem>
-                      <DropdownMenuItem onClick={() => handlePriorityChange('high')}>
+                      <DropdownMenuItem onClick={(e) => {
+                        e.stopPropagation();
+                        handlePriorityChange('high');
+                      }}>
                         <div className="flex items-center space-x-2">
                           <div className="w-3 h-3 rounded-full bg-red-500"></div>
                           <span>Red (Very Important)</span>
@@ -437,7 +466,9 @@ export default function TaskCard({ task, onUpdate }: TaskCardProps) {
               </div>
               
               {task.description && (
-                <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">
+                <p className={`text-sm text-gray-600 dark:text-gray-400 mt-1 ${
+                  task.isCompleted ? 'line-through opacity-60' : ''
+                }`}>
                   {task.description}
                 </p>
               )}
