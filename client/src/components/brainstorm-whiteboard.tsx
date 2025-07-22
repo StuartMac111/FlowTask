@@ -482,7 +482,7 @@ export default function BrainstormWhiteboard({ listId, tasks }: BrainstormWhiteb
     if (confirm(confirmOptions[option as keyof typeof confirmOptions])) {
       // Update the note with repeat information
       setStickyNotes(prev => prev.map(note => 
-        note.id === showRepeatMenu ? { ...note, repeatType: option } : note
+        note.id === showRepeatMenu ? { ...note, repeatType: option as "none" | "daily" | "weekly" | "monthly" | "yearly" } : note
       ));
       
       toast({
@@ -527,7 +527,7 @@ export default function BrainstormWhiteboard({ listId, tasks }: BrainstormWhiteb
     }
   };
 
-  // Toggle note completion with crumple animation
+  // Toggle note completion with crumple animation and move to Completed Tasks list
   const toggleNoteCompletion = (noteId: string) => {
     const note = stickyNotes.find(n => n.id === noteId);
     if (!note) return;
@@ -544,21 +544,62 @@ export default function BrainstormWhiteboard({ listId, tasks }: BrainstormWhiteb
       setTimeout(() => {
         setStickyNotes(prev => prev.filter(n => n.id !== noteId));
         
-        // Update task in database
-        apiRequest("PUT", `/api/tasks/${noteId}`, {
-          isCompleted: true,
-        }).then(() => {
-          queryClient.invalidateQueries({ queryKey: ["/api/lists"] });
-          toast({
-            title: "Idea Completed!",
-            description: "Sticky note has been marked as done",
-          });
-        }).catch((error) => {
-          console.error("Failed to update task completion:", error);
-          // Revert UI changes on error
-          setStickyNotes(prev => [...prev, { ...note, isCompleted: false, isCrumpling: false }]);
-        });
+        // Move sticky note to "Completed Tasks" list
+        moveTaskToCompletedList(noteId);
       }, 800); // Match animation duration
+    } else {
+      // Allow unticking - mark as incomplete and keep in whiteboard
+      setStickyNotes(prev => prev.map(n => 
+        n.id === noteId ? { ...n, isCompleted: false, isCrumpling: false } : n
+      ));
+      
+      // Update task in database
+      apiRequest("PUT", `/api/tasks/${noteId}`, {
+        isCompleted: false,
+      }).then(() => {
+        queryClient.invalidateQueries({ queryKey: ["/api/lists"] });
+        toast({
+          title: "Task Uncompleted",
+          description: "Sticky note has been marked as incomplete",
+        });
+      });
+    }
+  };
+
+  // Move completed sticky note to "Completed Tasks" list
+  const moveTaskToCompletedList = async (noteId: string) => {
+    try {
+      // First, get all lists to find the "Completed Tasks" list
+      const listsResponse = await apiRequest("GET", "/api/lists") as any[];
+      const completedTasksList = listsResponse.find((list: any) => list.name === "Completed Tasks");
+      
+      if (!completedTasksList) {
+        throw new Error("Completed Tasks list not found");
+      }
+
+      // Move the task to the Completed Tasks list and mark as completed
+      await apiRequest("PATCH", `/api/tasks/${noteId}`, {
+        listId: completedTasksList.id,
+        isCompleted: true,
+      });
+
+      queryClient.invalidateQueries({ queryKey: ["/api/lists"] });
+      toast({
+        title: "Task Completed!",
+        description: "Sticky note moved to Completed Tasks list",
+      });
+    } catch (error) {
+      console.error("Failed to move task to completed list:", error);
+      toast({
+        title: "Error",
+        description: "Failed to move task to Completed Tasks",
+        variant: "destructive",
+      });
+      // Revert UI changes on error
+      const note = stickyNotes.find(n => n.id === noteId);
+      if (note) {
+        setStickyNotes(prev => [...prev, { ...note, isCompleted: false, isCrumpling: false }]);
+      }
     }
   };
 

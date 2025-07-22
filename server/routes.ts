@@ -33,8 +33,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
         const userLists = await storage.getListsForUser(user.id);
         const hasMyDay = userLists.some(list => list.name === "My Day");
         const hasBrainstorming = userLists.some(list => list.name === "Brainstorming");
+        const hasTasks = userLists.some(list => list.name === "Tasks");
+        const hasCompleted = userLists.some(list => list.name === "Completed Tasks");
+        const hasAssigned = userLists.some(list => list.name === "Tasks assigned to me");
+        const hasShopping = userLists.some(list => list.name === "Shopping list");
         
-        if (!hasMyDay || !hasBrainstorming) {
+        if (!hasMyDay || !hasBrainstorming || !hasTasks || !hasCompleted || !hasAssigned || !hasShopping) {
           await storage.createDefaultLists(user.id);
         }
       } catch (listError) {
@@ -315,6 +319,28 @@ export async function registerRoutes(app: Express): Promise<Server> {
       wsClients.delete(clientId);
     });
   });
+
+  // Schedule daily cleanup at midnight (00:00)
+  const scheduleMyDayCleanup = () => {
+    const now = new Date();
+    const midnight = new Date();
+    midnight.setHours(24, 0, 0, 0); // Next midnight
+    
+    const timeUntilMidnight = midnight.getTime() - now.getTime();
+    
+    setTimeout(() => {
+      // Run the cleanup
+      storage.cleanupMyDayList();
+      
+      // Schedule the next cleanup (every 24 hours)
+      setInterval(() => {
+        storage.cleanupMyDayList();
+      }, 24 * 60 * 60 * 1000); // 24 hours
+    }, timeUntilMidnight);
+  };
+
+  // Start the daily cleanup scheduler
+  scheduleMyDayCleanup();
 
   return httpServer;
 }

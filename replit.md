@@ -80,7 +80,7 @@ RESTful API with endpoints for:
 
 ### Core Features
 - **Brainstorming Whiteboard**: Special brainstorming list with advanced whiteboard interface and sticky notes
-- **Automatic Default Lists**: New users get four starter lists: "My Day", "Tasks assigned to me", "Shopping list", and "Brainstorming"
+- **Automatic Default Lists**: New users get six starter lists: "My Day", "Tasks assigned to me", "Tasks", "Completed Tasks", "Shopping list", and "Brainstorming"
 - **Enhanced Task Management**: Left-click editing, right-click delete, completion sounds, animated completion effects
 - **Responsive Design**: Mobile/desktop toggle with 💻 Desktop and 📱 Mobile buttons
 - **Enhanced Typography**: 1.5x bigger font sizes throughout interface for better readability
@@ -88,6 +88,9 @@ RESTful API with endpoints for:
 - **Task Organization**: Completed tasks automatically move to bottom of lists
 - **Repeat Functionality**: Comprehensive repeat options for both tasks and sticky notes
 - **Microsoft To-Do Style**: Due date picker, priority dots, and professional interface
+- **Smart Task Completion**: Completed sticky notes automatically move to "Completed Tasks" list
+- **Task Unticking**: Allow reversing task completion by clicking checkbox again
+- **Daily Cleanup**: Automatic midnight cleanup of "My Day" list (moves tasks to "Tasks" list except those due next day or later)
 - **Dark Mode Support**: Complete dark mode implementation with theme toggle in user profile section
 - **Background Themes**: Customizable list backgrounds with gradients and patterns for visual organization
 - **Groups System**: Renamed "Family Groups" to "Groups" to support any type of collaboration

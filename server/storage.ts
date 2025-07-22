@@ -245,6 +245,46 @@ export class DatabaseStorage implements IStorage {
       });
     }
     
+    if (!existingListNames.includes("Tasks assigned to me")) {
+      neededLists.push({
+        name: "Tasks assigned to me",
+        description: "Tasks that others have assigned to you",
+        color: "#7C3AED",
+        ownerId: userId,
+        isPrivate: true,
+      });
+    }
+    
+    if (!existingListNames.includes("Tasks")) {
+      neededLists.push({
+        name: "Tasks",
+        description: "All your tasks and sticky notes",
+        color: "#2563EB",
+        ownerId: userId,
+        isPrivate: true,
+      });
+    }
+    
+    if (!existingListNames.includes("Completed Tasks")) {
+      neededLists.push({
+        name: "Completed Tasks",
+        description: "Finished tasks and sticky notes",
+        color: "#16A34A",
+        ownerId: userId,
+        isPrivate: true,
+      });
+    }
+    
+    if (!existingListNames.includes("Shopping list")) {
+      neededLists.push({
+        name: "Shopping list",
+        description: "Things to buy",
+        color: "#059669",
+        ownerId: userId,
+        isPrivate: true,
+      });
+    }
+    
     if (!existingListNames.includes("Brainstorming")) {
       neededLists.push({
         name: "Brainstorming",
@@ -257,6 +297,69 @@ export class DatabaseStorage implements IStorage {
     
     if (neededLists.length > 0) {
       await db.insert(lists).values(neededLists);
+    }
+  }
+
+  // Daily cleanup function for "My Day" list
+  async cleanupMyDayList(): Promise<void> {
+    try {
+      const myDayLists = await db
+        .select()
+        .from(lists)
+        .where(eq(lists.name, "My Day"));
+
+      for (const list of myDayLists) {
+        // Get all tasks in "My Day" list
+        const myDayTasks = await db
+          .select()
+          .from(tasks)
+          .where(eq(tasks.listId, list.id));
+
+        // Get the "Tasks" list for this user to move tasks to
+        const [tasksList] = await db
+          .select()
+          .from(lists)
+          .where(and(
+            eq(lists.ownerId, list.ownerId),
+            eq(lists.name, "Tasks")
+          ));
+
+        if (!tasksList) continue;
+
+        const today = new Date();
+        const tomorrow = new Date(today);
+        tomorrow.setDate(tomorrow.getDate() + 1);
+        tomorrow.setHours(0, 0, 0, 0);
+
+        for (const task of myDayTasks) {
+          let shouldMove = true;
+          
+          // Don't move completed tasks
+          if (task.isCompleted) {
+            shouldMove = false;
+          }
+          
+          // Don't move tasks that are due today or later
+          if (task.dueDate) {
+            const dueDate = new Date(task.dueDate);
+            if (dueDate >= tomorrow) {
+              shouldMove = false;
+            }
+          }
+
+          // Move task to "Tasks" list if it should be moved
+          if (shouldMove) {
+            await db
+              .update(tasks)
+              .set({ listId: tasksList.id })
+              .where(eq(tasks.id, task.id));
+          }
+        }
+      }
+      
+      console.log("Daily My Day cleanup completed successfully");
+    } catch (error) {
+      console.error("Error during My Day cleanup:", error);
     }
   }
 

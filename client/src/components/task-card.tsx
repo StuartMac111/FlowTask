@@ -294,7 +294,7 @@ export default function TaskCard({ task, onUpdate, listName }: TaskCardProps) {
     >
       <div className="flex items-start space-x-3">
         <Checkbox
-          checked={task.isCompleted}
+          checked={task.isCompleted || false}
           onCheckedChange={() => {
             if (!task.isCompleted) {
               playCompletionSound();
@@ -307,6 +307,7 @@ export default function TaskCard({ task, onUpdate, listName }: TaskCardProps) {
                 }, 500);
               }
             }
+            // Allow both completing and uncompleting tasks
             toggleCompleteMutation.mutate();
           }}
           className={`mt-1 ${listName?.toLowerCase() === 'my day' ? 'w-5 h-5 scale-125' : 'w-6 h-6 scale-150'}`}
@@ -483,7 +484,7 @@ export default function TaskCard({ task, onUpdate, listName }: TaskCardProps) {
               {task.dueDate && (
                 <div className="flex items-center space-x-1 text-sm text-gray-600 dark:text-gray-400">
                   <Calendar className="w-4 h-4" />
-                  <span>{formatDate(task.dueDate)}</span>
+                  <span>{formatDate(new Date(task.dueDate))}</span>
                 </div>
               )}
               
