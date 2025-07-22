@@ -312,6 +312,33 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // User profile update route
+  app.put('/api/user/profile', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user?.id || req.user?.claims?.sub;
+      if (!userId) {
+        return res.status(401).json({ message: "User not authenticated" });
+      }
+
+      const { name, email, profileImageUrl } = req.body;
+      const updateData: any = {};
+      
+      if (name) {
+        const nameParts = name.trim().split(' ');
+        updateData.firstName = nameParts[0];
+        updateData.lastName = nameParts.slice(1).join(' ') || nameParts[0];
+      }
+      if (email) updateData.email = email;
+      if (profileImageUrl !== undefined) updateData.profileImageUrl = profileImageUrl;
+
+      await storage.updateUser(userId, updateData);
+      res.json({ message: "Profile updated successfully" });
+    } catch (error) {
+      console.error("Error updating user profile:", error);
+      res.status(500).json({ message: "Failed to update profile" });
+    }
+  });
+
   const httpServer = createServer(app);
 
   // WebSocket setup
