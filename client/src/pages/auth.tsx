@@ -143,7 +143,7 @@ export default function AuthPage() {
         <CardHeader className="text-center">
           <CardTitle className="text-3xl font-bold">
             <span className="text-black">Organize your life with </span>
-            <span className="text-blue-600 dark:text-blue-400">TaskFlow</span>
+            <span className="text-blue-600 dark:text-blue-400">FlowPilot</span>
           </CardTitle>
           <div className="flex justify-center my-4">
             <ThemeToggle />

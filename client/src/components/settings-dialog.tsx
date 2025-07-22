@@ -51,7 +51,7 @@ export default function SettingsDialog({ selectedBackground, onBackgroundChange 
         <DialogHeader>
           <DialogTitle>Settings</DialogTitle>
           <DialogDescription>
-            Customize your TaskFlow experience with themes and backgrounds.
+            Customize your FlowPilot experience with themes and backgrounds.
           </DialogDescription>
         </DialogHeader>
         

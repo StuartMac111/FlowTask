@@ -2,7 +2,7 @@
 
 ## Overview
 
-This is a modern full-stack task management application called TaskFlow, built as a Microsoft To-Do inspired clone. The application features a React + TypeScript frontend with Express.js backend, using PostgreSQL with Drizzle ORM for data persistence. The system supports group collaboration, list sharing, real-time updates via WebSockets, and authentication through Replit's OAuth system.
+This is a modern full-stack task management application called FlowPilot, built as a Microsoft To-Do inspired clone. The application features a React + TypeScript frontend with Express.js backend, using PostgreSQL with Drizzle ORM for data persistence. The system supports group collaboration, list sharing, real-time updates via WebSockets, and authentication through Replit's OAuth system.
 
 ## User Preferences
 
@@ -65,14 +65,16 @@ RESTful API with endpoints for:
 
 ## Recent Changes (January 2025)
 
-### Task Completion Fixes and Enhanced UI (Latest - July 22, 2025)
+### Latest Updates (July 22, 2025)
+- **Rebranded to FlowPilot**: Changed all TaskFlow references to FlowPilot throughout the application
 - **Immediate Task Completion**: Made tick button instant on every list - no delays, animations, or loading states
 - **Profile Picture System**: Upload photos with initials fallback (first/last name letters like "SM")
-- **Repositioned TaskFlow**: Moved app name below profile picture with blue dot as requested
+- **Repositioned FlowPilot**: Moved app name below profile picture with blue dot as requested
 - **Enhanced Profile Editor**: Photo upload, remove, name/email editing with preview
 - **Fixed Task Completion**: Simplified task toggle to work on all lists without complex routing
 - **Enhanced List Editor**: Comprehensive background color picker with 12 Microsoft-style colors 
 - **Optimized Server Response**: Immediate API responses for faster UI updates
+- **Profile Update System**: Everyone can now update their profiles with image compression
 - **Daily Cleanup System**: Automatic midnight cleanup of "My Day" list with proper scheduling
 
 ### Simplified Brainstorming Whiteboard

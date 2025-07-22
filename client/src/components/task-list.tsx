@@ -300,7 +300,7 @@ export default function TaskList({ list, allLists = [], onShare, onRefresh }: Ta
               {list.name}
             </h1>
             <p className="text-lg text-ms-text-secondary mt-1" style={{ fontSize: isMobileView ? '1rem' : '1.5rem' }}>
-              {list.description || "Organize your life with TaskFlow"} • {list.taskCount} tasks
+              {list.description || "Organize your life with FlowPilot"} • {list.taskCount} tasks
             </p>
           </div>
           <div className="flex items-center space-x-3">

@@ -86,7 +86,7 @@ export default function Home() {
 
   return (
     <div className={`flex h-screen overflow-hidden ${getBackgroundClass(backgroundTheme)}`}>
-      {/* Top Header with TaskFlow title and Toggle Buttons */}
+      {/* Top Header with FlowPilot title and Toggle Buttons */}
       <div className="absolute top-0 left-0 right-0 z-50 bg-white/90 dark:bg-gray-900/90 backdrop-blur-sm border-b border-gray-200 dark:border-gray-700">
         <div className="flex items-center justify-between p-4">
           <div className="flex flex-col items-center gap-2">
@@ -96,7 +96,7 @@ export default function Home() {
             />
             <div className="flex items-center gap-2">
               <div className="w-2 h-2 bg-blue-600 rounded-full"></div>
-              <h1 className="text-2xl font-bold text-blue-600 dark:text-blue-400">TaskFlow</h1>
+              <h1 className="text-2xl font-bold text-blue-600 dark:text-blue-400">FlowPilot</h1>
             </div>
           </div>
           

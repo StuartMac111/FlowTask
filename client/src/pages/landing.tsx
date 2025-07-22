@@ -20,7 +20,7 @@ export default function Landing() {
             <CheckCircle className="h-8 w-8 text-primary" />
             <h1 className="text-3xl font-bold">
               <span className="text-black">Organize your life with </span>
-              <span className="text-blue-600 dark:text-blue-400">TaskFlow</span>
+              <span className="text-blue-600 dark:text-blue-400">FlowPilot</span>
             </h1>
           </div>
           
@@ -57,7 +57,7 @@ export default function Landing() {
         <div className="text-center mb-16">
           <h1 className="text-6xl font-bold mb-6">
             <span className="text-black">Organize Your Life with </span>
-            <span className="text-blue-600 dark:text-blue-400">TaskFlow</span>
+            <span className="text-blue-600 dark:text-blue-400">FlowPilot</span>
           </h1>
           <div className="flex justify-center mb-6">
             <ThemeToggle />
@@ -140,7 +140,7 @@ export default function Landing() {
             Ready to Get Organized?
           </h2>
           <p className="text-lg text-ms-text-secondary mb-8">
-            Join thousands of families who trust TaskFlow to keep their lives organized.
+            Join thousands of families who trust FlowPilot to keep their lives organized.
           </p>
           <Button onClick={handleLogin} size="lg" className="px-8 py-4 text-lg">
             Start Your Journey Today
