@@ -135,6 +135,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.json(lists);
     } catch (error) {
       console.error("Error fetching lists:", error);
+      
+      // Handle database connection errors gracefully
+      if (error.code === '57P01') {
+        return res.status(503).json({ message: "Database connection lost, please refresh" });
+      }
+      
       res.status(500).json({ message: "Failed to fetch lists" });
     }
   });
@@ -252,6 +258,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const { id } = req.params;
       const updates = req.body;
+      
+      // Validate that the task exists first
+      const existingTask = await storage.getTaskById(id);
+      if (!existingTask) {
+        return res.status(404).json({ message: "Task not found" });
+      }
+      
       const task = await storage.updateTask(id, updates);
       
       // Get the list ID to broadcast to correct clients
@@ -263,6 +276,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.json(task);
     } catch (error) {
       console.error("Error updating task:", error);
+      
+      // Handle specific database errors
+      if (error.code === '57P01') {
+        return res.status(503).json({ message: "Database connection lost, please try again" });
+      }
+      
       res.status(500).json({ message: "Failed to update task" });
     }
   });

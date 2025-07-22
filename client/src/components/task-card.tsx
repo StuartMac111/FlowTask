@@ -79,7 +79,7 @@ export default function TaskCard({ task, onUpdate, listName }: TaskCardProps) {
       if (!task.isCompleted) {
         // Task is being completed - move to "Completed Tasks" list
         const listsResponse = await apiRequest("GET", "/api/lists");
-        const completedTasksList = (listsResponse as any[]).find((list: any) => list.name === "Completed Tasks");
+        const completedTasksList = (listsResponse as unknown as any[]).find((list: any) => list.name === "Completed Tasks");
         
         if (completedTasksList) {
           await apiRequest("PUT", `/api/tasks/${task.id}`, {
@@ -95,7 +95,7 @@ export default function TaskCard({ task, onUpdate, listName }: TaskCardProps) {
       } else {
         // Task is being uncompleted - move back to "Tasks" list
         const listsResponse = await apiRequest("GET", "/api/lists");
-        const tasksList = (listsResponse as any[]).find((list: any) => list.name === "Tasks");
+        const tasksList = (listsResponse as unknown as any[]).find((list: any) => list.name === "Tasks");
         
         if (tasksList) {
           await apiRequest("PUT", `/api/tasks/${task.id}`, {

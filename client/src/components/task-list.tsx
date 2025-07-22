@@ -98,7 +98,7 @@ export default function TaskList({ list, allLists = [], onShare, onRefresh }: Ta
       // If creating task in "My Day", create it in "Tasks" list instead
       if (list.name === "My Day") {
         const listsResponse = await apiRequest("GET", "/api/lists");
-        const tasksList = (listsResponse as ListWithTasks[]).find((listItem: ListWithTasks) => listItem.name === "Tasks");
+        const tasksList = (listsResponse as unknown as ListWithTasks[]).find((listItem: ListWithTasks) => listItem.name === "Tasks");
         
         if (tasksList) {
           targetListId = tasksList.id;
