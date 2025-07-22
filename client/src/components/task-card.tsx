@@ -32,6 +32,7 @@ import { apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import { isUnauthorizedError } from "@/lib/authUtils";
 import PriorityDot from "./priority-dot";
+import { showTaskDeletedToast } from "./undo-toast";
 import type { Task } from "@shared/schema";
 
 interface TaskCardProps {

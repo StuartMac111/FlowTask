@@ -6,6 +6,7 @@ import ShareModal from "@/components/share-modal";
 import FamilyModal from "@/components/family-modal";
 import CreateListModal from "@/components/create-list-modal";
 import SettingsDialog from "@/components/settings-dialog";
+import UserProfileDropdown from "@/components/user-profile-dropdown";
 import { useAuth } from "@/hooks/useAuth";
 import { useWebSocket } from "@/hooks/useWebSocket";
 import { Button } from "@/components/ui/button";
@@ -89,6 +90,10 @@ export default function Home() {
       <div className="absolute top-0 left-0 right-0 z-50 bg-white/90 dark:bg-gray-900/90 backdrop-blur-sm border-b border-gray-200 dark:border-gray-700">
         <div className="flex items-center justify-between p-4">
           <div className="flex items-center gap-4">
+            <UserProfileDropdown 
+              user={user} 
+              onLogout={() => window.location.href = "/api/logout"} 
+            />
             <h1 className="text-3xl font-bold text-blue-600 dark:text-blue-400">TaskFlow</h1>
           </div>
           
