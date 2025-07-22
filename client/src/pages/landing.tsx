@@ -16,12 +16,14 @@ export default function Landing() {
       <div className="container mx-auto px-4 py-8">
         {/* Header */}
         <header className="flex justify-between items-center mb-16">
-          <div className="flex items-center space-x-4">
-            <CheckCircle className="h-8 w-8 text-primary" />
-            <h1 className="text-3xl font-bold">
-              <span className="text-black">Organize your life with </span>
-              <span className="text-blue-600 dark:text-blue-400">FlowPilot</span>
-            </h1>
+          <div className="flex flex-col items-start space-y-2">
+            <div className="flex items-center space-x-4">
+              <CheckCircle className="h-8 w-8 text-primary" />
+              <h1 className="text-3xl font-bold text-blue-600 dark:text-blue-400">FlowPilot</h1>
+            </div>
+            <div className="ml-12">
+              <ThemeToggle />
+            </div>
           </div>
           
           <div className="flex items-center gap-4">
@@ -55,13 +57,9 @@ export default function Landing() {
 
         {/* Hero Section */}
         <div className="text-center mb-16">
-          <h1 className="text-6xl font-bold mb-6">
-            <span className="text-black">Organize Your Life with </span>
-            <span className="text-blue-600 dark:text-blue-400">FlowPilot</span>
+          <h1 className="text-6xl font-bold mb-6 text-blue-600 dark:text-blue-400">
+            FlowPilot
           </h1>
-          <div className="flex justify-center mb-6">
-            <ThemeToggle />
-          </div>
           <p className="text-xl text-ms-text-secondary mb-8 max-w-2xl mx-auto">
             A comprehensive to-do list application with family sharing, custom lists, 
             and task assignment features. Stay organized, stay connected.

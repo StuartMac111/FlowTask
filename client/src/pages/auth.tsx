@@ -141,9 +141,8 @@ export default function AuthPage() {
       
       <Card className="w-full max-w-md mx-auto">
         <CardHeader className="text-center">
-          <CardTitle className="text-3xl font-bold">
-            <span className="text-black">Organize your life with </span>
-            <span className="text-blue-600 dark:text-blue-400">FlowPilot</span>
+          <CardTitle className="text-3xl font-bold text-blue-600 dark:text-blue-400">
+            FlowPilot
           </CardTitle>
           <div className="flex justify-center my-4">
             <ThemeToggle />
