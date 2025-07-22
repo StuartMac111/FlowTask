@@ -15,6 +15,12 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import {
+  ContextMenu,
+  ContextMenuContent,
+  ContextMenuItem,
+  ContextMenuTrigger,
+} from "@/components/ui/context-menu";
+import {
   Select,
   SelectContent,
   SelectItem,
@@ -40,8 +46,7 @@ export default function TaskCard({ task, onUpdate, listName }: TaskCardProps) {
   const [editDescription, setEditDescription] = useState(task.description || "");
   const [recurringType, setRecurringType] = useState<string>("none");
   const [selectedDays, setSelectedDays] = useState<string[]>([]);
-  const [showContextMenu, setShowContextMenu] = useState(false);
-  const [contextMenuPosition, setContextMenuPosition] = useState({ x: 0, y: 0 });
+
   const { toast } = useToast();
 
   // Play completion sound
@@ -279,21 +284,7 @@ export default function TaskCard({ task, onUpdate, listName }: TaskCardProps) {
     priorityMutation.mutate(newPriority);
   };
 
-  const handleRightClick = (e: React.MouseEvent) => {
-    e.preventDefault();
-    setContextMenuPosition({ x: e.clientX, y: e.clientY });
-    setShowContextMenu(true);
-  };
 
-  const handleContextEdit = () => {
-    setIsEditing(true);
-    setShowContextMenu(false);
-  };
-
-  const handleContextDelete = () => {
-    deleteTaskMutation.mutate();
-    setShowContextMenu(false);
-  };
 
   // Handle click away to exit editing
   React.useEffect(() => {
@@ -311,23 +302,24 @@ export default function TaskCard({ task, onUpdate, listName }: TaskCardProps) {
   }, [isEditing]);
 
   return (
-    <div 
-      data-task-id={task.id}
-      className={`task-card bg-white dark:bg-gray-800 rounded-lg border border-gray-300 dark:border-gray-600 p-4 shadow-sm cursor-pointer transition-all duration-300 ${
-        task.isCompleted ? 'completed-task opacity-75' : ''
-      }`}
-      onContextMenu={handleRightClick}
-      onClick={(e) => {
-        e.stopPropagation();
-        const target = e.target as HTMLElement;
-        // Only edit if NOT clicking on interactive elements (checkbox, buttons, dropdowns)
-        if (!target.closest('button, input, select, [role="button"], [data-radix-popper-content-wrapper]') &&
-            !target.hasAttribute('role') && 
-            !target.closest('[role="button"], [role="menuitem"], [role="option"]')) {
-          setIsEditing(true);
-        }
-      }}
-    >
+    <ContextMenu>
+      <ContextMenuTrigger asChild>
+        <div 
+          data-task-id={task.id}
+          className={`task-card bg-white dark:bg-gray-800 rounded-lg border border-gray-300 dark:border-gray-600 p-4 shadow-sm cursor-pointer transition-all duration-300 ${
+            task.isCompleted ? 'completed-task opacity-75' : ''
+          }`}
+          onClick={(e) => {
+            e.stopPropagation();
+            const target = e.target as HTMLElement;
+            // Only edit if NOT clicking on interactive elements (checkbox, buttons, dropdowns)
+            if (!target.closest('button, input, select, [role="button"], [data-radix-popper-content-wrapper]') &&
+                !target.hasAttribute('role') && 
+                !target.closest('[role="button"], [role="menuitem"], [role="option"]')) {
+              setIsEditing(true);
+            }
+          }}
+        >
       <div className="flex items-start space-x-3">
         <Checkbox
           checked={task.isCompleted || false}
@@ -557,37 +549,24 @@ export default function TaskCard({ task, onUpdate, listName }: TaskCardProps) {
         </div>
       </div>
 
-      {/* Right-click Context Menu */}
-      {showContextMenu && (
-        <>
-          <div 
-            className="fixed inset-0 z-40"
-            onClick={() => setShowContextMenu(false)}
-          />
-          <div 
-            className="fixed z-50 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-600 rounded-md shadow-lg py-1"
-            style={{
-              left: contextMenuPosition.x,
-              top: contextMenuPosition.y,
-            }}
-          >
-            <button
-              onClick={handleContextEdit}
-              className="w-full px-3 py-2 text-sm text-left hover:bg-gray-100 dark:hover:bg-gray-700 flex items-center gap-2"
-            >
-              <Edit3 className="w-4 h-4" />
-              Edit Task
-            </button>
-            <button
-              onClick={handleContextDelete}
-              className="w-full px-3 py-2 text-sm text-left hover:bg-gray-100 dark:hover:bg-gray-700 text-red-600 dark:text-red-400 flex items-center gap-2"
-            >
-              <Trash2 className="w-4 h-4" />
-              Delete Task
-            </button>
-          </div>
-        </>
-      )}
-    </div>
+        </div>
+      </ContextMenuTrigger>
+      <ContextMenuContent>
+        <ContextMenuItem 
+          onClick={() => setIsEditing(true)}
+          className="cursor-pointer"
+        >
+          <Edit3 className="w-4 h-4 mr-2" />
+          Edit Task
+        </ContextMenuItem>
+        <ContextMenuItem 
+          onClick={() => deleteTaskMutation.mutate()}
+          className="cursor-pointer text-red-600 dark:text-red-400"
+        >
+          <Trash2 className="w-4 h-4 mr-2" />
+          Delete Task
+        </ContextMenuItem>
+      </ContextMenuContent>
+    </ContextMenu>
   );
 }
