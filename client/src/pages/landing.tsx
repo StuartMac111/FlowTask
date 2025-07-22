@@ -11,22 +11,18 @@ export default function Landing() {
     window.location.href = "/auth";
   };
 
+  const handleSignUp = () => {
+    window.location.href = "/auth";
+  };
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-white">
       <div className="container mx-auto px-4 py-8">
         {/* Header */}
         <header className="flex justify-between items-center mb-16">
-          <div className="flex flex-col items-start space-y-2">
-            <div className="flex items-center space-x-4">
-              <CheckCircle className="h-8 w-8 text-primary" />
-              <h1 className="text-3xl font-bold text-blue-600 dark:text-blue-400">FlowPilot</h1>
-            </div>
-            <div className="ml-12">
-              <ThemeToggle />
-            </div>
-          </div>
-          
+          {/* Dark Mode Toggle - Top Left */}
           <div className="flex items-center gap-4">
+            <ThemeToggle />
             {/* View Mode Toggle */}
             <div className="flex items-center gap-1 bg-gray-100 dark:bg-gray-800 rounded-lg p-1">
               <Button
@@ -48,17 +44,33 @@ export default function Landing() {
                 Mobile
               </Button>
             </div>
-            
-            <Button onClick={handleLogin} size="lg">
+          </div>
+
+          {/* Center Title */}
+          <div className="flex items-center space-x-4">
+            <CheckCircle className="h-8 w-8 text-primary" />
+            <h1 className="text-3xl font-bold">
+              <span className="text-black dark:text-white">Organize your life with </span>
+              <span className="text-blue-600 dark:text-blue-400">FlowPilot</span>
+            </h1>
+          </div>
+          
+          {/* Sign In and Sign Up Buttons - Top Right */}
+          <div className="flex items-center gap-3">
+            <Button onClick={handleLogin} variant="outline" size="lg">
               Sign In
+            </Button>
+            <Button onClick={handleSignUp} size="lg">
+              Sign Up
             </Button>
           </div>
         </header>
 
         {/* Hero Section */}
         <div className="text-center mb-16">
-          <h1 className="text-6xl font-bold mb-6 text-blue-600 dark:text-blue-400">
-            FlowPilot
+          <h1 className="text-6xl font-bold mb-6">
+            <span className="text-black dark:text-white">Organize Your Life with </span>
+            <span className="text-blue-600 dark:text-blue-400">FlowPilot</span>
           </h1>
           <p className="text-xl text-ms-text-secondary mb-8 max-w-2xl mx-auto">
             A comprehensive to-do list application with family sharing, custom lists, 
