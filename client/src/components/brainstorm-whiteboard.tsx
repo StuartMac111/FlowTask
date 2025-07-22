@@ -3,7 +3,7 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent } from "@/components/ui/card";
-import { X, Plus, Move3D, Lightbulb, Calendar, AlertCircle, CheckCircle, Clock, Palette, Download, Link, Square, Circle, Triangle, Type, Bold, Italic, Underline, Minus, HelpCircle, CalendarDays, Edit, Check } from "lucide-react";
+import { X, Plus, Move3D, Lightbulb, Calendar, AlertCircle, CheckCircle, Clock, Palette, Download, Link, Type, Bold, Italic, Underline, Minus, HelpCircle, CalendarDays, Edit, Check } from "lucide-react";
 import { apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import { isUnauthorizedError } from "@/lib/authUtils";
@@ -21,7 +21,7 @@ interface StickyNote {
   createdAt?: Date;
   dueDate?: Date;
   description?: string;
-  shape?: "square" | "circle" | "triangle";
+
   textStyle?: {
     bold?: boolean;
     italic?: boolean;
@@ -60,14 +60,9 @@ interface BrainstormWhiteboardProps {
 }
 
 const NOTE_COLORS = [
-  "#FFF740", // Yellow
-  "#FFB3BA", // Pink
-  "#BAFFC9", // Green  
-  "#BAE1FF", // Blue
-  "#FFFFBA", // Light Yellow
-  "#FFD700", // Gold
-  "#98FB98", // Pale Green
-  "#DDA0DD", // Plum
+  "#BAFFC9", // Green
+  "#FFF740", // Yellow  
+  "#FFB3BA", // Red/Pink
 ];
 
 export default function BrainstormWhiteboard({ listId, tasks }: BrainstormWhiteboardProps) {
@@ -78,8 +73,8 @@ export default function BrainstormWhiteboard({ listId, tasks }: BrainstormWhiteb
   const [drawingLines, setDrawingLines] = useState<DrawingLine[]>([]);
   const [connectionLines, setConnectionLines] = useState<ConnectionLine[]>([]);
   const [selectedTool, setSelectedTool] = useState<"move" | "draw" | "connect" | "text">("move");
-  const [selectedShape, setSelectedShape] = useState<"square" | "circle" | "triangle">("square");
-  const [selectedColor, setSelectedColor] = useState("#FFF740");
+
+  const [selectedColor, setSelectedColor] = useState("#BAFFC9");
   const [isDrawing, setIsDrawing] = useState(false);
   const [currentLine, setCurrentLine] = useState<DrawingLine | null>(null);
   const [connectingFrom, setConnectingFrom] = useState<string | null>(null);
@@ -113,7 +108,7 @@ export default function BrainstormWhiteboard({ listId, tasks }: BrainstormWhiteb
       createdAt: task.createdAt || undefined,
       dueDate: task.dueDate || undefined,
       description: task.description || "",
-      shape: "square",
+
       textStyle: { bold: false, italic: false, underline: false, fontSize: 14 },
       connections: [],
       isCompleted: task.isCompleted || false,
@@ -229,7 +224,7 @@ export default function BrainstormWhiteboard({ listId, tasks }: BrainstormWhiteb
       // Find a good position for the new note in smaller whiteboard
       const newX = 50 + (stickyNotes.length % 6) * 180;
       const newY = 80 + Math.floor(stickyNotes.length / 6) * 140;
-      const newColor = NOTE_COLORS[stickyNotes.length % NOTE_COLORS.length];
+      const newColor = selectedColor;
 
       createTaskMutation.mutate({
         title: newIdeaText.trim(),
@@ -414,11 +409,7 @@ export default function BrainstormWhiteboard({ listId, tasks }: BrainstormWhiteb
   };
 
   // Note shape and formatting functions
-  const updateNoteShape = (noteId: string, shape: "square" | "circle" | "triangle") => {
-    setStickyNotes(prev => prev.map(note => 
-      note.id === noteId ? { ...note, shape } : note
-    ));
-  };
+
 
   const updateNoteStyle = (noteId: string, style: Partial<StickyNote['textStyle']>) => {
     setStickyNotes(prev => prev.map(note => 
@@ -763,34 +754,10 @@ export default function BrainstormWhiteboard({ listId, tasks }: BrainstormWhiteb
           </Button>
         </div>
 
-        {/* Shape and Color Selection */}
+        {/* Color Selection */}
         <div className="flex gap-4 items-center flex-wrap">
           <div className="flex gap-1">
-            <Button
-              variant={selectedShape === "square" ? "default" : "outline"}
-              size="sm"
-              onClick={() => setSelectedShape("square")}
-            >
-              <Square className="w-4 h-4" />
-            </Button>
-            <Button
-              variant={selectedShape === "circle" ? "default" : "outline"}
-              size="sm"
-              onClick={() => setSelectedShape("circle")}
-            >
-              <Circle className="w-4 h-4" />
-            </Button>
-            <Button
-              variant={selectedShape === "triangle" ? "default" : "outline"}
-              size="sm"
-              onClick={() => setSelectedShape("triangle")}
-            >
-              <Triangle className="w-4 h-4" />
-            </Button>
-          </div>
-
-          <div className="flex gap-1">
-            {NOTE_COLORS.slice(0, 6).map(color => (
+            {NOTE_COLORS.map(color => (
               <button
                 key={color}
                 className={`w-6 h-6 rounded border-2 ${selectedColor === color ? 'border-gray-800' : 'border-gray-300'}`}
@@ -856,9 +823,9 @@ export default function BrainstormWhiteboard({ listId, tasks }: BrainstormWhiteb
               <div>
                 <h4 className="font-medium mb-1">Priority Colors:</h4>
                 <ul className="space-y-1 text-gray-600 dark:text-gray-300">
-                  <li>• <span className="inline-block w-3 h-3 bg-green-500 rounded-full mr-2"></span><strong>Green:</strong> Low priority (not important)</li>
-                  <li>• <span className="inline-block w-3 h-3 bg-yellow-500 rounded-full mr-2"></span><strong>Yellow:</strong> Medium priority (somewhat important)</li>
-                  <li>• <span className="inline-block w-3 h-3 bg-red-500 rounded-full mr-2"></span><strong>Red:</strong> High priority (very important)</li>
+                  <li>• <span className="inline-block w-3 h-3 bg-green-500 rounded-full mr-2"></span><strong>Green:</strong> Low priority</li>
+                  <li>• <span className="inline-block w-3 h-3 bg-yellow-500 rounded-full mr-2"></span><strong>Yellow:</strong> Medium priority</li>
+                  <li>• <span className="inline-block w-3 h-3 bg-red-500 rounded-full mr-2"></span><strong>Red:</strong> High priority</li>
                 </ul>
               </div>
               
@@ -1134,9 +1101,6 @@ export default function BrainstormWhiteboard({ listId, tasks }: BrainstormWhiteb
                     draggedNote === note.id ? 'scale-105 shadow-xl' : 'hover:scale-105'
                   } ${
                     connectingFrom === note.id ? 'ring-4 ring-blue-400' : ''
-                  } ${
-                    note.shape === 'circle' ? 'rounded-full' : 
-                    note.shape === 'triangle' ? 'clip-triangle' : 'rounded-lg'
                   } ${
                     note.isCrumpling ? 'animate-crumple' : ''
                   }`}
@@ -1433,22 +1397,7 @@ export default function BrainstormWhiteboard({ listId, tasks }: BrainstormWhiteb
                         <div className="w-3 h-3 bg-red-500 rounded-full"></div>
                       </button>
                       
-                      {/* Divider */}
-                      <div className="w-px h-4 bg-gray-300 mx-1"></div>
-                      
-                      {/* Shape control */}
-                      <button
-                        className="w-6 h-6 text-xs bg-gray-100 hover:bg-gray-200 rounded flex items-center justify-center"
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          updateNoteShape(note.id, note.shape === 'square' ? 'circle' : note.shape === 'circle' ? 'triangle' : 'square');
-                        }}
-                        title="Change Shape"
-                      >
-                        {note.shape === 'square' && <Square className="w-3 h-3" />}
-                        {note.shape === 'circle' && <Circle className="w-3 h-3" />}
-                        {note.shape === 'triangle' && <Triangle className="w-3 h-3" />}
-                      </button>
+
                     </div>
 
                     {/* Decorative elements */}

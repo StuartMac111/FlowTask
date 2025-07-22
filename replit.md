@@ -65,10 +65,11 @@ RESTful API with endpoints for:
 
 ## Recent Changes (January 2025)
 
-### Advanced Brainstorming Whiteboard (Latest)
+### Simplified Brainstorming Whiteboard (Latest)
 - **Professional Drawing Tools**: Line drawing with color selection and adjustable thickness
 - **Smart Connection System**: Click-to-connect notes with labeled arrows and visual feedback
-- **Multiple Note Shapes**: Square, circle, and triangle sticky notes with shape-changing controls
+- **Simple Note Design**: Simplified sticky notes with square shape only
+- **Three Priority Colors**: Green (low), Yellow (medium), Red (high) priority colors only
 - **Text Formatting**: Bold, italic, underline options with hover controls on each note
 - **Pan & Zoom Navigation**: Left-click drag to pan, scroll wheel zoom (30%-300% range)
 - **Infinite Canvas**: Extended 120% viewport whiteboard with transform-based movement
