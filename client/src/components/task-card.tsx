@@ -308,7 +308,7 @@ export default function TaskCard({ task, onUpdate }: TaskCardProps) {
             }
             toggleCompleteMutation.mutate();
           }}
-          className="mt-1"
+          className="mt-1 w-6 h-6 scale-150"
           disabled={toggleCompleteMutation.isPending}
           onClick={(e) => e.stopPropagation()}
         />
@@ -462,13 +462,6 @@ export default function TaskCard({ task, onUpdate }: TaskCardProps) {
                         <Edit3 className="w-4 h-4 mr-2" />
                         Edit
                       </DropdownMenuItem>
-                      <DropdownMenuItem onClick={(e) => {
-                        e.stopPropagation();
-                        deleteTaskMutation.mutate();
-                      }} className="text-red-600">
-                        <Trash2 className="w-4 h-4 mr-2" />
-                        Delete
-                      </DropdownMenuItem>
                     </DropdownMenuContent>
                   </DropdownMenu>
                 </div>
@@ -512,7 +505,10 @@ export default function TaskCard({ task, onUpdate }: TaskCardProps) {
                 <Button 
                   variant="ghost" 
                   size="sm"
-                  onClick={() => setIsEditing(true)}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    setIsEditing(true);
+                  }}
                   className="text-gray-600 dark:text-gray-400 hover:text-blue-600 dark:hover:text-blue-400"
                 >
                   <Edit3 className="w-4 h-4" />
