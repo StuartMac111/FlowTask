@@ -91,6 +91,8 @@ RESTful API with endpoints for:
 - **Smart Task Completion**: Completed sticky notes automatically move to "Completed Tasks" list
 - **Task Unticking**: Allow reversing task completion by clicking checkbox again
 - **Daily Cleanup**: Automatic midnight cleanup of "My Day" list (moves tasks to "Tasks" list except those due next day or later)
+- **Automatic Task Routing**: New tasks from sticky notes and "My Day" automatically go to "Tasks" list
+- **Completion Routing**: All completed tasks automatically move to "Completed Tasks" list
 - **Dark Mode Support**: Complete dark mode implementation with theme toggle in user profile section
 - **Background Themes**: Customizable list backgrounds with gradients and patterns for visual organization
 - **Groups System**: Renamed "Family Groups" to "Groups" to support any type of collaboration

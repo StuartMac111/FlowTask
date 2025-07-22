@@ -86,28 +86,64 @@ export default function TaskList({ list, onShare, onRefresh }: TaskListProps) {
     },
   });
 
-  const handleAddTask = () => {
+  const handleAddTask = async () => {
     if (!newTaskTitle.trim() || !list) return;
 
-    const taskData: any = {
-      title: newTaskTitle,
-      description: newTaskNote.trim() || null,
-      listId: list.id,
-      priority: "medium",
-    };
+    try {
+      let targetListId = list.id;
 
-    if (selectedDueDate) {
-      taskData.dueDate = selectedDueDate.toISOString();
-    }
-
-    if (repeatType !== "none") {
-      taskData.recurringType = repeatType;
-      if (repeatType === "custom") {
-        taskData.recurringDays = selectedDays;
+      // If creating task in "My Day", create it in "Tasks" list instead
+      if (list.name === "My Day") {
+        const listsResponse = await apiRequest("GET", "/api/lists") as any[];
+        const tasksList = listsResponse.find((listItem: any) => listItem.name === "Tasks");
+        
+        if (tasksList) {
+          targetListId = tasksList.id;
+        }
       }
-    }
 
-    createTaskMutation.mutate(taskData as InsertTask);
+      const taskData: any = {
+        title: newTaskTitle,
+        description: newTaskNote.trim() || null,
+        listId: targetListId,  // Use Tasks list if originally My Day
+        priority: "medium",
+      };
+
+      if (selectedDueDate) {
+        taskData.dueDate = selectedDueDate.toISOString();
+      }
+
+      if (repeatType !== "none") {
+        taskData.recurringType = repeatType;
+        if (repeatType === "custom") {
+          taskData.recurringDays = selectedDays;
+        }
+      }
+
+      createTaskMutation.mutate(taskData as InsertTask);
+    } catch (error) {
+      console.error("Failed to create task:", error);
+      // Fallback to original list if error
+      const taskData: any = {
+        title: newTaskTitle,
+        description: newTaskNote.trim() || null,
+        listId: list.id,
+        priority: "medium",
+      };
+
+      if (selectedDueDate) {
+        taskData.dueDate = selectedDueDate.toISOString();
+      }
+
+      if (repeatType !== "none") {
+        taskData.recurringType = repeatType;
+        if (repeatType === "custom") {
+          taskData.recurringDays = selectedDays;
+        }
+      }
+
+      createTaskMutation.mutate(taskData as InsertTask);
+    }
   };
 
   const resetTaskForm = () => {

@@ -214,22 +214,39 @@ export default function BrainstormWhiteboard({ listId, tasks }: BrainstormWhiteb
     },
   });
 
-  const addNewIdea = () => {
+  const addNewIdea = async () => {
     if (!newIdeaText.trim()) return;
 
-    // Find a good position for the new note in smaller whiteboard
-    const newX = 50 + (stickyNotes.length % 6) * 180;
-    const newY = 80 + Math.floor(stickyNotes.length / 6) * 140;
-    const newColor = NOTE_COLORS[stickyNotes.length % NOTE_COLORS.length];
+    try {
+      // Get the "Tasks" list to create the task there instead of brainstorming list
+      const listsResponse = await apiRequest("GET", "/api/lists") as any[];
+      const tasksList = listsResponse.find((list: any) => list.name === "Tasks");
+      
+      if (!tasksList) {
+        throw new Error("Tasks list not found");
+      }
 
-    createTaskMutation.mutate({
-      title: newIdeaText.trim(),
-      listId,
-      isCompleted: false,
-      priority: "medium",
-    } as InsertTask);
+      // Find a good position for the new note in smaller whiteboard
+      const newX = 50 + (stickyNotes.length % 6) * 180;
+      const newY = 80 + Math.floor(stickyNotes.length / 6) * 140;
+      const newColor = NOTE_COLORS[stickyNotes.length % NOTE_COLORS.length];
 
-    setNewIdeaText("");
+      createTaskMutation.mutate({
+        title: newIdeaText.trim(),
+        listId: tasksList.id,  // Create in "Tasks" list instead of brainstorming
+        isCompleted: false,
+        priority: "medium",
+      } as InsertTask);
+
+      setNewIdeaText("");
+    } catch (error) {
+      console.error("Failed to find Tasks list:", error);
+      toast({
+        title: "Error",
+        description: "Failed to create task - Tasks list not found",
+        variant: "destructive",
+      });
+    }
   };
 
   const removeIdea = (noteId: string) => {
