@@ -20,9 +20,8 @@ export default function Landing() {
       <div className="container mx-auto px-4 py-8">
         {/* Header */}
         <header className="flex justify-between items-center mb-16">
-          {/* Dark Mode Toggle - Top Left */}
-          <div className="flex items-center gap-4">
-            <ThemeToggle />
+          {/* Left Side - View Mode Toggle and Dark Mode */}
+          <div className="flex flex-col items-start gap-2">
             {/* View Mode Toggle */}
             <div className="flex items-center gap-1 bg-gray-100 dark:bg-gray-800 rounded-lg p-1">
               <Button
@@ -44,6 +43,8 @@ export default function Landing() {
                 Mobile
               </Button>
             </div>
+            {/* Dark Mode Toggle */}
+            <ThemeToggle />
           </div>
 
           {/* Center Logo */}
