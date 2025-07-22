@@ -24,6 +24,7 @@ interface TaskListProps {
 
 export default function TaskList({ list, onShare, onRefresh }: TaskListProps) {
   const [newTaskTitle, setNewTaskTitle] = useState("");
+  const [newTaskNote, setNewTaskNote] = useState("");
   const [filter, setFilter] = useState("all");
   const [sortBy, setSortBy] = useState("created");
   const [assigneeFilter, setAssigneeFilter] = useState("all");
@@ -87,6 +88,7 @@ export default function TaskList({ list, onShare, onRefresh }: TaskListProps) {
 
     const taskData: any = {
       title: newTaskTitle,
+      description: newTaskNote.trim() || null,
       listId: list.id,
       priority: "medium",
     };
@@ -107,6 +109,7 @@ export default function TaskList({ list, onShare, onRefresh }: TaskListProps) {
 
   const resetTaskForm = () => {
     setNewTaskTitle("");
+    setNewTaskNote("");
     setSelectedDueDate(undefined);
     setShowDatePicker(false);
     setShowRepeatOptions(false);
@@ -260,14 +263,26 @@ export default function TaskList({ list, onShare, onRefresh }: TaskListProps) {
         {/* Add Task Input */}
         <div className="mb-6">
           <div className="bg-white dark:bg-gray-800 rounded-lg border border-gray-300 dark:border-gray-600 p-4 shadow-sm">
-            <Input
-              type="text"
-              placeholder="Add a task..."
-              value={newTaskTitle}
-              onChange={(e) => setNewTaskTitle(e.target.value)}
-              onKeyPress={handleKeyPress}
-              className="text-xl text-black dark:text-white placeholder-gray-500 dark:placeholder-gray-400 border-none focus-visible:ring-0 p-0 bg-transparent touch-manipulation"
-            />
+            <div className="space-y-3">
+              <Input
+                type="text"
+                placeholder="Add a task..."
+                value={newTaskTitle}
+                onChange={(e) => setNewTaskTitle(e.target.value)}
+                onKeyPress={handleKeyPress}
+                className="text-xl text-black dark:text-white placeholder-gray-500 dark:placeholder-gray-400 border-none focus-visible:ring-0 p-0 bg-transparent touch-manipulation"
+              />
+              
+              {/* Optional Note Field for New Tasks */}
+              <textarea
+                value={newTaskNote}
+                onChange={(e) => setNewTaskNote(e.target.value)}
+                placeholder="📝 Note (optional)..."
+                className="w-full text-sm text-black dark:text-white placeholder-gray-500 dark:placeholder-gray-400 border-none focus-visible:ring-0 p-0 bg-transparent resize-none"
+                rows={2}
+                style={{ outline: 'none' }}
+              />
+            </div>
             <div className="flex items-center justify-between mt-3">
               <div className="flex items-center space-x-4">
                 <Popover open={showDatePicker} onOpenChange={setShowDatePicker}>

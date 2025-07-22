@@ -317,7 +317,7 @@ export default function TaskCard({ task, onUpdate }: TaskCardProps) {
                 value={editDescription}
                 onChange={(e) => setEditDescription(e.target.value)}
                 className="text-black dark:text-white bg-white dark:bg-gray-700"
-                placeholder="Task description (optional)..."
+                placeholder="📝 Note (optional)..."
                 rows={2}
               />
               
