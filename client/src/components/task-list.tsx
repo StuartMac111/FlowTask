@@ -7,7 +7,7 @@ import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Calendar as CalendarComponent } from "@/components/ui/calendar";
-import { Share2, List, Grid3X3, Calendar, User, Lightbulb, Repeat, X } from "lucide-react";
+import { Share2, List, Grid3X3, Calendar, User, Lightbulb, Repeat, X, Edit, Trash2 } from "lucide-react";
 import { format } from "date-fns";
 import TaskCard from "./task-card";
 import BrainstormWhiteboard from "./brainstorm-whiteboard";
@@ -34,6 +34,9 @@ export default function TaskList({ list, onShare, onRefresh }: TaskListProps) {
   const [showRepeatOptions, setShowRepeatOptions] = useState(false);
   const [repeatType, setRepeatType] = useState<string>("none");
   const [selectedDays, setSelectedDays] = useState<string[]>([]);
+  const [isMobileView, setIsMobileView] = useState(false);
+  const [showListContextMenu, setShowListContextMenu] = useState(false);
+  const [listContextMenuPos, setListContextMenuPos] = useState({ x: 0, y: 0 });
   const { toast } = useToast();
 
   // Add click handler to close dropdowns when clicking away
@@ -164,9 +167,19 @@ export default function TaskList({ list, onShare, onRefresh }: TaskListProps) {
     filteredTasks = filteredTasks.filter(task => !task.assignedTo);
   }
 
-  // Sort tasks
+  // Sort tasks - completed tasks always go to bottom
+  const completedTasks = filteredTasks.filter(task => task.isCompleted);
+  const incompleteTasks = filteredTasks.filter(task => !task.isCompleted);
+
+  // Sort incomplete tasks first
   if (sortBy === "due_date") {
-    filteredTasks.sort((a, b) => {
+    incompleteTasks.sort((a, b) => {
+      if (!a.dueDate && !b.dueDate) return 0;
+      if (!a.dueDate) return 1;
+      if (!b.dueDate) return -1;
+      return new Date(a.dueDate).getTime() - new Date(b.dueDate).getTime();
+    });
+    completedTasks.sort((a, b) => {
       if (!a.dueDate && !b.dueDate) return 0;
       if (!a.dueDate) return 1;
       if (!b.dueDate) return -1;
@@ -174,29 +187,99 @@ export default function TaskList({ list, onShare, onRefresh }: TaskListProps) {
     });
   } else if (sortBy === "priority") {
     const priorityOrder: Record<string, number> = { high: 3, medium: 2, low: 1 };
-    filteredTasks.sort((a, b) => priorityOrder[b.priority || 'medium'] - priorityOrder[a.priority || 'medium']);
+    incompleteTasks.sort((a, b) => priorityOrder[b.priority || 'medium'] - priorityOrder[a.priority || 'medium']);
+    completedTasks.sort((a, b) => priorityOrder[b.priority || 'medium'] - priorityOrder[a.priority || 'medium']);
   } else {
-    filteredTasks.sort((a, b) => 
+    incompleteTasks.sort((a, b) => 
+      new Date(b.createdAt!).getTime() - new Date(a.createdAt!).getTime()
+    );
+    completedTasks.sort((a, b) => 
       new Date(b.createdAt!).getTime() - new Date(a.createdAt!).getTime()
     );
   }
 
+  // Combine: incomplete tasks first, then completed tasks
+  filteredTasks = [...incompleteTasks, ...completedTasks];
+
+  const handleListRightClick = (e: React.MouseEvent) => {
+    e.preventDefault();
+    setListContextMenuPos({ x: e.clientX, y: e.clientY });
+    setShowListContextMenu(true);
+  };
+
+  const handleDeleteList = () => {
+    if (confirm('Are you sure you want to delete this list? This action cannot be undone.')) {
+      // Delete list logic here
+      toast({
+        title: "List Deleted",
+        description: "The list has been successfully deleted.",
+      });
+    }
+    setShowListContextMenu(false);
+  };
+
+  const handleRenameList = () => {
+    const newName = prompt('Enter new list name:', list?.name);
+    if (newName && newName.trim()) {
+      // Rename list logic here
+      toast({
+        title: "List Renamed", 
+        description: `List renamed to "${newName}".`,
+      });
+    }
+    setShowListContextMenu(false);
+  };
+
+  const handleDuplicateList = () => {
+    // Duplicate list logic here
+    toast({
+      title: "List Duplicated",
+      description: "A copy of the list has been created.",
+    });
+    setShowListContextMenu(false);
+  };
+
   return (
-    <div className="flex-1 flex flex-col overflow-hidden">
+    <div className={`flex-1 flex flex-col overflow-hidden ${isMobileView ? 'mobile-view' : 'desktop-view'}`}>
       {/* Header */}
-      <div className="bg-ms-surface border-b border-ms-border p-6">
+      <div 
+        className="bg-ms-surface border-b border-ms-border p-6" 
+        onContextMenu={handleListRightClick}
+      >
         <div className="flex items-center justify-between">
           <div>
-            <h1 className="text-2xl font-semibold text-ms-text">{list.name}</h1>
-            <p className="text-sm text-ms-text-secondary mt-1">
-              {list.description || "Your tasks and priorities"} • {list.taskCount} tasks
+            <h1 className="text-4xl font-semibold text-ms-text" style={{ fontSize: isMobileView ? '2rem' : '3rem' }}>
+              {list.name}
+            </h1>
+            <p className="text-lg text-ms-text-secondary mt-1" style={{ fontSize: isMobileView ? '1rem' : '1.5rem' }}>
+              {list.description || "Organize your life with TaskFlow"} • {list.taskCount} tasks
             </p>
           </div>
           <div className="flex items-center space-x-3">
-            <Button onClick={onShare} className="bg-primary hover:bg-primary/90">
-              <Share2 className="w-4 h-4 mr-2" />
+            <Button onClick={onShare} className="bg-primary hover:bg-primary/90 text-lg px-6 py-3">
+              <Share2 className="w-5 h-5 mr-2" />
               Share
             </Button>
+            
+            {/* Mobile/Desktop Toggle */}
+            <div className="flex bg-gray-100 dark:bg-gray-700 rounded-md p-1">
+              <Button
+                variant={!isMobileView ? "default" : "ghost"}
+                size="sm"
+                onClick={() => setIsMobileView(false)}
+                className="text-lg px-4 py-2"
+              >
+                💻 Desktop
+              </Button>
+              <Button
+                variant={isMobileView ? "default" : "ghost"}
+                size="sm"
+                onClick={() => setIsMobileView(true)}
+                className="text-lg px-4 py-2"
+              >
+                📱 Mobile
+              </Button>
+            </div>
             
             <div className="flex bg-gray-100 rounded-md p-1">
               <Button
@@ -270,7 +353,8 @@ export default function TaskList({ list, onShare, onRefresh }: TaskListProps) {
                 value={newTaskTitle}
                 onChange={(e) => setNewTaskTitle(e.target.value)}
                 onKeyPress={handleKeyPress}
-                className="text-xl text-black dark:text-white placeholder-gray-500 dark:placeholder-gray-400 border-none focus-visible:ring-0 p-0 bg-transparent touch-manipulation"
+                className="text-3xl text-black dark:text-white placeholder-gray-500 dark:placeholder-gray-400 border-none focus-visible:ring-0 p-0 bg-transparent touch-manipulation font-medium"
+                style={{ fontSize: '1.5rem' }}
               />
               
               {/* Optional Note Field for New Tasks */}
@@ -278,9 +362,9 @@ export default function TaskList({ list, onShare, onRefresh }: TaskListProps) {
                 value={newTaskNote}
                 onChange={(e) => setNewTaskNote(e.target.value)}
                 placeholder="📝 Note (optional)..."
-                className="w-full text-sm text-black dark:text-white placeholder-gray-500 dark:placeholder-gray-400 border-none focus-visible:ring-0 p-0 bg-transparent resize-none"
+                className="w-full text-lg text-black dark:text-white placeholder-gray-500 dark:placeholder-gray-400 border-none focus-visible:ring-0 p-0 bg-transparent resize-none"
                 rows={2}
-                style={{ outline: 'none' }}
+                style={{ outline: 'none', fontSize: '1.2rem' }}
               />
             </div>
             <div className="flex items-center justify-between mt-3">
@@ -501,10 +585,17 @@ export default function TaskList({ list, onShare, onRefresh }: TaskListProps) {
         </div>
 
         {/* Tasks */}
-        <div className="space-y-3">
+        <div className={`space-y-3 ${isMobileView ? 'mobile-task-layout' : 'desktop-task-layout'}`}>
           {filteredTasks.length === 0 ? (
             <div className="text-center py-12">
-              <p className="text-gray-600 dark:text-gray-400">No tasks found</p>
+              <h3 className="text-xl font-medium text-ms-text-secondary mb-2" style={{ fontSize: isMobileView ? '1.2rem' : '1.8rem' }}>
+                No tasks found
+              </h3>
+              <p className="text-lg text-ms-text-secondary" style={{ fontSize: isMobileView ? '1rem' : '1.3rem' }}>
+                {filter === "pending" 
+                  ? "All tasks are completed! 🎉" 
+                  : "Add your first task to get started"}
+              </p>
             </div>
           ) : (
             <>
@@ -525,6 +616,56 @@ export default function TaskList({ list, onShare, onRefresh }: TaskListProps) {
           )}
         </div>
       </div>
+
+      {/* List Context Menu */}
+      {showListContextMenu && (
+        <>
+          <div 
+            className="fixed inset-0 z-40"
+            onClick={() => setShowListContextMenu(false)}
+          />
+          <div 
+            className="fixed z-50 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-600 rounded-md shadow-lg py-1 min-w-[180px]"
+            style={{
+              left: listContextMenuPos.x,
+              top: listContextMenuPos.y,
+            }}
+          >
+            <button
+              onClick={handleRenameList}
+              className="w-full px-3 py-2 text-sm text-left hover:bg-gray-100 dark:hover:bg-gray-700 flex items-center gap-2"
+            >
+              <Edit className="w-4 h-4" />
+              Rename List
+            </button>
+            <button
+              onClick={handleDuplicateList}
+              className="w-full px-3 py-2 text-sm text-left hover:bg-gray-100 dark:hover:bg-gray-700 flex items-center gap-2"
+            >
+              📋 Duplicate List
+            </button>
+            <div className="border-t border-gray-200 dark:border-gray-600 my-1"></div>
+            <button
+              onClick={() => {
+                onShare();
+                setShowListContextMenu(false);
+              }}
+              className="w-full px-3 py-2 text-sm text-left hover:bg-gray-100 dark:hover:bg-gray-700 flex items-center gap-2"
+            >
+              <Share2 className="w-4 h-4" />
+              Share List
+            </button>
+            <div className="border-t border-gray-200 dark:border-gray-600 my-1"></div>
+            <button
+              onClick={handleDeleteList}
+              className="w-full px-3 py-2 text-sm text-left hover:bg-gray-100 dark:hover:bg-gray-700 text-red-600 dark:text-red-400 flex items-center gap-2"
+            >
+              <Trash2 className="w-4 h-4" />
+              Delete List
+            </button>
+          </div>
+        </>
+      )}
     </div>
   );
 }

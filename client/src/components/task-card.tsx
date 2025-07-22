@@ -275,7 +275,8 @@ export default function TaskCard({ task, onUpdate }: TaskCardProps) {
 
   return (
     <div 
-      className={`task-card bg-white dark:bg-gray-800 rounded-lg border border-gray-300 dark:border-gray-600 p-4 shadow-sm cursor-pointer ${
+      data-task-id={task.id}
+      className={`task-card bg-white dark:bg-gray-800 rounded-lg border border-gray-300 dark:border-gray-600 p-4 shadow-sm cursor-pointer transition-all duration-300 ${
         task.isCompleted ? 'completed-task opacity-75' : ''
       }`}
       onContextMenu={handleRightClick}
@@ -296,6 +297,14 @@ export default function TaskCard({ task, onUpdate }: TaskCardProps) {
           onCheckedChange={() => {
             if (!task.isCompleted) {
               playCompletionSound();
+              // Add completion animation
+              const taskCard = document.querySelector(`[data-task-id="${task.id}"]`);
+              if (taskCard) {
+                taskCard.classList.add('animate-pulse');
+                setTimeout(() => {
+                  taskCard.classList.remove('animate-pulse');
+                }, 500);
+              }
             }
             toggleCompleteMutation.mutate();
           }}
@@ -395,7 +404,7 @@ export default function TaskCard({ task, onUpdate }: TaskCardProps) {
               <div className="flex items-center justify-between">
                 <h3 className={`task-title font-medium text-black dark:text-white ${
                   task.isCompleted ? 'line-through opacity-60' : ''
-                }`}>
+                }`} style={{ fontSize: '1.5rem' }}>
                   {task.title}
                 </h3>
                 <div className="flex items-center space-x-2">
@@ -466,9 +475,9 @@ export default function TaskCard({ task, onUpdate }: TaskCardProps) {
               </div>
               
               {task.description && (
-                <p className={`text-sm text-gray-600 dark:text-gray-400 mt-1 ${
+                <p className={`text-lg text-gray-600 dark:text-gray-400 mt-1 ${
                   task.isCompleted ? 'line-through opacity-60' : ''
-                }`}>
+                }`} style={{ fontSize: '1.2rem' }}>
                   {task.description}
                 </p>
               )}
