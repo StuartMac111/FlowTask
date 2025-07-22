@@ -259,10 +259,16 @@ export default function TaskCard({ task, onUpdate }: TaskCardProps) {
 
   return (
     <div 
-      className={`task-card bg-white dark:bg-gray-800 rounded-lg border border-gray-300 dark:border-gray-600 p-4 shadow-sm ${
+      className={`task-card bg-white dark:bg-gray-800 rounded-lg border border-gray-300 dark:border-gray-600 p-4 shadow-sm cursor-pointer ${
         task.isCompleted ? 'completed-task' : ''
       }`}
       onContextMenu={handleRightClick}
+      onClick={(e) => {
+        // Only edit if not clicking on checkbox or other interactive elements
+        if (e.target === e.currentTarget || e.target.closest('.task-title')) {
+          setIsEditing(true);
+        }
+      }}
     >
       <div className="flex items-start space-x-3">
         <Checkbox
@@ -270,6 +276,7 @@ export default function TaskCard({ task, onUpdate }: TaskCardProps) {
           onCheckedChange={() => toggleCompleteMutation.mutate()}
           className="mt-1"
           disabled={toggleCompleteMutation.isPending}
+          onClick={(e) => e.stopPropagation()}
         />
         
         <div className="flex-1 min-w-0">

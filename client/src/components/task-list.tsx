@@ -259,29 +259,70 @@ export default function TaskList({ list, onShare, onRefresh }: TaskListProps) {
                   <PopoverTrigger asChild>
                     <Button variant="ghost" size="sm" className="text-gray-600 dark:text-gray-400">
                       <Calendar className="w-4 h-4 mr-1" />
-                      {selectedDueDate ? format(selectedDueDate, "PPP") : "Due date"}
+                      {selectedDueDate ? format(selectedDueDate, "MMM d") : "Due date"}
                     </Button>
                   </PopoverTrigger>
-                  <PopoverContent className="w-auto p-0" align="start">
-                    <CalendarComponent
-                      mode="single"
-                      selected={selectedDueDate}
-                      onSelect={setSelectedDueDate}
-                      initialFocus
-                    />
-                    {selectedDueDate && (
-                      <div className="p-2 border-t">
+                  <PopoverContent className="w-72 p-0" align="start">
+                    <div className="p-4 space-y-3">
+                      {/* Quick date options */}
+                      <div className="space-y-2">
                         <Button
                           variant="ghost"
-                          size="sm"
-                          onClick={() => setSelectedDueDate(undefined)}
-                          className="w-full"
+                          className="w-full justify-start text-left"
+                          onClick={() => {
+                            const today = new Date();
+                            setSelectedDueDate(today);
+                            setShowDatePicker(false);
+                          }}
                         >
-                          <X className="w-4 h-4 mr-1" />
-                          Clear date
+                          <Calendar className="w-4 h-4 mr-3" />
+                          Due Today
+                        </Button>
+                        
+                        <Button
+                          variant="ghost"
+                          className="w-full justify-start text-left"
+                          onClick={() => {
+                            const tomorrow = new Date();
+                            tomorrow.setDate(tomorrow.getDate() + 1);
+                            setSelectedDueDate(tomorrow);
+                            setShowDatePicker(false);
+                          }}
+                        >
+                          <Calendar className="w-4 h-4 mr-3" />
+                          Due Tomorrow
                         </Button>
                       </div>
-                    )}
+                      
+                      <div className="border-t pt-3">
+                        <CalendarComponent
+                          mode="single"
+                          selected={selectedDueDate}
+                          onSelect={(date) => {
+                            setSelectedDueDate(date);
+                            setShowDatePicker(false);
+                          }}
+                          initialFocus
+                        />
+                      </div>
+                      
+                      {selectedDueDate && (
+                        <div className="border-t pt-3">
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => {
+                              setSelectedDueDate(undefined);
+                              setShowDatePicker(false);
+                            }}
+                            className="w-full text-red-600 hover:text-red-700"
+                          >
+                            <X className="w-4 h-4 mr-1" />
+                            Remove due date
+                          </Button>
+                        </div>
+                      )}
+                    </div>
                   </PopoverContent>
                 </Popover>
 
@@ -289,50 +330,108 @@ export default function TaskList({ list, onShare, onRefresh }: TaskListProps) {
                   <PopoverTrigger asChild>
                     <Button variant="ghost" size="sm" className="text-gray-600 dark:text-gray-400">
                       <Repeat className="w-4 h-4 mr-1" />
-                      {repeatType !== "none" ? `Repeat ${repeatType}` : "Repeat"}
+                      {repeatType !== "none" ? `${repeatType.charAt(0).toUpperCase() + repeatType.slice(1)}` : "Repeat"}
                     </Button>
                   </PopoverTrigger>
-                  <PopoverContent className="w-80 p-4" align="start">
-                    <div className="space-y-3">
-                      <h4 className="font-medium">Repeat Task</h4>
-                      <Select value={repeatType} onValueChange={setRepeatType}>
-                        <SelectTrigger>
-                          <SelectValue placeholder="Select repeat option" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="none">Don't repeat</SelectItem>
-                          <SelectItem value="daily">Daily</SelectItem>
-                          <SelectItem value="weekly">Weekly</SelectItem>
-                          <SelectItem value="monthly">Monthly</SelectItem>
-                          <SelectItem value="custom">Custom days</SelectItem>
-                        </SelectContent>
-                      </Select>
-                      
-                      {repeatType === "custom" && (
-                        <div className="space-y-2">
-                          <label className="text-sm font-medium">Select days:</label>
-                          <div className="flex flex-wrap gap-2">
-                            {["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"].map((day) => (
-                              <Button
-                                key={day}
-                                type="button"
-                                size="sm"
-                                variant={selectedDays.includes(day) ? "default" : "outline"}
-                                onClick={() => {
-                                  setSelectedDays(prev => 
-                                    prev.includes(day) 
-                                      ? prev.filter(d => d !== day)
-                                      : [...prev, day]
-                                  );
-                                }}
-                                className="text-xs"
-                              >
-                                {day.slice(0, 3)}
-                              </Button>
-                            ))}
+                  <PopoverContent className="w-64 p-0" align="start">
+                    <div className="p-2">
+                      <div className="space-y-1">
+                        <Button
+                          variant="ghost"
+                          className={`w-full justify-start ${repeatType === "daily" ? "bg-blue-50 text-blue-600" : ""}`}
+                          onClick={() => {
+                            setRepeatType("daily");
+                            setShowRepeatOptions(false);
+                          }}
+                        >
+                          <div className="flex items-center">
+                            <div className="w-4 h-4 mr-3 flex items-center justify-center">
+                              <div className={`w-2 h-2 rounded-full ${repeatType === "daily" ? "bg-blue-600" : "bg-blue-500"}`}></div>
+                            </div>
+                            Daily
                           </div>
-                        </div>
-                      )}
+                        </Button>
+                        
+                        <Button
+                          variant="ghost"
+                          className={`w-full justify-start ${repeatType === "weekdays" ? "bg-blue-50 text-blue-600" : ""}`}
+                          onClick={() => {
+                            setRepeatType("weekdays");
+                            setShowRepeatOptions(false);
+                          }}
+                        >
+                          <div className="flex items-center">
+                            <div className="w-4 h-4 mr-3 flex items-center justify-center">
+                              <div className={`w-2 h-2 rounded-full ${repeatType === "weekdays" ? "bg-blue-600" : "bg-blue-500"}`}></div>
+                            </div>
+                            Weekdays
+                          </div>
+                        </Button>
+                        
+                        <Button
+                          variant="ghost"
+                          className={`w-full justify-start ${repeatType === "weekly" ? "bg-blue-50 text-blue-600" : ""}`}
+                          onClick={() => {
+                            setRepeatType("weekly");
+                            setShowRepeatOptions(false);
+                          }}
+                        >
+                          <div className="flex items-center">
+                            <div className="w-4 h-4 mr-3 flex items-center justify-center">
+                              <div className={`w-2 h-2 rounded-full ${repeatType === "weekly" ? "bg-blue-600" : "bg-blue-500"}`}></div>
+                            </div>
+                            Weekly
+                          </div>
+                        </Button>
+                        
+                        <Button
+                          variant="ghost"
+                          className={`w-full justify-start ${repeatType === "monthly" ? "bg-blue-50 text-blue-600" : ""}`}
+                          onClick={() => {
+                            setRepeatType("monthly");
+                            setShowRepeatOptions(false);
+                          }}
+                        >
+                          <div className="flex items-center">
+                            <div className="w-4 h-4 mr-3 flex items-center justify-center">
+                              <div className={`w-2 h-2 rounded-full ${repeatType === "monthly" ? "bg-blue-600" : "bg-blue-500"}`}></div>
+                            </div>
+                            Monthly
+                          </div>
+                        </Button>
+                        
+                        <Button
+                          variant="ghost"
+                          className={`w-full justify-start ${repeatType === "yearly" ? "bg-blue-50 text-blue-600" : ""}`}
+                          onClick={() => {
+                            setRepeatType("yearly");
+                            setShowRepeatOptions(false);
+                          }}
+                        >
+                          <div className="flex items-center">
+                            <div className="w-4 h-4 mr-3 flex items-center justify-center">
+                              <div className={`w-2 h-2 rounded-full ${repeatType === "yearly" ? "bg-blue-600" : "bg-blue-500"}`}></div>
+                            </div>
+                            Yearly
+                          </div>
+                        </Button>
+                        
+                        <Button
+                          variant="ghost"
+                          className={`w-full justify-start ${repeatType === "custom" ? "bg-blue-50 text-blue-600" : ""}`}
+                          onClick={() => {
+                            setRepeatType("custom");
+                            setShowRepeatOptions(false);
+                          }}
+                        >
+                          <div className="flex items-center">
+                            <div className="w-4 h-4 mr-3 flex items-center justify-center">
+                              <div className={`w-2 h-2 rounded-full ${repeatType === "custom" ? "bg-blue-600" : "bg-blue-500"}`}></div>
+                            </div>
+                            Custom
+                          </div>
+                        </Button>
+                      </div>
                     </div>
                   </PopoverContent>
                 </Popover>
