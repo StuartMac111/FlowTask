@@ -74,54 +74,20 @@ export default function TaskCard({ task, onUpdate, listName }: TaskCardProps) {
     }
   };
 
-  // Toggle task completion and move to appropriate list
+  // Toggle task completion - simplified to work on all lists
   const toggleCompleteMutation = useMutation({
     mutationFn: async () => {
-      if (!task.isCompleted) {
-        // Task is being completed - move to "Completed Tasks" list
-        const listsResponse = await apiRequest("GET", "/api/lists");
-        const completedTasksList = (listsResponse as unknown as any[]).find((list: any) => list.name === "Completed Tasks");
-        
-        if (completedTasksList) {
-          await apiRequest("PUT", `/api/tasks/${task.id}`, {
-            isCompleted: true,
-            listId: completedTasksList.id,
-          });
-        } else {
-          // Fallback: just mark as completed if list not found
-          await apiRequest("PUT", `/api/tasks/${task.id}`, {
-            isCompleted: true,
-          });
-        }
-      } else {
-        // Task is being uncompleted - move back to "Tasks" list
-        const listsResponse = await apiRequest("GET", "/api/lists");
-        const tasksList = (listsResponse as unknown as any[]).find((list: any) => list.name === "Tasks");
-        
-        if (tasksList) {
-          await apiRequest("PUT", `/api/tasks/${task.id}`, {
-            isCompleted: false,
-            listId: tasksList.id,
-          });
-        } else {
-          // Fallback: just mark as incomplete if list not found
-          await apiRequest("PUT", `/api/tasks/${task.id}`, {
-            isCompleted: false,
-          });
-        }
-      }
+      // Simply toggle the completion status without moving lists
+      await apiRequest("PUT", `/api/tasks/${task.id}`, {
+        isCompleted: !task.isCompleted,
+      });
     },
     onSuccess: () => {
       if (!task.isCompleted) {
         playCompletionSound();
       }
       onUpdate();
-      toast({
-        title: task.isCompleted ? "Task Uncompleted" : "Task Completed!",
-        description: task.isCompleted ? 
-          "Task moved back to Tasks list" : 
-          "Task moved to Completed Tasks list",
-      });
+      // Remove toast notification for cleaner UX - task status change is visual enough
     },
     onError: (error) => {
       if (isUnauthorizedError(error)) {

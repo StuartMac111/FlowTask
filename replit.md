@@ -65,7 +65,15 @@ RESTful API with endpoints for:
 
 ## Recent Changes (January 2025)
 
-### Simplified Brainstorming Whiteboard (Latest)
+### Task Completion Fixes and Enhanced UI (Latest - July 22, 2025)
+- **Fixed Task Completion**: Simplified task toggle to work on all lists without complex routing
+- **Enhanced List Editor**: Comprehensive background color picker with 12 Microsoft-style colors 
+- **Improved UX**: Removed completion toasts for cleaner interface, kept completion sounds
+- **Edit List Button**: Prominent "Edit List" button in header for easy access to customization
+- **Simplified Task Logic**: Removed automatic list routing to prevent "Failed to update task" errors
+- **Daily Cleanup System**: Automatic midnight cleanup of "My Day" list with proper scheduling
+
+### Simplified Brainstorming Whiteboard
 - **Professional Drawing Tools**: Line drawing with color selection and adjustable thickness
 - **Smart Connection System**: Click-to-connect notes with labeled arrows and visual feedback
 - **Simple Note Design**: Simplified sticky notes with square shape only
