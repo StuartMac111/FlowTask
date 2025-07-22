@@ -267,21 +267,20 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       const task = await storage.updateTask(id, updates);
       
-      // Get the list ID to broadcast to correct clients
-      const taskWithDetails = await storage.getTaskById(id);
-      if (taskWithDetails) {
-        broadcastToListClients(wsClients, taskWithDetails.listId, { type: 'task_updated', data: task });
-      }
-      
+      // Immediate response for faster UI updates
       res.json(task);
+      
+      // Broadcast to WebSocket clients asynchronously
+      setImmediate(() => {
+        const taskWithDetails = storage.getTaskById(id).then(taskData => {
+          if (taskData) {
+            broadcastToListClients(wsClients, taskData.listId, { type: 'task_updated', data: task });
+          }
+        });
+      });
+      
     } catch (error) {
       console.error("Error updating task:", error);
-      
-      // Handle specific database errors
-      if (error.code === '57P01') {
-        return res.status(503).json({ message: "Database connection lost, please try again" });
-      }
-      
       res.status(500).json({ message: "Failed to update task" });
     }
   });

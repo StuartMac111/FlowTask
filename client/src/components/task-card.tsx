@@ -86,8 +86,8 @@ export default function TaskCard({ task, onUpdate, listName }: TaskCardProps) {
       if (!task.isCompleted) {
         playCompletionSound();
       }
+      // Immediate UI update
       onUpdate();
-      // Remove toast notification for cleaner UX - task status change is visual enough
     },
     onError: (error) => {
       if (isUnauthorizedError(error)) {
@@ -330,7 +330,7 @@ export default function TaskCard({ task, onUpdate, listName }: TaskCardProps) {
       <ContextMenuTrigger asChild>
         <div 
           data-task-id={task.id}
-          className={`task-card bg-white dark:bg-gray-800 rounded-lg border border-gray-300 dark:border-gray-600 p-4 shadow-sm cursor-pointer transition-all duration-300 ${
+          className={`task-card bg-white dark:bg-gray-800 rounded-lg border border-gray-300 dark:border-gray-600 p-4 shadow-sm cursor-pointer ${
             task.isCompleted ? 'completed-task opacity-75' : ''
           }`}
           onClick={(e) => {
@@ -348,22 +348,15 @@ export default function TaskCard({ task, onUpdate, listName }: TaskCardProps) {
         <Checkbox
           checked={task.isCompleted || false}
           onCheckedChange={() => {
+            // Immediate toggle without waiting
             if (!task.isCompleted) {
               playCompletionSound();
-              // Add completion animation
-              const taskCard = document.querySelector(`[data-task-id="${task.id}"]`);
-              if (taskCard) {
-                taskCard.classList.add('animate-pulse');
-                setTimeout(() => {
-                  taskCard.classList.remove('animate-pulse');
-                }, 500);
-              }
             }
-            // Allow both completing and uncompleting tasks
+            // Immediate mutation call
             toggleCompleteMutation.mutate();
           }}
           className={`mt-1 ${listName?.toLowerCase() === 'my day' ? 'w-5 h-5 scale-125' : 'w-6 h-6 scale-150'}`}
-          disabled={toggleCompleteMutation.isPending}
+          disabled={false}
           onClick={(e) => e.stopPropagation()}
         />
         
