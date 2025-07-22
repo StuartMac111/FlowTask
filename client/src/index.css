@@ -43,6 +43,18 @@
   text-shadow: 2px 2px 0 black, -2px -2px 0 black, 2px -2px 0 black, -2px 2px 0 black;
 }
 
+/* Enhanced dark mode task card styling */
+.dark .task-card {
+  background-color: rgb(31, 41, 55) !important;
+  border-color: rgb(75, 85, 99) !important;
+  color: white !important;
+}
+
+.dark .task-card:hover {
+  background-color: rgb(55, 65, 81) !important;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3) !important;
+}
+
 :root {
   --background: hsl(0, 0%, 100%);
   --foreground: hsl(240, 10%, 3.9%);

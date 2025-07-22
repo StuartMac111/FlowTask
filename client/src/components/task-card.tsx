@@ -114,7 +114,7 @@ export default function TaskCard({ task, onUpdate }: TaskCardProps) {
   };
 
   return (
-    <div className={`task-card bg-white rounded-lg border border-ms-border p-4 shadow-sm ${
+    <div className={`task-card bg-white dark:bg-gray-800 rounded-lg border border-gray-300 dark:border-gray-600 p-4 shadow-sm ${
       task.isCompleted ? 'completed-task' : ''
     }`}>
       <div className="flex items-start space-x-3">
@@ -127,7 +127,7 @@ export default function TaskCard({ task, onUpdate }: TaskCardProps) {
         
         <div className="flex-1 min-w-0">
           <div className="flex items-center justify-between">
-            <h3 className={`task-title font-medium text-ms-text ${
+            <h3 className={`task-title font-medium text-black dark:text-white ${
               task.isCompleted ? 'line-through' : ''
             }`}>
               {task.title}
@@ -154,7 +154,7 @@ export default function TaskCard({ task, onUpdate }: TaskCardProps) {
           </div>
           
           {task.description && (
-            <p className="text-sm text-ms-text-secondary mt-1">
+            <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">
               {task.description}
             </p>
           )}
@@ -162,7 +162,7 @@ export default function TaskCard({ task, onUpdate }: TaskCardProps) {
           <div className="flex items-center justify-between mt-3">
             <div className="flex items-center space-x-4">
               {task.dueDate && (
-                <div className="flex items-center space-x-1 text-sm text-ms-text-secondary">
+                <div className="flex items-center space-x-1 text-sm text-gray-600 dark:text-gray-400">
                   <Calendar className="w-4 h-4" />
                   <span>{formatDate(task.dueDate)}</span>
                 </div>
@@ -175,7 +175,7 @@ export default function TaskCard({ task, onUpdate }: TaskCardProps) {
                       U
                     </AvatarFallback>
                   </Avatar>
-                  <span className="text-sm text-ms-text-secondary">
+                  <span className="text-sm text-gray-600 dark:text-gray-400">
                     Assigned
                   </span>
                 </div>

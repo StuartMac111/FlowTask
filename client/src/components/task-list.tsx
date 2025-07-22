@@ -214,7 +214,7 @@ export default function TaskList({ list, onShare, onRefresh }: TaskListProps) {
       <div className="flex-1 overflow-y-auto p-6">
         {/* Add Task Input */}
         <div className="mb-6">
-          <div className="bg-white dark:bg-gray-800 rounded-lg border border-ms-border dark:border-gray-600 p-4 shadow-sm">
+          <div className="bg-white dark:bg-gray-800 rounded-lg border border-gray-300 dark:border-gray-600 p-4 shadow-sm">
             <Input
               type="text"
               placeholder="Add a task..."
@@ -225,11 +225,11 @@ export default function TaskList({ list, onShare, onRefresh }: TaskListProps) {
             />
             <div className="flex items-center justify-between mt-3">
               <div className="flex items-center space-x-4">
-                <Button variant="ghost" size="sm" className="text-ms-text-secondary">
+                <Button variant="ghost" size="sm" className="text-gray-600 dark:text-gray-400">
                   <Calendar className="w-4 h-4 mr-1" />
                   Due date
                 </Button>
-                <Button variant="ghost" size="sm" className="text-ms-text-secondary">
+                <Button variant="ghost" size="sm" className="text-gray-600 dark:text-gray-400">
                   <User className="w-4 h-4 mr-1" />
                   Assign
                 </Button>
@@ -237,6 +237,7 @@ export default function TaskList({ list, onShare, onRefresh }: TaskListProps) {
               <Button 
                 onClick={handleAddTask}
                 disabled={!newTaskTitle.trim() || createTaskMutation.isPending}
+                className="bg-blue-600 hover:bg-blue-700 text-white"
               >
                 {createTaskMutation.isPending ? "Adding..." : "Add Task"}
               </Button>
@@ -248,7 +249,7 @@ export default function TaskList({ list, onShare, onRefresh }: TaskListProps) {
         <div className="space-y-3">
           {filteredTasks.length === 0 ? (
             <div className="text-center py-12">
-              <p className="text-ms-text-secondary">No tasks found</p>
+              <p className="text-gray-600 dark:text-gray-400">No tasks found</p>
             </div>
           ) : (
             filteredTasks.map((task) => (
