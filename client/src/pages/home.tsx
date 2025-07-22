@@ -135,6 +135,7 @@ export default function Home() {
               onCreateList={() => setCreateListModalOpen(true)}
               onManageFamily={() => setFamilyModalOpen(true)}
               user={user as any}
+              onRefresh={refetchLists}
             />
             
             <TaskList

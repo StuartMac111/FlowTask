@@ -94,6 +94,36 @@ export default function TaskCard({ task, onUpdate }: TaskCardProps) {
     },
   });
 
+  // Priority mutation
+  const priorityMutation = useMutation({
+    mutationFn: async (newPriority: "low" | "medium" | "high") => {
+      await apiRequest("PUT", `/api/tasks/${task.id}`, {
+        priority: newPriority,
+      });
+    },
+    onSuccess: () => {
+      onUpdate();
+    },
+    onError: (error) => {
+      if (isUnauthorizedError(error)) {
+        toast({
+          title: "Unauthorized",
+          description: "You are logged out. Logging in again...",
+          variant: "destructive",
+        });
+        setTimeout(() => {
+          window.location.href = "/api/login";
+        }, 500);
+        return;
+      }
+      toast({
+        title: "Error",
+        description: "Failed to update priority",
+        variant: "destructive",
+      });
+    },
+  });
+
   // Delete task mutation
   const deleteTaskMutation = useMutation({
     mutationFn: async () => {
@@ -166,6 +196,14 @@ export default function TaskCard({ task, onUpdate }: TaskCardProps) {
     setEditDescription(task.description || "");
   };
 
+  const cyclePriority = () => {
+    const currentPriority = (task.priority as "low" | "medium" | "high") || 'medium';
+    const priorities: ("low" | "medium" | "high")[] = ['low', 'medium', 'high'];
+    const currentIndex = priorities.indexOf(currentPriority);
+    const nextIndex = (currentIndex + 1) % priorities.length;
+    priorityMutation.mutate(priorities[nextIndex]);
+  };
+
   return (
     <div className={`task-card bg-white dark:bg-gray-800 rounded-lg border border-gray-300 dark:border-gray-600 p-4 shadow-sm ${
       task.isCompleted ? 'completed-task' : ''
@@ -224,7 +262,11 @@ export default function TaskCard({ task, onUpdate }: TaskCardProps) {
                   {task.title}
                 </h3>
                 <div className="flex items-center space-x-2">
-                  <PriorityDot priority={(task.priority as "low" | "medium" | "high") || 'medium'} />
+                  <PriorityDot 
+                    priority={(task.priority as "low" | "medium" | "high") || 'medium'} 
+                    onClick={cyclePriority}
+                    size="lg"
+                  />
                   <DropdownMenu>
                     <DropdownMenuTrigger asChild>
                       <Button variant="ghost" size="sm">

@@ -28,10 +28,17 @@
     font-size: 22px !important;
   }
   
-  /* Enhanced mobile text sizes */
-  h1 { font-size: 2rem; }
-  h2 { font-size: 1.5rem; }
-  p { font-size: 1.125rem; }
+  /* Enhanced mobile text sizes - 1.5x bigger */
+  h1 { font-size: 3rem; }
+  h2 { font-size: 2.25rem; }
+  p { font-size: 1.6875rem; }
+  
+  /* General font size increase for all text */
+  body { font-size: 1.5rem; }
+  .text-sm { font-size: 1.3125rem !important; }
+  .text-base { font-size: 1.5rem !important; }
+  .text-lg { font-size: 2.25rem !important; }
+  .text-xl { font-size: 2.4375rem !important; }
 }
 
 /* Text outline utility class */
