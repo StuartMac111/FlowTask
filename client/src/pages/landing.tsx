@@ -1,6 +1,6 @@
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { CheckCircle, Users, Share2, Target, Calendar, Bell, Monitor, Smartphone } from "lucide-react";
+import { CheckCircle, Users, Share2, Target, Calendar, Bell, Monitor, Smartphone, Moon } from "lucide-react";
 import { useState } from "react";
 import { ThemeToggle } from "@/components/theme-toggle";
 
@@ -44,8 +44,25 @@ export default function Landing() {
               </Button>
             </div>
             {/* Dark Mode Toggle - Below Desktop/Mobile */}
-            <div className="ml-0">
-              <ThemeToggle />
+            <div className="flex items-center gap-1 bg-gray-100 dark:bg-gray-800 rounded-lg p-1">
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => {
+                  const isDark = document.documentElement.classList.contains('dark');
+                  if (isDark) {
+                    document.documentElement.classList.remove('dark');
+                    localStorage.setItem('theme', 'light');
+                  } else {
+                    document.documentElement.classList.add('dark');
+                    localStorage.setItem('theme', 'dark');
+                  }
+                }}
+                className="h-8 px-3"
+              >
+                <Moon className="h-4 w-4 mr-1" />
+                Dark Mode
+              </Button>
             </div>
           </div>
 
