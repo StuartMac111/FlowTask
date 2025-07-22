@@ -141,6 +141,45 @@ export default function TaskCard({ task, onUpdate, listName }: TaskCardProps) {
     },
   });
 
+  // Restore task mutation for undo functionality
+  const restoreTaskMutation = useMutation({
+    mutationFn: async () => {
+      await apiRequest("POST", "/api/tasks", {
+        title: task.title,
+        description: task.description,
+        listId: task.listId,
+        priority: task.priority,
+        isCompleted: task.isCompleted,
+        dueDate: task.dueDate,
+      });
+    },
+    onSuccess: () => {
+      toast({
+        title: "Task Restored",
+        description: "Task has been restored successfully",
+      });
+      onUpdate();
+    },
+    onError: (error) => {
+      if (isUnauthorizedError(error)) {
+        toast({
+          title: "Unauthorized",
+          description: "You are logged out. Logging in again...",
+          variant: "destructive",
+        });
+        setTimeout(() => {
+          window.location.href = "/api/login";
+        }, 500);
+        return;
+      }
+      toast({
+        title: "Error",
+        description: "Failed to restore task",
+        variant: "destructive",
+      });
+    },
+  });
+
   // Edit task mutation
   const editTaskMutation = useMutation({
     mutationFn: async (updates: { title?: string; description?: string; recurringType?: string; recurringDays?: string[] }) => {
@@ -204,15 +243,25 @@ export default function TaskCard({ task, onUpdate, listName }: TaskCardProps) {
     },
   });
 
-  // Delete task mutation
+  // Delete task mutation with undo functionality
   const deleteTaskMutation = useMutation({
     mutationFn: async () => {
       await apiRequest("DELETE", `/api/tasks/${task.id}`);
     },
     onSuccess: () => {
+      // Show undo toast
       toast({
-        title: "Success",
-        description: "Task deleted successfully",
+        title: "Task Deleted",
+        description: "Task has been deleted",
+        action: (
+          <Button
+            size="sm"
+            onClick={() => restoreTaskMutation.mutate()}
+            className="bg-blue-500 hover:bg-blue-600 text-white"
+          >
+            Undo
+          </Button>
+        ),
       });
       onUpdate();
     },

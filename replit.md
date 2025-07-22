@@ -94,6 +94,9 @@ RESTful API with endpoints for:
 - **Automatic Task Routing**: New tasks from sticky notes and "My Day" automatically go to "Tasks" list
 - **Completion Routing**: All completed tasks automatically move to "Completed Tasks" list
 - **User Profile Management**: Top-left profile dropdown with avatar, email, logout, edit profile, and switch accounts options
+- **List Editing**: Full list editor with name and background color customization via right-click context menu
+- **Immediate Task Actions**: Instant task creation and deletion without success toasts for cleaner UX
+- **Undo System**: Deleted tasks show toast notification with "Undo" button to restore tasks immediately
 - **Dark Mode Support**: Complete dark mode implementation with theme toggle in user profile section
 - **Background Themes**: Customizable list backgrounds with gradients and patterns for visual organization
 - **Groups System**: Renamed "Family Groups" to "Groups" to support any type of collaboration

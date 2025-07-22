@@ -28,10 +28,11 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { Search, Plus, Users, Edit, Trash2, Merge, LogOut, Settings, User as UserIcon, ChevronDown } from "lucide-react";
+import { Search, Plus, Users, Edit, Trash2, Merge, LogOut, Settings, User as UserIcon, ChevronDown, Palette } from "lucide-react";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import { isUnauthorizedError } from "@/lib/authUtils";
+import ListEditor from "./list-editor";
 import type { ListWithTasks, User, GroupWithMembers } from "@shared/schema";
 
 interface SidebarProps {
@@ -58,6 +59,8 @@ export default function Sidebar({
   const [listToDelete, setListToDelete] = useState<ListWithTasks | null>(null);
   const [editingList, setEditingList] = useState<ListWithTasks | null>(null);
   const [editTitle, setEditTitle] = useState("");
+  const [showListEditor, setShowListEditor] = useState(false);
+  const [listToEdit, setListToEdit] = useState<ListWithTasks | null>(null);
   const { toast } = useToast();
 
   // Fetch groups
@@ -154,6 +157,11 @@ export default function Sidebar({
   };
 
   const handleEditList = (list: ListWithTasks) => {
+    setListToEdit(list);
+    setShowListEditor(true);
+  };
+
+  const handleQuickEditList = (list: ListWithTasks) => {
     setEditingList(list);
     setEditTitle(list.name);
   };
@@ -287,9 +295,13 @@ export default function Sidebar({
                 </div>
               </ContextMenuTrigger>
               <ContextMenuContent>
-                <ContextMenuItem onClick={() => handleEditList(list)}>
+                <ContextMenuItem onClick={() => handleQuickEditList(list)}>
                   <Edit className="w-4 h-4 mr-2" />
-                  Edit
+                  Rename
+                </ContextMenuItem>
+                <ContextMenuItem onClick={() => handleEditList(list)}>
+                  <Palette className="w-4 h-4 mr-2" />
+                  Edit List
                 </ContextMenuItem>
                 <ContextMenuItem onClick={() => handleDeleteList(list)}>
                   <Trash2 className="w-4 h-4 mr-2" />
@@ -347,9 +359,13 @@ export default function Sidebar({
                     </div>
                   </ContextMenuTrigger>
                   <ContextMenuContent>
-                    <ContextMenuItem onClick={() => handleEditList(list)}>
+                    <ContextMenuItem onClick={() => handleQuickEditList(list)}>
                       <Edit className="w-4 h-4 mr-2" />
-                      Edit
+                      Rename
+                    </ContextMenuItem>
+                    <ContextMenuItem onClick={() => handleEditList(list)}>
+                      <Palette className="w-4 h-4 mr-2" />
+                      Edit List
                     </ContextMenuItem>
                     <ContextMenuItem onClick={() => handleDeleteList(list)}>
                       <Trash2 className="w-4 h-4 mr-2" />
@@ -432,6 +448,19 @@ export default function Sidebar({
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+
+      {/* List Editor Dialog */}
+      {showListEditor && listToEdit && (
+        <ListEditor
+          list={listToEdit}
+          isOpen={showListEditor}
+          onClose={() => {
+            setShowListEditor(false);
+            setListToEdit(null);
+          }}
+          onRefresh={onRefresh}
+        />
+      )}
     </div>
   );
 }

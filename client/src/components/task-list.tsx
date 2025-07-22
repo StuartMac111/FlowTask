@@ -37,6 +37,8 @@ export default function TaskList({ list, onShare, onRefresh }: TaskListProps) {
   const [isMobileView, setIsMobileView] = useState(false);
   const [showListContextMenu, setShowListContextMenu] = useState(false);
   const [listContextMenuPos, setListContextMenuPos] = useState({ x: 0, y: 0 });
+  const [deletedTask, setDeletedTask] = useState<any>(null);
+  const [showUndoToast, setShowUndoToast] = useState(false);
   const { toast } = useToast();
 
   // Add click handler to close dropdowns when clicking away
@@ -53,16 +55,13 @@ export default function TaskList({ list, onShare, onRefresh }: TaskListProps) {
     return () => document.removeEventListener('mousedown', handleClickAway);
   }, []);
 
-  // Create task mutation
+  // Create task mutation with immediate UI update
   const createTaskMutation = useMutation({
     mutationFn: async (taskData: InsertTask) => {
       await apiRequest("POST", "/api/tasks", taskData);
     },
     onSuccess: () => {
-      toast({
-        title: "Success",
-        description: "Task created successfully",
-      });
+      // Immediate feedback without toast to reduce clutter
       onRefresh();
       resetTaskForm();
     },
