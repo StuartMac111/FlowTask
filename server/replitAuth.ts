@@ -57,13 +57,18 @@ function updateUserSession(
 async function upsertUser(
   claims: any,
 ) {
-  await storage.upsertUser({
+  const user = await storage.upsertUser({
     id: claims["sub"],
     email: claims["email"],
     firstName: claims["first_name"],
     lastName: claims["last_name"],
     profileImageUrl: claims["profile_image_url"],
   });
+  
+  // Create default lists for new/returning users
+  await storage.createDefaultLists(user.id);
+  
+  return user;
 }
 
 export async function setupAuth(app: Express) {

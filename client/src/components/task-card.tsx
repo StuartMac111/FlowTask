@@ -264,8 +264,10 @@ export default function TaskCard({ task, onUpdate }: TaskCardProps) {
       }`}
       onContextMenu={handleRightClick}
       onClick={(e) => {
-        // Only edit if not clicking on checkbox or other interactive elements
-        if (e.target === e.currentTarget || e.target.closest('.task-title')) {
+        const target = e.target as HTMLElement;
+        // Only edit if clicking on the task title or card body (not interactive elements)
+        if (target.closest('.task-title') || 
+            (target === e.currentTarget && !target.closest('button, input, select, [role="button"]'))) {
           setIsEditing(true);
         }
       }}
@@ -273,7 +275,10 @@ export default function TaskCard({ task, onUpdate }: TaskCardProps) {
       <div className="flex items-start space-x-3">
         <Checkbox
           checked={task.isCompleted}
-          onCheckedChange={() => toggleCompleteMutation.mutate()}
+          onCheckedChange={() => {
+            playCompletionSound();
+            toggleCompleteMutation.mutate();
+          }}
           className="mt-1"
           disabled={toggleCompleteMutation.isPending}
           onClick={(e) => e.stopPropagation()}
@@ -407,16 +412,23 @@ export default function TaskCard({ task, onUpdate }: TaskCardProps) {
                   </DropdownMenu>
                   <DropdownMenu>
                     <DropdownMenuTrigger asChild>
-                      <Button variant="ghost" size="sm">
+                      <Button variant="ghost" size="sm" onClick={(e) => e.stopPropagation()}>
                         <MoreVertical className="w-4 h-4" />
                       </Button>
                     </DropdownMenuTrigger>
-                    <DropdownMenuContent>
-                      <DropdownMenuItem onClick={() => setIsEditing(true)}>
+                    <DropdownMenuContent onClick={(e) => e.stopPropagation()}>
+                      <DropdownMenuItem onClick={(e) => {
+                        e.stopPropagation();
+                        setIsEditing(true);
+                      }}>
                         <Edit3 className="w-4 h-4 mr-2" />
                         Edit
                       </DropdownMenuItem>
-                      <DropdownMenuItem onClick={() => deleteTaskMutation.mutate()}>
+                      <DropdownMenuItem onClick={(e) => {
+                        e.stopPropagation();
+                        deleteTaskMutation.mutate();
+                      }} className="text-red-600">
+                        <Trash2 className="w-4 h-4 mr-2" />
                         Delete
                       </DropdownMenuItem>
                     </DropdownMenuContent>

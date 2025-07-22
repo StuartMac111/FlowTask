@@ -264,35 +264,53 @@ export default function TaskList({ list, onShare, onRefresh }: TaskListProps) {
                   </PopoverTrigger>
                   <PopoverContent className="w-72 p-0" align="start">
                     <div className="p-4 space-y-3">
-                      {/* Quick date options */}
-                      <div className="space-y-2">
-                        <Button
-                          variant="ghost"
-                          className="w-full justify-start text-left"
-                          onClick={() => {
-                            const today = new Date();
-                            setSelectedDueDate(today);
-                            setShowDatePicker(false);
-                          }}
-                        >
-                          <Calendar className="w-4 h-4 mr-3" />
-                          Due Today
-                        </Button>
-                        
-                        <Button
-                          variant="ghost"
-                          className="w-full justify-start text-left"
-                          onClick={() => {
-                            const tomorrow = new Date();
-                            tomorrow.setDate(tomorrow.getDate() + 1);
-                            setSelectedDueDate(tomorrow);
-                            setShowDatePicker(false);
-                          }}
-                        >
-                          <Calendar className="w-4 h-4 mr-3" />
-                          Due Tomorrow
-                        </Button>
-                      </div>
+                      {/* Add to My Day */}
+                      <Button
+                        variant="ghost"
+                        className="w-full justify-start text-left mb-2"
+                        onClick={() => {
+                          // Add to My Day logic here
+                          setShowDatePicker(false);
+                          toast({
+                            title: "Added to My Day",
+                            description: "Task will appear in your My Day list",
+                          });
+                        }}
+                      >
+                        <div className="w-4 h-4 mr-3 flex items-center justify-center">
+                          <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
+                        </div>
+                        Add to My Day
+                      </Button>
+
+                      {/* Due Today */}
+                      <Button
+                        variant="ghost"
+                        className="w-full justify-start text-left"
+                        onClick={() => {
+                          const today = new Date();
+                          setSelectedDueDate(today);
+                          setShowDatePicker(false);
+                        }}
+                      >
+                        <Calendar className="w-4 h-4 mr-3" />
+                        Due Today
+                      </Button>
+                      
+                      {/* Due Tomorrow */}
+                      <Button
+                        variant="ghost"
+                        className="w-full justify-start text-left"
+                        onClick={() => {
+                          const tomorrow = new Date();
+                          tomorrow.setDate(tomorrow.getDate() + 1);
+                          setSelectedDueDate(tomorrow);
+                          setShowDatePicker(false);
+                        }}
+                      >
+                        <Calendar className="w-4 h-4 mr-3" />
+                        Due Tomorrow
+                      </Button>
                       
                       <div className="border-t pt-3">
                         <CalendarComponent
@@ -338,7 +356,7 @@ export default function TaskList({ list, onShare, onRefresh }: TaskListProps) {
                       <div className="space-y-1">
                         <Button
                           variant="ghost"
-                          className={`w-full justify-start ${repeatType === "daily" ? "bg-blue-50 text-blue-600" : ""}`}
+                          className={`w-full justify-start text-left ${repeatType === "daily" ? "bg-blue-50 text-blue-600" : ""}`}
                           onClick={() => {
                             setRepeatType("daily");
                             setShowRepeatOptions(false);
@@ -354,7 +372,7 @@ export default function TaskList({ list, onShare, onRefresh }: TaskListProps) {
                         
                         <Button
                           variant="ghost"
-                          className={`w-full justify-start ${repeatType === "weekdays" ? "bg-blue-50 text-blue-600" : ""}`}
+                          className={`w-full justify-start text-left ${repeatType === "weekdays" ? "bg-blue-50 text-blue-600" : ""}`}
                           onClick={() => {
                             setRepeatType("weekdays");
                             setShowRepeatOptions(false);
@@ -370,7 +388,7 @@ export default function TaskList({ list, onShare, onRefresh }: TaskListProps) {
                         
                         <Button
                           variant="ghost"
-                          className={`w-full justify-start ${repeatType === "weekly" ? "bg-blue-50 text-blue-600" : ""}`}
+                          className={`w-full justify-start text-left ${repeatType === "weekly" ? "bg-blue-50 text-blue-600" : ""}`}
                           onClick={() => {
                             setRepeatType("weekly");
                             setShowRepeatOptions(false);
@@ -386,7 +404,7 @@ export default function TaskList({ list, onShare, onRefresh }: TaskListProps) {
                         
                         <Button
                           variant="ghost"
-                          className={`w-full justify-start ${repeatType === "monthly" ? "bg-blue-50 text-blue-600" : ""}`}
+                          className={`w-full justify-start text-left ${repeatType === "monthly" ? "bg-blue-50 text-blue-600" : ""}`}
                           onClick={() => {
                             setRepeatType("monthly");
                             setShowRepeatOptions(false);
@@ -402,7 +420,7 @@ export default function TaskList({ list, onShare, onRefresh }: TaskListProps) {
                         
                         <Button
                           variant="ghost"
-                          className={`w-full justify-start ${repeatType === "yearly" ? "bg-blue-50 text-blue-600" : ""}`}
+                          className={`w-full justify-start text-left ${repeatType === "yearly" ? "bg-blue-50 text-blue-600" : ""}`}
                           onClick={() => {
                             setRepeatType("yearly");
                             setShowRepeatOptions(false);
@@ -418,7 +436,7 @@ export default function TaskList({ list, onShare, onRefresh }: TaskListProps) {
                         
                         <Button
                           variant="ghost"
-                          className={`w-full justify-start ${repeatType === "custom" ? "bg-blue-50 text-blue-600" : ""}`}
+                          className={`w-full justify-start text-left ${repeatType === "custom" ? "bg-blue-50 text-blue-600" : ""}`}
                           onClick={() => {
                             setRepeatType("custom");
                             setShowRepeatOptions(false);

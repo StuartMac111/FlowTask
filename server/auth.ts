@@ -125,6 +125,9 @@ export async function setupAuth(app: Express) {
           }])
         });
 
+        // Create default lists for new user
+        await storage.createDefaultLists(user.id);
+
         done(null, user);
       } catch (error) {
         done(error, null);
@@ -169,6 +172,9 @@ export async function setupAuth(app: Express) {
             email: email
           }])
         });
+
+        // Create default lists for new user
+        await storage.createDefaultLists(user.id);
 
         done(null, user);
       } catch (error) {
