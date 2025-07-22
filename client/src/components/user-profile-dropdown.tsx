@@ -73,11 +73,41 @@ export default function UserProfileDropdown({ user, onLogout }: UserProfileDropd
   const handleImageUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     if (file) {
-      // Convert image to base64 for storage (in a real app, you'd upload to cloud storage)
+      // Compress and convert image to base64
+      const canvas = document.createElement('canvas');
+      const ctx = canvas.getContext('2d');
+      const img = new Image();
+      
+      img.onload = () => {
+        // Set maximum dimensions
+        const maxSize = 200;
+        let { width, height } = img;
+        
+        if (width > height) {
+          if (width > maxSize) {
+            height = height * (maxSize / width);
+            width = maxSize;
+          }
+        } else {
+          if (height > maxSize) {
+            width = width * (maxSize / height);
+            height = maxSize;
+          }
+        }
+        
+        canvas.width = width;
+        canvas.height = height;
+        
+        ctx?.drawImage(img, 0, 0, width, height);
+        
+        // Convert to base64 with compression
+        const base64 = canvas.toDataURL('image/jpeg', 0.7);
+        setProfileImage(base64);
+      };
+      
       const reader = new FileReader();
       reader.onload = (e) => {
-        const base64 = e.target?.result as string;
-        setProfileImage(base64);
+        img.src = e.target?.result as string;
       };
       reader.readAsDataURL(file);
     }
