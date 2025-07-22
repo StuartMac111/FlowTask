@@ -27,6 +27,21 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.get('/api/auth/user', isAuthenticated, async (req: any, res) => {
     try {
       const user = req.user;
+      
+      // Ensure user has default lists (check and create if missing)
+      try {
+        const userLists = await storage.getListsForUser(user.id);
+        const hasMyDay = userLists.some(list => list.name === "My Day");
+        const hasBrainstorming = userLists.some(list => list.name === "Brainstorming");
+        
+        if (!hasMyDay || !hasBrainstorming) {
+          await storage.createDefaultLists(user.id);
+        }
+      } catch (listError) {
+        console.log("Creating default lists for user:", user.id);
+        await storage.createDefaultLists(user.id);
+      }
+      
       res.json(user);
     } catch (error) {
       console.error("Error fetching user:", error);
