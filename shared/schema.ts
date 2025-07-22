@@ -94,6 +94,8 @@ export const tasks = pgTable("tasks", {
   listId: varchar("list_id").references(() => lists.id, { onDelete: "cascade" }).notNull(),
   assignedTo: varchar("assigned_to").references(() => users.id, { onDelete: "set null" }),
   parentTaskId: varchar("parent_task_id"),
+  recurringType: varchar("recurring_type", { enum: ["daily", "weekly", "monthly", "custom"] }),
+  recurringDays: text("recurring_days").array(),
   sortOrder: integer("sort_order").default(0),
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),

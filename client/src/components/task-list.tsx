@@ -252,9 +252,21 @@ export default function TaskList({ list, onShare, onRefresh }: TaskListProps) {
               <p className="text-gray-600 dark:text-gray-400">No tasks found</p>
             </div>
           ) : (
-            filteredTasks.map((task) => (
-              <TaskCard key={task.id} task={task} onUpdate={onRefresh} />
-            ))
+            <>
+              {/* Incomplete Tasks */}
+              {filteredTasks
+                .filter(task => !task.isCompleted)
+                .map((task) => (
+                  <TaskCard key={task.id} task={task} onUpdate={onRefresh} />
+                ))}
+              
+              {/* Completed Tasks - Always at bottom */}
+              {filteredTasks
+                .filter(task => task.isCompleted)
+                .map((task) => (
+                  <TaskCard key={task.id} task={task} onUpdate={onRefresh} />
+                ))}
+            </>
           )}
         </div>
       </div>

@@ -36,6 +36,8 @@ export default function TaskCard({ task, onUpdate }: TaskCardProps) {
   const [isEditing, setIsEditing] = useState(false);
   const [editTitle, setEditTitle] = useState(task.title);
   const [editDescription, setEditDescription] = useState(task.description || "");
+  const [recurringType, setRecurringType] = useState<string>("none");
+  const [selectedDays, setSelectedDays] = useState<string[]>([]);
   const { toast } = useToast();
 
   // Toggle task completion mutation
@@ -70,7 +72,7 @@ export default function TaskCard({ task, onUpdate }: TaskCardProps) {
 
   // Edit task mutation
   const editTaskMutation = useMutation({
-    mutationFn: async (updates: { title?: string; description?: string }) => {
+    mutationFn: async (updates: { title?: string; description?: string; recurringType?: string; recurringDays?: string[] }) => {
       await apiRequest("PUT", `/api/tasks/${task.id}`, updates);
     },
     onSuccess: () => {
@@ -193,6 +195,8 @@ export default function TaskCard({ task, onUpdate }: TaskCardProps) {
       editTaskMutation.mutate({
         title: editTitle.trim(),
         description: editDescription.trim() || undefined,
+        recurringType: recurringType !== "none" ? recurringType : undefined,
+        recurringDays: recurringType === "custom" ? selectedDays : undefined,
       });
     }
   };
@@ -201,6 +205,8 @@ export default function TaskCard({ task, onUpdate }: TaskCardProps) {
     setIsEditing(false);
     setEditTitle(task.title);
     setEditDescription(task.description || "");
+    setRecurringType("none");
+    setSelectedDays([]);
   };
 
   const handlePriorityChange = (newPriority: "low" | "medium" | "high") => {
@@ -235,6 +241,55 @@ export default function TaskCard({ task, onUpdate }: TaskCardProps) {
                 placeholder="Task description (optional)..."
                 rows={2}
               />
+              
+              {/* Recurring Options */}
+              <div className="space-y-2">
+                <label className="text-sm font-medium text-gray-700 dark:text-gray-300">
+                  Repeat:
+                </label>
+                <Select value={recurringType} onValueChange={setRecurringType}>
+                  <SelectTrigger className="w-full">
+                    <SelectValue placeholder="Select repeat option" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="none">Don't repeat</SelectItem>
+                    <SelectItem value="daily">Daily</SelectItem>
+                    <SelectItem value="weekly">Weekly</SelectItem>
+                    <SelectItem value="monthly">Monthly</SelectItem>
+                    <SelectItem value="custom">Custom days</SelectItem>
+                  </SelectContent>
+                </Select>
+                
+                {/* Custom Days Selection */}
+                {recurringType === "custom" && (
+                  <div className="space-y-2">
+                    <label className="text-sm font-medium text-gray-700 dark:text-gray-300">
+                      Select days:
+                    </label>
+                    <div className="flex flex-wrap gap-2">
+                      {["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"].map((day) => (
+                        <Button
+                          key={day}
+                          type="button"
+                          size="sm"
+                          variant={selectedDays.includes(day) ? "default" : "outline"}
+                          onClick={() => {
+                            setSelectedDays(prev => 
+                              prev.includes(day) 
+                                ? prev.filter(d => d !== day)
+                                : [...prev, day]
+                            );
+                          }}
+                          className="text-xs"
+                        >
+                          {day.slice(0, 3)}
+                        </Button>
+                      ))}
+                    </div>
+                  </div>
+                )}
+              </div>
+              
               <div className="flex space-x-2">
                 <Button
                   size="sm"
