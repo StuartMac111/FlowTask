@@ -2,9 +2,11 @@ import { useState } from "react";
 import { useMutation } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
-import { Calendar, User, Plus, Edit3, MoreVertical, ChevronDown, ChevronRight } from "lucide-react";
+import { Calendar, User, Plus, Edit3, MoreVertical, ChevronDown, ChevronRight, Save, X } from "lucide-react";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -24,6 +26,9 @@ interface TaskCardProps {
 
 export default function TaskCard({ task, onUpdate }: TaskCardProps) {
   const [showSubtasks, setShowSubtasks] = useState(false);
+  const [isEditing, setIsEditing] = useState(false);
+  const [editTitle, setEditTitle] = useState(task.title);
+  const [editDescription, setEditDescription] = useState(task.description || "");
   const { toast } = useToast();
 
   // Toggle task completion mutation
@@ -34,6 +39,39 @@ export default function TaskCard({ task, onUpdate }: TaskCardProps) {
       });
     },
     onSuccess: () => {
+      onUpdate();
+    },
+    onError: (error) => {
+      if (isUnauthorizedError(error)) {
+        toast({
+          title: "Unauthorized",
+          description: "You are logged out. Logging in again...",
+          variant: "destructive",
+        });
+        setTimeout(() => {
+          window.location.href = "/api/login";
+        }, 500);
+        return;
+      }
+      toast({
+        title: "Error",
+        description: "Failed to update task",
+        variant: "destructive",
+      });
+    },
+  });
+
+  // Edit task mutation
+  const editTaskMutation = useMutation({
+    mutationFn: async (updates: { title?: string; description?: string }) => {
+      await apiRequest("PUT", `/api/tasks/${task.id}`, updates);
+    },
+    onSuccess: () => {
+      toast({
+        title: "Success",
+        description: "Task updated successfully",
+      });
+      setIsEditing(false);
       onUpdate();
     },
     onError: (error) => {
@@ -113,6 +151,21 @@ export default function TaskCard({ task, onUpdate }: TaskCardProps) {
     }
   };
 
+  const handleSaveEdit = () => {
+    if (editTitle.trim()) {
+      editTaskMutation.mutate({
+        title: editTitle.trim(),
+        description: editDescription.trim() || undefined,
+      });
+    }
+  };
+
+  const handleCancelEdit = () => {
+    setIsEditing(false);
+    setEditTitle(task.title);
+    setEditDescription(task.description || "");
+  };
+
   return (
     <div className={`task-card bg-white dark:bg-gray-800 rounded-lg border border-gray-300 dark:border-gray-600 p-4 shadow-sm ${
       task.isCompleted ? 'completed-task' : ''
@@ -126,37 +179,77 @@ export default function TaskCard({ task, onUpdate }: TaskCardProps) {
         />
         
         <div className="flex-1 min-w-0">
-          <div className="flex items-center justify-between">
-            <h3 className={`task-title font-medium text-black dark:text-white ${
-              task.isCompleted ? 'line-through' : ''
-            }`}>
-              {task.title}
-            </h3>
-            <div className="flex items-center space-x-2">
-              <PriorityDot priority={(task.priority as "low" | "medium" | "high") || 'medium'} />
-              <DropdownMenu>
-                <DropdownMenuTrigger asChild>
-                  <Button variant="ghost" size="sm">
-                    <MoreVertical className="w-4 h-4" />
-                  </Button>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent>
-                  <DropdownMenuItem>
-                    <Edit3 className="w-4 h-4 mr-2" />
-                    Edit
-                  </DropdownMenuItem>
-                  <DropdownMenuItem onClick={() => deleteTaskMutation.mutate()}>
-                    Delete
-                  </DropdownMenuItem>
-                </DropdownMenuContent>
-              </DropdownMenu>
+          {isEditing ? (
+            <div className="space-y-3">
+              <Input
+                value={editTitle}
+                onChange={(e) => setEditTitle(e.target.value)}
+                className="text-black dark:text-white bg-white dark:bg-gray-700"
+                placeholder="Task title..."
+              />
+              <Textarea
+                value={editDescription}
+                onChange={(e) => setEditDescription(e.target.value)}
+                className="text-black dark:text-white bg-white dark:bg-gray-700"
+                placeholder="Task description (optional)..."
+                rows={2}
+              />
+              <div className="flex space-x-2">
+                <Button
+                  size="sm"
+                  onClick={handleSaveEdit}
+                  disabled={editTaskMutation.isPending || !editTitle.trim()}
+                  className="bg-blue-600 hover:bg-blue-700 text-white"
+                >
+                  <Save className="w-4 h-4 mr-1" />
+                  {editTaskMutation.isPending ? "Saving..." : "Save"}
+                </Button>
+                <Button
+                  size="sm"
+                  variant="outline"
+                  onClick={handleCancelEdit}
+                  disabled={editTaskMutation.isPending}
+                >
+                  <X className="w-4 h-4 mr-1" />
+                  Cancel
+                </Button>
+              </div>
             </div>
-          </div>
-          
-          {task.description && (
-            <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">
-              {task.description}
-            </p>
+          ) : (
+            <>
+              <div className="flex items-center justify-between">
+                <h3 className={`task-title font-medium text-black dark:text-white ${
+                  task.isCompleted ? 'line-through' : ''
+                }`}>
+                  {task.title}
+                </h3>
+                <div className="flex items-center space-x-2">
+                  <PriorityDot priority={(task.priority as "low" | "medium" | "high") || 'medium'} />
+                  <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                      <Button variant="ghost" size="sm">
+                        <MoreVertical className="w-4 h-4" />
+                      </Button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent>
+                      <DropdownMenuItem onClick={() => setIsEditing(true)}>
+                        <Edit3 className="w-4 h-4 mr-2" />
+                        Edit
+                      </DropdownMenuItem>
+                      <DropdownMenuItem onClick={() => deleteTaskMutation.mutate()}>
+                        Delete
+                      </DropdownMenuItem>
+                    </DropdownMenuContent>
+                  </DropdownMenu>
+                </div>
+              </div>
+              
+              {task.description && (
+                <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">
+                  {task.description}
+                </p>
+              )}
+            </>
           )}
           
           <div className="flex items-center justify-between mt-3">
@@ -182,14 +275,18 @@ export default function TaskCard({ task, onUpdate }: TaskCardProps) {
               )}
             </div>
             
-            <div className="flex items-center space-x-2">
-              <Button variant="ghost" size="sm">
-                <Plus className="w-4 h-4" />
-              </Button>
-              <Button variant="ghost" size="sm">
-                <Edit3 className="w-4 h-4" />
-              </Button>
-            </div>
+            {!isEditing && (
+              <div className="flex items-center space-x-2">
+                <Button 
+                  variant="ghost" 
+                  size="sm"
+                  onClick={() => setIsEditing(true)}
+                  className="text-gray-600 dark:text-gray-400 hover:text-blue-600 dark:hover:text-blue-400"
+                >
+                  <Edit3 className="w-4 h-4" />
+                </Button>
+              </div>
+            )}
           </div>
         </div>
       </div>
