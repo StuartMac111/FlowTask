@@ -128,14 +128,16 @@ export default function StatisticsDashboard({ lists, listId }: StatisticsDashboa
   }, [lists]);
 
   return (
-    <div className="p-6 space-y-6">
-      <div className="flex items-center gap-3 mb-6">
+    <div className="h-full flex flex-col bg-ms-bg dark:bg-gray-900">
+      <div className="flex items-center gap-3 p-6 pb-4 border-b border-gray-200 dark:border-gray-700">
         <BarChart3 className="w-8 h-8 text-red-600" />
         <div>
           <h1 className="text-3xl font-semibold text-gray-900 dark:text-gray-100">Statistics</h1>
           <p className="text-gray-600 dark:text-gray-400">Your task completion metrics and performance</p>
         </div>
       </div>
+      
+      <div className="flex-1 overflow-y-auto p-6 space-y-6">
 
       {/* Main Stats Cards */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
@@ -329,6 +331,7 @@ export default function StatisticsDashboard({ lists, listId }: StatisticsDashboa
           </div>
         </CardContent>
       </Card>
+      </div>
     </div>
   );
 }

@@ -98,7 +98,7 @@ export default function TaskList({ list, allLists = [], onShare, onRefresh }: Ta
       // If creating task in "My Day", create it in "Tasks" list instead
       if (list.name === "My Day") {
         const listsResponse = await apiRequest("GET", "/api/lists");
-        const tasksList = (listsResponse as any[]).find((listItem: any) => listItem.name === "Tasks");
+        const tasksList = (listsResponse as ListWithTasks[]).find((listItem: ListWithTasks) => listItem.name === "Tasks");
         
         if (tasksList) {
           targetListId = tasksList.id;
@@ -187,7 +187,11 @@ export default function TaskList({ list, allLists = [], onShare, onRefresh }: Ta
 
   // Show statistics dashboard for statistics list
   if (list.name.toLowerCase() === "statistics") {
-    return <StatisticsDashboard lists={allLists} listId={list.id} />;
+    return (
+      <div className="flex-1 h-full overflow-hidden">
+        <StatisticsDashboard lists={allLists} listId={list.id} />
+      </div>
+    );
   }
 
   // Filter and sort tasks

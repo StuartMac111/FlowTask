@@ -166,7 +166,7 @@ export default function Home() {
                 >
                   {lists.map(list => (
                     <option key={list.id} value={list.id}>
-                      {list.title}
+                      {list.name}
                     </option>
                   ))}
                 </select>
