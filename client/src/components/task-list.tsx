@@ -7,13 +7,14 @@ import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Calendar as CalendarComponent } from "@/components/ui/calendar";
-import { Share2, List, Grid3X3, Calendar, User, Lightbulb, Repeat, X, Edit, Trash2 } from "lucide-react";
+import { Share2, List, Grid3X3, Calendar, User, Lightbulb, Repeat, X, Edit, Trash2, Palette } from "lucide-react";
 import { format } from "date-fns";
 import TaskCard from "./task-card";
 import BrainstormWhiteboard from "./brainstorm-whiteboard";
 import { apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import { isUnauthorizedError } from "@/lib/authUtils";
+import ListEditor from "./list-editor";
 import type { ListWithTasks, InsertTask } from "@shared/schema";
 
 interface TaskListProps {
@@ -39,6 +40,7 @@ export default function TaskList({ list, onShare, onRefresh }: TaskListProps) {
   const [listContextMenuPos, setListContextMenuPos] = useState({ x: 0, y: 0 });
   const [deletedTask, setDeletedTask] = useState<any>(null);
   const [showUndoToast, setShowUndoToast] = useState(false);
+  const [showListEditor, setShowListEditor] = useState(false);
   const { toast } = useToast();
 
   // Add click handler to close dropdowns when clicking away
@@ -315,6 +317,16 @@ export default function TaskList({ list, onShare, onRefresh }: TaskListProps) {
                 📱 Mobile
               </Button>
             </div>
+            
+            {/* Edit List Button */}
+            <Button
+              variant="outline"
+              onClick={() => setShowListEditor(true)}
+              className="text-lg px-4 py-2 bg-white dark:bg-gray-800 border-2 border-gray-300 dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-700"
+            >
+              <Palette className="w-5 h-5 mr-2" />
+              Edit List
+            </Button>
             
             <div className="flex bg-gray-100 rounded-md p-1">
               <Button
@@ -700,6 +712,16 @@ export default function TaskList({ list, onShare, onRefresh }: TaskListProps) {
             </button>
           </div>
         </>
+      )}
+      
+      {/* List Editor Dialog */}
+      {showListEditor && list && (
+        <ListEditor
+          list={list}
+          isOpen={showListEditor}
+          onClose={() => setShowListEditor(false)}
+          onRefresh={onRefresh}
+        />
       )}
     </div>
   );

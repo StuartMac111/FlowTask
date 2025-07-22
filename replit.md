@@ -97,6 +97,7 @@ RESTful API with endpoints for:
 - **List Editing**: Full list editor with name and background color customization via right-click context menu
 - **Immediate Task Actions**: Instant task creation and deletion without success toasts for cleaner UX
 - **Undo System**: Deleted tasks show toast notification with "Undo" button to restore tasks immediately
+- **Edit List Button**: Added prominent "Edit List" button below Desktop/Mobile toggle for easy access to list customization
 - **Dark Mode Support**: Complete dark mode implementation with theme toggle in user profile section
 - **Background Themes**: Customizable list backgrounds with gradients and patterns for visual organization
 - **Groups System**: Renamed "Family Groups" to "Groups" to support any type of collaboration
