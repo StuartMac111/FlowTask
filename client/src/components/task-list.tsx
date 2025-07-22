@@ -603,14 +603,14 @@ export default function TaskList({ list, onShare, onRefresh }: TaskListProps) {
               {filteredTasks
                 .filter(task => !task.isCompleted)
                 .map((task) => (
-                  <TaskCard key={task.id} task={task} onUpdate={onRefresh} />
+                  <TaskCard key={task.id} task={task} onUpdate={onRefresh} listName={list.name} />
                 ))}
               
               {/* Completed Tasks - Always at bottom */}
               {filteredTasks
                 .filter(task => task.isCompleted)
                 .map((task) => (
-                  <TaskCard key={task.id} task={task} onUpdate={onRefresh} />
+                  <TaskCard key={task.id} task={task} onUpdate={onRefresh} listName={list.name} />
                 ))}
             </>
           )}

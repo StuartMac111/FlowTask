@@ -32,6 +32,8 @@ interface StickyNote {
   connections?: string[];
   isCompleted?: boolean;
   isCrumpling?: boolean;
+  repeatType?: "none" | "daily" | "weekly" | "monthly" | "yearly";
+  repeatDays?: string[];
 }
 
 interface DrawingLine {
@@ -92,6 +94,8 @@ export default function BrainstormWhiteboard({ listId, tasks }: BrainstormWhiteb
   const [showDatePicker, setShowDatePicker] = useState<string | null>(null);
   const [selectedDate, setSelectedDate] = useState<Date | undefined>(undefined);
   const [showFontSizer, setShowFontSizer] = useState<string | null>(null);
+  const [showRepeatMenu, setShowRepeatMenu] = useState<string | null>(null);
+  const [selectedRepeatType, setSelectedRepeatType] = useState<string>("none");
   const whiteboardRef = useRef<HTMLDivElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
   const { toast } = useToast();
@@ -458,7 +462,38 @@ export default function BrainstormWhiteboard({ listId, tasks }: BrainstormWhiteb
     const note = stickyNotes.find(n => n.id === noteId);
     setSelectedDate(note?.dueDate);
     setShowDatePicker(noteId);
+  }
+
+  const openRepeatMenu = (noteId: string) => {
+    setShowRepeatMenu(noteId);
+    const note = stickyNotes.find(n => n.id === noteId);
+    setSelectedRepeatType(note?.repeatType || "none");
   };
+
+  const handleRepeatOptionClick = (option: string) => {
+    const confirmOptions = {
+      "daily": "This note will repeat every day. Continue?",
+      "weekly": "This note will repeat every week. Continue?", 
+      "monthly": "This note will repeat every month. Continue?",
+      "yearly": "This note will repeat every year. Continue?",
+      "none": "Remove repeat for this note?"
+    };
+
+    if (confirm(confirmOptions[option as keyof typeof confirmOptions])) {
+      // Update the note with repeat information
+      setStickyNotes(prev => prev.map(note => 
+        note.id === showRepeatMenu ? { ...note, repeatType: option } : note
+      ));
+      
+      toast({
+        title: "Repeat Updated",
+        description: `Note will ${option === "none" ? "not repeat" : `repeat ${option}`}`,
+      });
+    }
+    
+    setShowRepeatMenu(null);
+    setSelectedRepeatType("none");
+  };;
 
   const updateNoteFontSize = (noteId: string, fontSize: number) => {
     setStickyNotes(prev => prev.map(note => 
@@ -1062,27 +1097,30 @@ export default function BrainstormWhiteboard({ listId, tasks }: BrainstormWhiteb
                     {/* Corner fold effect */}
                     <div className="absolute top-0 right-0 w-4 h-4 bg-black bg-opacity-10 rounded-bl-lg"></div>
                     
-                    {/* Completion Checkbox */}
+                    {/* Completion Checkbox - Big for sticky notes */}
                     <div 
-                      className="absolute top-1 right-1 w-5 h-5 border-2 border-gray-400 rounded cursor-pointer hover:border-green-500 hover:bg-green-50 transition-all duration-200 bg-white flex items-center justify-center z-20"
+                      className="absolute top-2 left-2 z-30"
                       onClick={(e) => {
                         e.stopPropagation();
-                        e.preventDefault();
                         toggleNoteCompletion(note.id);
                       }}
-                      onMouseDown={(e) => e.stopPropagation()}
-                      title="Mark as completed"
                     >
-                      {note.isCompleted ? (
-                        <Check className="w-3 h-3 text-green-600" />
-                      ) : (
-                        <div className="w-2 h-2 rounded-full bg-gray-300 hover:bg-green-300 transition-colors"></div>
-                      )}
+                      <div 
+                        className={`w-7 h-7 rounded border-2 cursor-pointer transition-all ${
+                          note.isCompleted 
+                            ? 'bg-green-500 border-green-500' 
+                            : 'bg-white border-gray-400 hover:border-gray-600'
+                        }`}
+                      >
+                        {note.isCompleted && (
+                          <Check className="w-5 h-5 text-white absolute top-0.5 left-0.5" />
+                        )}
+                      </div>
                     </div>
                     
                     {/* Priority indicator with colored dot only */}
                     {note.priority && (
-                      <div className={`absolute top-2 left-2 w-4 h-4 rounded-full ${
+                      <div className={`absolute top-2 right-2 w-4 h-4 rounded-full ${
                         note.priority === 'high' ? 'bg-red-500' :
                         note.priority === 'medium' ? 'bg-yellow-500' : 'bg-green-500'
                       }`} title={`Priority: ${note.priority}`}>
@@ -1455,6 +1493,16 @@ export default function BrainstormWhiteboard({ listId, tasks }: BrainstormWhiteb
             <CalendarDays className="w-4 h-4 text-purple-600" />
             Set Due Date
           </button>
+          <button
+            onClick={() => {
+              openRepeatMenu(contextMenu.noteId);
+              setContextMenu(null);
+            }}
+            className="w-full px-4 py-3 text-left text-sm hover:bg-green-50 dark:hover:bg-green-900/20 flex items-center gap-3 text-gray-800 dark:text-gray-200 font-medium"
+          >
+            <Clock className="w-4 h-4 text-green-600" />
+            Set Repeat
+          </button>
           <div className="border-t border-gray-200 dark:border-gray-600 my-1"></div>
           <button
             onClick={() => {
@@ -1528,6 +1576,43 @@ export default function BrainstormWhiteboard({ listId, tasks }: BrainstormWhiteb
               </button>
             </div>
           </div>
+        </div>
+      )}
+      
+      {/* Repeat Menu Popup */}
+      {showRepeatMenu && (
+        <div
+          className="fixed bg-white dark:bg-gray-800 border-2 border-gray-400 dark:border-gray-500 rounded-lg shadow-2xl py-2 min-w-48"
+          style={{
+            left: `${contextMenu?.x || 200}px`,
+            top: `${contextMenu?.y || 200}px`,
+            zIndex: 99999,
+            position: 'fixed',
+            pointerEvents: 'auto'
+          }}
+          onMouseDown={(e) => e.stopPropagation()}
+          onClick={(e) => e.stopPropagation()}
+        >
+          <div className="px-4 py-2 border-b border-gray-200 dark:border-gray-600">
+            <p className="text-sm font-medium text-gray-800 dark:text-gray-200">Set Repeat</p>
+          </div>
+          
+          {["none", "daily", "weekly", "monthly", "yearly"].map((type) => (
+            <button
+              key={type}
+              onClick={() => handleRepeatOptionClick(type)}
+              className={`w-full px-4 py-3 text-left text-sm hover:bg-blue-50 dark:hover:bg-blue-900/20 flex items-center gap-3 text-gray-800 dark:text-gray-200 ${
+                selectedRepeatType === type ? 'bg-blue-100 dark:bg-blue-900/30' : ''
+              }`}
+            >
+              <div className={`w-3 h-3 rounded-full ${
+                selectedRepeatType === type ? 'bg-blue-600' : 'bg-gray-400'
+              }`}></div>
+              <span className="capitalize">
+                {type === "none" ? "No Repeat" : `Repeat ${type}`}
+              </span>
+            </button>
+          ))}
         </div>
       )}
     </div>

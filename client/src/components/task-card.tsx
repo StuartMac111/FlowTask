@@ -30,9 +30,10 @@ import type { Task } from "@shared/schema";
 interface TaskCardProps {
   task: Task;
   onUpdate: () => void;
+  listName?: string;
 }
 
-export default function TaskCard({ task, onUpdate }: TaskCardProps) {
+export default function TaskCard({ task, onUpdate, listName }: TaskCardProps) {
   const [showSubtasks, setShowSubtasks] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
   const [editTitle, setEditTitle] = useState(task.title);
@@ -308,7 +309,7 @@ export default function TaskCard({ task, onUpdate }: TaskCardProps) {
             }
             toggleCompleteMutation.mutate();
           }}
-          className="mt-1 w-6 h-6 scale-150"
+          className={`mt-1 ${listName?.toLowerCase() === 'my day' ? 'w-5 h-5 scale-125' : 'w-6 h-6 scale-150'}`}
           disabled={toggleCompleteMutation.isPending}
           onClick={(e) => e.stopPropagation()}
         />
