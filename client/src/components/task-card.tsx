@@ -13,6 +13,13 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import { isUnauthorizedError } from "@/lib/authUtils";
@@ -196,12 +203,8 @@ export default function TaskCard({ task, onUpdate }: TaskCardProps) {
     setEditDescription(task.description || "");
   };
 
-  const cyclePriority = () => {
-    const currentPriority = (task.priority as "low" | "medium" | "high") || 'medium';
-    const priorities: ("low" | "medium" | "high")[] = ['low', 'medium', 'high'];
-    const currentIndex = priorities.indexOf(currentPriority);
-    const nextIndex = (currentIndex + 1) % priorities.length;
-    priorityMutation.mutate(priorities[nextIndex]);
+  const handlePriorityChange = (newPriority: "low" | "medium" | "high") => {
+    priorityMutation.mutate(newPriority);
   };
 
   return (
@@ -262,11 +265,37 @@ export default function TaskCard({ task, onUpdate }: TaskCardProps) {
                   {task.title}
                 </h3>
                 <div className="flex items-center space-x-2">
-                  <PriorityDot 
-                    priority={(task.priority as "low" | "medium" | "high") || 'medium'} 
-                    onClick={cyclePriority}
-                    size="lg"
-                  />
+                  <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                      <div className="cursor-pointer">
+                        <PriorityDot 
+                          priority={(task.priority as "low" | "medium" | "high") || 'medium'} 
+                          size="lg"
+                          className="hover:scale-110 transition-transform"
+                        />
+                      </div>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent>
+                      <DropdownMenuItem onClick={() => handlePriorityChange('low')}>
+                        <div className="flex items-center space-x-2">
+                          <div className="w-3 h-3 rounded-full bg-green-500"></div>
+                          <span>Green (Not Important)</span>
+                        </div>
+                      </DropdownMenuItem>
+                      <DropdownMenuItem onClick={() => handlePriorityChange('medium')}>
+                        <div className="flex items-center space-x-2">
+                          <div className="w-3 h-3 rounded-full bg-yellow-500"></div>
+                          <span>Yellow (Important)</span>
+                        </div>
+                      </DropdownMenuItem>
+                      <DropdownMenuItem onClick={() => handlePriorityChange('high')}>
+                        <div className="flex items-center space-x-2">
+                          <div className="w-3 h-3 rounded-full bg-red-500"></div>
+                          <span>Red (Very Important)</span>
+                        </div>
+                      </DropdownMenuItem>
+                    </DropdownMenuContent>
+                  </DropdownMenu>
                   <DropdownMenu>
                     <DropdownMenuTrigger asChild>
                       <Button variant="ghost" size="sm">

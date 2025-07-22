@@ -18,11 +18,20 @@ const PRIORITY_SIZES = {
 };
 
 export default function PriorityDot({ priority, size = "md", onClick, className = "" }: PriorityDotProps) {
+  const getPriorityLabel = (priority: "low" | "medium" | "high") => {
+    switch (priority) {
+      case "low": return "Not Important";
+      case "medium": return "Important";
+      case "high": return "Very Important";
+      default: return "Important";
+    }
+  };
+
   return (
     <div
       className={`${PRIORITY_SIZES[size]} rounded-full ${onClick ? 'cursor-pointer hover:scale-110 transition-transform' : ''} ${className}`}
       style={{ backgroundColor: PRIORITY_COLORS[priority] }}
-      title={`Priority: ${priority}${onClick ? ' (click to change)' : ''}`}
+      title={`${getPriorityLabel(priority)}${onClick ? ' (click to change)' : ''}`}
       onClick={onClick}
     />
   );
