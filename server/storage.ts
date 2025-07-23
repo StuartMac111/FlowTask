@@ -356,14 +356,17 @@ export class DatabaseStorage implements IStorage {
         tomorrow.setHours(0, 0, 0, 0);
 
         for (const task of myDayTasks) {
-          let shouldMove = true;
-          
-          // Don't move completed tasks
+          // Delete completed tasks from "My Day" list
           if (task.isCompleted) {
-            shouldMove = false;
+            await db
+              .delete(tasks)
+              .where(eq(tasks.id, task.id));
+            console.log(`Deleted completed task: ${task.title}`);
+            continue;
           }
           
           // Don't move tasks that are due today or later
+          let shouldMove = true;
           if (task.dueDate) {
             const dueDate = new Date(task.dueDate);
             if (dueDate >= tomorrow) {
@@ -377,6 +380,7 @@ export class DatabaseStorage implements IStorage {
               .update(tasks)
               .set({ listId: tasksList.id })
               .where(eq(tasks.id, task.id));
+            console.log(`Moved task to Tasks list: ${task.title}`);
           }
         }
       }

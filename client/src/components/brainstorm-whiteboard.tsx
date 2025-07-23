@@ -226,11 +226,16 @@ export default function BrainstormWhiteboard({ listId, tasks }: BrainstormWhiteb
       const newY = 80 + Math.floor(stickyNotes.length / 6) * 140;
       const newColor = selectedColor;
 
+      // Set default due date to today
+      const today = new Date();
+      today.setHours(23, 59, 59, 999); // Set to end of day
+
       createTaskMutation.mutate({
         title: newIdeaText.trim(),
         listId: tasksList.id,  // Create in "Tasks" list instead of brainstorming
         isCompleted: false,
         priority: "medium",
+        dueDate: today.toISOString(), // Default to today
       } as InsertTask);
 
       setNewIdeaText("");

@@ -112,8 +112,14 @@ export default function TaskList({ list, allLists = [], onShare, onRefresh }: Ta
         priority: "medium",
       };
 
+      // Set due date - use selected date or default to today
       if (selectedDueDate) {
         taskData.dueDate = selectedDueDate.toISOString();
+      } else {
+        // Default to today's date
+        const today = new Date();
+        today.setHours(23, 59, 59, 999); // Set to end of day
+        taskData.dueDate = today.toISOString();
       }
 
       if (repeatType !== "none") {
@@ -134,8 +140,14 @@ export default function TaskList({ list, allLists = [], onShare, onRefresh }: Ta
         priority: "medium",
       };
 
+      // Set due date - use selected date or default to today
       if (selectedDueDate) {
         taskData.dueDate = selectedDueDate.toISOString();
+      } else {
+        // Default to today's date
+        const today = new Date();
+        today.setHours(23, 59, 59, 999); // Set to end of day
+        taskData.dueDate = today.toISOString();
       }
 
       if (repeatType !== "none") {
